@@ -1,0 +1,9 @@
+{
+  "name": "xhr-hook",
+  "title": "XHR Hook",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jpillora/xhr-hook",
+  "author": "Jaime Pillora <dev@jpillora.com>",
+  "source": "~/Code/JavaScript/grunt-source-jslib",
+  "repo": "https://github.com/jpillora/grunt-source-jslib.git"
+}
