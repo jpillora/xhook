@@ -1,1 +1,28 @@
-jquery.html
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<h5>example2.txt</h5>
+<pre id="two"></pre>
+
+<script src="../dist/xhr-hook.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+
+<script type="text/javascript">
+// hook and modify 'responseText' of 'example2.txt'
+XHRHook(function(xhr) {
+  xhr.on('set:responseText', function(curr, prev) {
+    if(xhr.url.match(/example2\.txt$/))
+      return curr.replace(/[aeiou]/g,'z');
+  });
+});
+
+//jquery
+$.get('example1.txt').done(function(str) {
+  $('#one').text(str);
+});
+
+$.get('example2.txt').done(function(str) {
+  $('#two').text(str);
+});
+</script>

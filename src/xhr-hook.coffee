@@ -1,55 +1,145 @@
 
-consts = ["UNSENT", "OPENED", "HEADERS_RECEIVED", "LOADING", "DONE"]
-fns = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType", "addEventListener", "removeEventListener", "dispatchEvent"]
-events = ["onreadystatechange", "onprogress", "onloadstart", "onloadend", "onload", "onerror", "onabort"]
-status = ["statusText", "status", "response", "responseType", "responseXML", "responseText", "upload", "readyState", "withCredentials"]
-patchXhr = (xhr, Class) ->
-  
-  #init 'withCredentials' on object so jQuery thinks we have CORS
-  x = withCredentials: false
-  i = undefined
-  req = headers: {}
-  res = headers: {}
-  copyStatus = ->
-    try
-      for i of status
-        x[status[i]] = (if status[i] is "responseText" then xhr[status[i]].replace(/[aeiou]/g, "z") else xhr[status[i]])
+#XMLHTTP Object Properties
+FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType", "addEventListener", "removeEventListener", "dispatchEvent"]
+EVENTS = ["onreadystatechange", "onprogress", "onloadstart", "onloadend", "onload", "onerror", "onabort"]
+PROPS = ["statusText", "status", "response", "responseType", "responseXML", "responseText", "upload", "readyState", "withCredentials"]
 
-  
-  #send method calls TO xhr
-  copyFn = (key) ->
-    x[key] = ->
-      switch key
-        when "send"
-          req.data = arguments_[0]
-        when "open"
-          req.method = arguments_[0]
-          req.url = arguments_[1]
-          req.async = arguments_[2]
-        when "setRequestHeader"
-          req.headers[arguments_[0]] = arguments_[1]
-      xhr[key].apply xhr, arguments_  if xhr[key]
+create = (parent) ->
+  F = ->
+  F.prototype = parent
+  new F
 
-  for i of fns
-    copyFn fns[i]
-  
-  #recieve event calls FROM xhr
-  proxyEvent = (key) ->
-    xhr[key] = ->
-      copyStatus()
-      console.log req  if x[key] and xhr.readyState is 4
-      x[key].apply x, arguments_  if x[key]
+#main method
+XHRHook = (callback) ->
+  XHRHook.s.push callback
+#array of xhr hook (callback)s
+XHRHook.s = []
 
-  for i of events
-    proxyEvent events[i]
-  x
-
+#patch XMLHTTP
 patchClass = (name) ->
   Class = window[name]
-  return  unless Class
+  return unless Class
   window[name] = (arg) ->
-    return  if typeof arg is "string" and not /\.XMLHTTP/.test(arg)
+    return if typeof arg is "string" and not /\.XMLHTTP/.test(arg)
+    console.log 'creating a ' + name
     patchXhr new Class(arg), Class
 
 patchClass "ActiveXObject"
 patchClass "XMLHttpRequest"
+
+#make patched version
+patchXhr = (xhr, Class) ->
+  #keeps track of changes using "dirty-checking"
+  xhrDup = {}
+
+  #facade XHR - initialise 'withCredentials' on object so jQuery thinks we have CORS
+  x = withCredentials: false
+
+  #set modified values here
+  data =
+   requestHeaders: {}
+   responseHeaders: {}
+
+  #presented to the user for modifying
+  user = create data
+  user.callbacks = []
+  user.on = (event, callback) ->
+    (user.callbacks[event] or (user.callbacks[event] = [])).push callback
+
+  #send method calls TO xhr
+  for fn in FNS
+    ((key) ->
+      x[key] = (args...)->
+        #extract info
+        switch key
+          when "send"
+            data.data = args[0]
+          when "open"
+            data.method = args[0]
+            data.url = args[1]
+            data.async = args[2]
+          when "setRequestHeader"
+            data.requestHeaders[args[0]] = args[1]
+
+        #run all hooks
+        newargs = args
+        callbacks = user.callbacks["call:#{key}"]
+        if callbacks
+          for callback in callbacks
+            result = callback args
+            newargs = result if result
+
+        #call on xhr if able
+        if xhr[key]
+          ret = xhr[key].apply xhr, newargs
+          # console.log 'call %s with [%s] returned %s', key, newargs.join(', '), ret
+
+        ret
+    )(fn)
+  
+  #dirty check
+  setAllValues = ->
+    try
+      for prop in PROPS
+        setValue prop, xhr[prop]
+
+  #handle value changes
+  setValue = (prop, curr) ->
+    prev = xhrDup[prop]
+    return if curr is prev
+    xhrDup[prop] = curr
+
+    #HTTP header recieved
+    if prop is 'readyState' and curr is 2
+      data.statusCode = xhr.status
+      headers = xhr.getAllResponseHeaders().split '\n'
+      for header in headers
+        h = if /([^:]+):\s*(.*)/.test(header) then {k:RegExp.$1,v:RegExp.$2}
+        data.responseHeaders[h.k] = h.v if h
+
+    #run all hooks
+    callbacks = user.callbacks["set:#{prop}"]
+    if callbacks
+      for callback in callbacks
+        result = callback curr, prev
+        override = result if result isnt `undefined`
+
+    x[prop] = if override is `undefined` then curr else override
+    # console.log 'set %s: "%s" -> "%s"', prop, prev, x[prop]
+
+  cloneEvent = (e) ->
+    clone = {}
+    for key, val of e
+      clone[key] = if val is xhr then x else val
+    clone
+
+  #recieve event calls FROM xhr
+  for eventName in EVENTS
+    ((eventName) ->
+      xhr[eventName] = (event) ->
+        setAllValues()
+        copy = cloneEvent(event) if event
+        # console.log 'caught %s with', eventName, copy
+        # window.E.push copy
+        x[eventName].call x, copy if x[eventName]
+    )(eventName)
+
+  #set initial values
+  setAllValues()
+
+  #fill in the gaps
+  for key of xhr
+    if x[key] is `undefined` and key not in EVENTS
+      try
+        x[key] = xhr[key]
+
+  #provide api into this XHR to the user 
+  for callback in XHRHook.s
+    callback.call null, user
+
+  #return facade XHR
+  return x
+
+#publicise
+window.XHRHook = XHRHook
+

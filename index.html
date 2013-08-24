@@ -1,6 +1,124 @@
-<h5>See examples:</h5>
 
-<ul>
-  <li><a href="example/angular.html">Demo with Angular</a></li>
-  <li><a href="example/jquery.html">Demo with jQuery</a></li>
-</ul>
+<html>
+  <head>
+    <title>XHR Hook Examples</title>
+    <style type="text/css">
+      html,body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      iframe {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        height: 100%;
+        width: 50%;
+      }
+      #ace, textarea {
+        position: absolute;
+        font-size: 12px; 
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 50%;
+        overflow: scroll;
+        margin: 0;
+        padding: 0;
+        border-right: thin solid black;
+      }
+      #controls {
+        position: absolute;
+        right: 51%;
+        top: 5px;
+        z-index: 2;
+        text-align: right;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div id="controls">
+      <select>
+        <option value="modify-request">Modify Request</option>
+        <option value="jquery">With jQuery</option>
+        <option value="angular">With Angular</option>
+        <option value="track-errors">Track Error Codes</option>
+      </select><br>
+      <button>Open</button>
+    </div>
+
+    <div id="ace"></div>
+    <textarea id="ta"></textarea>
+
+    <iframe frameborder="0"></iframe>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js"
+            type="text/javascript" charset="utf-8"></script>
+
+    <script type="text/javascript">
+
+      (function() {
+
+        if(/MSIE [678]/.test(window.navigator.userAgent)) {
+          $("#ace").remove();
+          var set = function(code) {
+            $("#ta").val(code);
+          }
+          var get = function() {
+            return $("#ta").val()
+          }
+        } else {
+          $("#ta").remove();
+
+          window.editor = ace.edit("ace");
+          editor.setTheme("ace/theme/textmate");
+          editor.getSession().setMode("ace/mode/html");
+          editor.session.setTabSize(2);
+          editor.session.setUseSoftTabs(true);
+          editor.setShowPrintMargin(false);
+          editor.setReadOnly(true);
+
+          var set = function(code) {
+            editor.session.setValue(code);
+          }
+
+          var get = function() {
+            return editor.session.getValue()
+          }
+        }
+
+        var url = null;
+
+        $("select").change(function() {
+          var eg = $(this).find(':selected').val();
+          if(!eg) return;
+          window.location.hash = eg;
+          url = 'example/'+eg+'.html';
+
+          $("iframe").attr('src', url);
+
+          $.get(url).done(function(code) {
+            set(code);
+          });
+        })
+          .val(window.location.hash.substr(1))
+          .trigger('change');
+
+        $("button").click(function() {
+          window.location.href = url;
+        });
+
+      })();
+    </script>
+  </body>
+</html>
+
+
+
+

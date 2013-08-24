@@ -1,20 +1,35 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<h5>example2.txt</h5>
+<pre id="two"></pre>
+
 <script src="../dist/xhr-hook.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
 
 <div ng-app="app"></div>
 
 <script type="text/javascript">
-
-  var app = angular.module('app', []);
-
-  app.run(function($http) {
-
-    $http.get('http://echo.jpillora.com?1').success(function(res) {
-
-    })
-
+//hook and modify 'responseText' of 'example2.txt'
+XHRHook(function(xhr) {
+  xhr.on('set:responseText', function(curr, prev) {
+    if(xhr.url.match(/example2\.txt$/))
+      return curr.replace(/[aeiou]/g,'z');
   });
-</script>
+});
 
-<h5>Results:</h5>
-<pre id="results"></pre>
+//setup angular
+var app = angular.module('app', []);
+app.run(function($http) {
+
+  $http.get('example1.txt').success(function(str) {
+    document.getElementById('one').innerText = str;
+  });
+
+  $http.get('example2.txt').success(function(str) {
+    document.getElementById('two').innerText = str;
+  });
+
+});
+</script>

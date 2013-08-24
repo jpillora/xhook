@@ -1,0 +1,19 @@
+
+<h5>Errors:</h5>
+<pre></pre>
+
+<script src="../dist/xhr-hook.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+
+<script type="text/javascript">
+
+XHRHook(function(xhr) {
+  xhr.on('set:status', function(code) {
+    if(code !== 200) {
+      $("pre").append("Non-200 error code detected: "+ code);
+    }
+  });
+});
+
+$.get('exampleX.txt');
+</script>

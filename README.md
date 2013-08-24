@@ -1,49 +1,83 @@
-
 # *In progress*
 
 ---
 
 # XHR Hook
 
-> Allows modification of all requests and responses for use in any library
+> Easily modify XHR requests and responses
 
 ## Examples
 
-### Modify response text
+**[Modify response text of requests to 'example2.json'](http://jpillora.com/xhr-hook#jquery)**
 
 ``` javascript
-XHRHook.on('request', function(req) {
-  
-  req.on('set:responseText', function(value) {
-    return value.replace(/[z]/g, 'a');
+XHRHook(function(xhr) {
+  xhr.on('set:responseText', function(curr, prev) {
+    if(xhr.url.match(/example2\.json$/))
+      return curr.replace(/[aeiou]/g,'z');
   });
-
 });
 ```
 
-### Dummy response
+### *See all examples here*
 
-``` javascript
-XHRHook.on('request', function(req) {
-  
-  req.on('call:send', function() {
+> ### http://jpillora.com/xhr-hook
 
-    req.emit('onload', { progress: 0.4 });
+## Download
 
-    req.state = ''
-
-    req.emit('onload', { progress: 0.4 });
-
-
-    req.emit('onload', { progress: 0.4 });
-
-    return false;
-  });
-
-});
-```
+* Development [xhr-hook.js](https://raw.github.com/jpillora/xhr-hook/ghpages/dist/xhr-hook.js) 5KB
+* Production [xhr-hook.min.js](https://raw.github.com/jpillora/xhr-hook/ghpages/dist/xhr-hook.min.js) 2.3KB
 
 ## API
 
+### XHRHook(`callback`)
 
+Adds a hook
+
+`callback` will be called with an `xhr` instance
+
+### `xhr`.`on`(`event`, `callback`)
+
+Intercept property changes and method calls
+
+`event` must be `set:<property name>` or `call:<method name>`
+
+When intercepting a property change (`set:...`), `callback(curr, prev)` will be called
+with the `curr`ent and `prev`ious values of that property, to use a value other than `curr`,
+simply return a new value
+
+When intercepting a method (`call:...`), `callback(args)` will be called with a modifiable array of arguments
+
+### `xhr`.`trigger`(`event`, `[, arg1, arg2, ...]`)
+
+Manually trigger XHR events
+
+### Reference
+
+For the complete list of properties, methods and events, see:
+
+https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+
+#### MIT License
+
+Copyright © 2013 Jaime Pillora &lt;dev@jpillora.com&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
