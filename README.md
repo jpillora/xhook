@@ -49,9 +49,13 @@ Intercept a method call
 
 `args` is a modifiable array of arguments
 
+> Tip: `"open"` has args `[method, url]`
+
 ### `xhr`.`trigger`(`event`, `[, arg1, arg2, ...]`)
 
 Manually trigger XHR events
+
+*In progress...*
 
 ### Reference
 

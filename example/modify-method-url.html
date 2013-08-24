@@ -7,16 +7,12 @@
 
 <script type="text/javascript">
 // hook and modify request from POST -> GET to and 'example1' -> 'example2'
-try {
-  XHRHook(function(xhr) {
-    xhr.onCall('open', function(args) {
-      args[0] = 'GET';
-      args[1] = 'example2.txt';
-    });
+XHRHook(function(xhr) {
+  xhr.onCall('open', function(args) {
+    args[0] = 'GET';
+    args[1] = 'example2.txt';
   });
-} catch(e) {
-  console.log('errORRRR')
-}
+});
 
 //jquery
 $.post('example1.txt').done(function(str) {

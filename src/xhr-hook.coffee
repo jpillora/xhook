@@ -21,7 +21,6 @@ patchClass = (name) ->
   return unless Class
   window[name] = (arg) ->
     return if typeof arg is "string" and not /\.XMLHTTP/.test(arg)
-    console.log 'creating a ' + name
     patchXhr new Class(arg), Class
 
 patchClass "ActiveXObject"
@@ -136,6 +135,7 @@ patchXhr = (xhr, Class) ->
     if x[key] is `undefined` and key not in EVENTS
       try
         x[key] = xhr[key]
+      
 
   #provide api into this XHR to the user 
   for callback in XHRHook.s

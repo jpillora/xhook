@@ -34,7 +34,6 @@ patchClass = function(name) {
     if (typeof arg === "string" && !/\.XMLHTTP/.test(arg)) {
       return;
     }
-    console.log('creating a ' + name);
     return patchXhr(new Class(arg), Class);
   };
 };
