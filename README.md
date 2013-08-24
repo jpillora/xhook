@@ -30,23 +30,24 @@ XHRHook(function(xhr) {
 
 ## API
 
-### XHRHook(`callback`)
+### XHRHook(`callback(xhr)`)
 
 Adds a hook
 
 `callback` will be called with an `xhr` instance
 
-### `xhr`.`on`(`event`, `callback`)
+### `xhr`.`onChange`(`propertyName`, `callback(curr, prev)`)
 
-Intercept property changes and method calls
+Intercept a property change
 
-`event` must be `set:<property name>` or `call:<method name>`
+`curr` is the current, `prev` is the previous values of that property,
+to use a value other than `curr`, simply return different value.
 
-When intercepting a property change (`set:...`), `callback(curr, prev)` will be called
-with the `curr`ent and `prev`ious values of that property, to use a value other than `curr`,
-simply return a new value
+### `xhr`.`onCall`(`methodName`, `callback(args)`)
 
-When intercepting a method (`call:...`), `callback(args)` will be called with a modifiable array of arguments
+Intercept a method call
+
+`args` is a modifiable array of arguments
 
 ### `xhr`.`trigger`(`event`, `[, arg1, arg2, ...]`)
 

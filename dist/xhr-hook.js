@@ -44,7 +44,7 @@ patchClass("ActiveXObject");
 patchClass("XMLHttpRequest");
 
 patchXhr = function(xhr, Class) {
-  var callback, cloneEvent, data, eventName, fn, key, setAllValues, setValue, user, x, xhrDup, _fn, _fn1, _i, _j, _k, _len, _len1, _len2, _ref;
+  var callback, cloneEvent, data, eventName, fn, key, setAllValues, setValue, user, userOn, x, xhrDup, _fn, _fn1, _i, _j, _k, _len, _len1, _len2, _ref;
   xhrDup = {};
   x = {
     withCredentials: false
@@ -55,8 +55,14 @@ patchXhr = function(xhr, Class) {
   };
   user = create(data);
   user.callbacks = [];
-  user.on = function(event, callback) {
+  userOn = function(event, callback) {
     return (user.callbacks[event] || (user.callbacks[event] = [])).push(callback);
+  };
+  user.onChange = function(event, callback) {
+    return userOn("<:" + event, callback);
+  };
+  user.onCall = function(event, callback) {
+    return userOn(">:" + event, callback);
   };
   _fn = function(key) {
     return x[key] = function() {
@@ -75,7 +81,7 @@ patchXhr = function(xhr, Class) {
           data.requestHeaders[args[0]] = args[1];
       }
       newargs = args;
-      callbacks = user.callbacks["call:" + key];
+      callbacks = user.callbacks[">:" + key];
       if (callbacks) {
         for (_j = 0, _len1 = callbacks.length; _j < _len1; _j++) {
           callback = callbacks[_j];
@@ -127,7 +133,7 @@ patchXhr = function(xhr, Class) {
         }
       }
     }
-    callbacks = user.callbacks["set:" + prop];
+    callbacks = user.callbacks["<:" + prop];
     if (callbacks) {
       for (_k = 0, _len2 = callbacks.length; _k < _len2; _k++) {
         callback = callbacks[_k];

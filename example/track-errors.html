@@ -8,7 +8,7 @@
 <script type="text/javascript">
 
 XHRHook(function(xhr) {
-  xhr.on('set:status', function(code) {
+  xhr.onChange('status', function(code) {
     if(code !== 200) {
       $("pre").append("Non-200 error code detected: "+ code);
     }

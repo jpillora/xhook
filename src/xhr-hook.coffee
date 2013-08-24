@@ -43,8 +43,12 @@ patchXhr = (xhr, Class) ->
   #presented to the user for modifying
   user = create data
   user.callbacks = []
-  user.on = (event, callback) ->
+  userOn = (event, callback) ->
     (user.callbacks[event] or (user.callbacks[event] = [])).push callback
+  user.onChange = (event, callback) ->
+    userOn "<:#{event}", callback
+  user.onCall = (event, callback) ->
+    userOn ">:#{event}", callback
 
   #send method calls TO xhr
   for fn in FNS
@@ -63,7 +67,7 @@ patchXhr = (xhr, Class) ->
 
         #run all hooks
         newargs = args
-        callbacks = user.callbacks["call:#{key}"]
+        callbacks = user.callbacks[">:#{key}"]
         if callbacks
           for callback in callbacks
             result = callback args
@@ -98,7 +102,7 @@ patchXhr = (xhr, Class) ->
         data.responseHeaders[h.k] = h.v if h
 
     #run all hooks
-    callbacks = user.callbacks["set:#{prop}"]
+    callbacks = user.callbacks["<:#{prop}"]
     if callbacks
       for callback in callbacks
         result = callback curr, prev

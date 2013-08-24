@@ -13,7 +13,7 @@
 <script type="text/javascript">
 //hook and modify 'responseText' of 'example2.txt'
 XHRHook(function(xhr) {
-  xhr.on('set:responseText', function(curr, prev) {
+  xhr.onChange('responseText', function(curr, prev) {
     if(xhr.url.match(/example2\.txt$/))
       return curr.replace(/[aeiou]/g,'z');
   });
