@@ -1,0 +1,20 @@
+<script src="../dist/xhr-hook.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+
+<div ng-app="app"></div>
+
+<script type="text/javascript">
+
+  var app = angular.module('app', []);
+
+  app.run(function($http) {
+
+    $http.get('http://echo.jpillora.com?1').success(function(res) {
+
+    })
+
+  });
+</script>
+
+<h5>Results:</h5>
+<pre id="results"></pre>
