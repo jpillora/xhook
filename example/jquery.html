@@ -5,12 +5,12 @@
 <h5>example2.txt</h5>
 <pre id="two"></pre>
 
-<script src="../dist/xhr-hook.js"></script>
+<script src="../dist/xhook.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
 
 <script type="text/javascript">
 // hook and modify 'responseText' of 'example2.txt'
-XHRHook(function(xhr) {
+xhook(function(xhr) {
   xhr.onChange('responseText', function(curr, prev) {
     if(xhr.url.match(/example2\.txt$/))
       return curr.replace(/[aeiou]/g,'z');
