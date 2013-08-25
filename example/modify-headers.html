@@ -1,0 +1,23 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<script src="../dist/xhook.js"></script>
+
+<script type="text/javascript">
+// hook and generate fake 'responseText'
+xhook(function(xhr) {
+  //override request header 'Content-type'
+  xhr.setRequestHeader('Content-type', 'awesome/file');
+  //add response header 'Foo'
+  xhr.setResponseHeader('Foo', 42);
+});
+
+//vanilla call
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'example1.txt');
+xhr.onload = function(e) {
+  document.getElementById('one').innerText = xhr.getAllResponseHeaders();
+}
+xhr.send();
+</script>

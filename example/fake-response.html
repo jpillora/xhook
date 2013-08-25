@@ -1,0 +1,32 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<script src="../dist/xhook.js"></script>
+
+<script type="text/javascript">
+// hook and generate fake 'responseText'
+xhook(function(xhr) {
+  xhr.onCall('send', function() {
+    setTimeout(function() {
+      //trigger fake call
+      xhr.set('status', 200);
+      xhr.set('responseText', 'this is the third text file example (example3.txt)')
+      xhr.setResponseHeader('Foo', 'Bar');
+      xhr.triggerComplete();
+    }, 1000);
+    //cancel call
+    return false;
+  });
+});
+
+//vanilla call
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'example1.txt');
+xhr.onload = function(e) {
+  document.getElementById('one').innerText = xhr.responseText;
+  console.log(xhr.getAllResponseHeaders());
+  console.log(e)
+}
+xhr.send();
+</script>

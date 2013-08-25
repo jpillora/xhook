@@ -33,8 +33,8 @@ xhook(function(xhr) {
 
 ## Download
 
-* Development [xhook.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.js) 5KB
-* Production [xhook.min.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.min.js) 2.3KB
+* Development [xhook.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.js) 7.5KB
+* Production [xhook.min.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.min.js) 3.1KB (0.7KB Gzip)
 
 * Note: It's **important** to include XHook first as other libraries may
   store a reference to `XMLHttpRequest` before XHook can patch it*
@@ -46,6 +46,20 @@ xhook(function(xhr) {
 Adds a hook
 
 `callback` will be called with an xhook `xhr` instance
+
+### `xhr`.`set`(`propertyName`, `value`)
+
+Sets a property to a new value, which the underlying XHR cannot modify
+
+*Will not fire the `onChange()` handler*
+
+### `xhr`.`setRequestHeader`(`key`, `value`)
+
+Sets a request header, which the underlying XHR cannot modify
+
+### `xhr`.`setResponseHeader`(`key`, `value`)
+
+Sets a response header, which the underlying XHR cannot modify
 
 ### `xhr`.`onChange`(`propertyName`, `callback(curr, prev)`)
 
@@ -60,25 +74,31 @@ Intercept a method call
 
 `args` is a modifiable array of arguments
 
+If you return `undefined` (or equivalently return nothing), `args`
+will be used. If you return a new array, it will be used. If you
+return `false` the method call will be cancelled.
+
 > Tip: `"open"` has args `[method, url]`
 
-### `xhr`.`trigger`(`event`, `[, arg1, arg2, ...]`)
+### `xhr`.`trigger`(`event`, `obj` = {})
 
 Manually trigger XHR events
 
-*In progress...*
 
-### `xhr`.`triggerProgress`(`value`)
 
-*In progress...*
+Will set `obj.type = event`
 
-### `xhr`.`triggerComplete`(`responseText`, `responseHeaders`)
+### `xhr`.`triggerComplete`()
 
-*In progress...*
+Short hand for `xhr.trigger()`ing the remaining events. It is up
+to you to `xhr.set()`/`setResponseHeader()` the appropriate values
+before calling this method.
 
-### Warnings
+### Issues
 
-It should be noted that XHook does **not** attempt to resolve any browser compatibility issues,
+* `instanceof XMLHttpRequest` checks will return `false`
+
+* It should be noted that XHook does **not** attempt to resolve any browser compatibility issues,
 it simply proxies and modifies calls to and from XMLHttpRequest (and ActiveXObject). Libraries like jQuery 
 and https://github.com/ilinsky/xmlhttprequest already attempt to do this, which you may use in
 conjunction with XHook, although they should be loaded **after** XHook.
