@@ -1,7 +1,7 @@
-// XHR Hook - v0.1.0 - https://github.com/jpillora/xhr-hook
+// XHook - v0.1.0 - https://github.com/jpillora/xhook
 // © Jaime Pillora <dev@jpillora.com> 2013
 (function(window,document,undefined) {
-var EVENTS, FNS, PROPS, XHRHook, create, patchClass, patchXhr,
+var EVENTS, FNS, PROPS, create, patchClass, patchXhr, xhook,
   __slice = [].slice,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -18,11 +18,11 @@ create = function(parent) {
   return new F;
 };
 
-XHRHook = function(callback) {
-  return XHRHook.s.push(callback);
+xhook = function(callback) {
+  return xhook.s.push(callback);
 };
 
-XHRHook.s = [];
+xhook.s = [];
 
 patchClass = function(name) {
   var Class;
@@ -177,7 +177,7 @@ patchXhr = function(xhr, Class) {
       } catch (_error) {}
     }
   }
-  _ref = XHRHook.s;
+  _ref = xhook.s;
   for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
     callback = _ref[_k];
     callback.call(null, user);
@@ -185,5 +185,5 @@ patchXhr = function(xhr, Class) {
   return x;
 };
 
-window.XHRHook = XHRHook;
+window.xhook = xhook;
 }(window,document));

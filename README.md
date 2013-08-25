@@ -2,16 +2,24 @@
 
 ---
 
-# XHR Hook
+# XHook
 
-> Easily modify XHR requests and responses
+> Hook (monkey-patch) XHR to easily modify requests and responses
+
+With XHook, you can easily implement functionality to:
+* Cache requests in memory
+* Insert authentication headers
+* Simulate responses
+  * For testing purposes, just add your test hooks and everything else stays the same
+  * For cross-domain requests, offload requests to an iframe then simulate a successful response, see [XDomain](http://jpillora.com/xhook)
+* Error tracking
 
 ## Examples
 
-**[Modify response text of requests to 'example2.json'](http://jpillora.com/xhr-hook#jquery)**
+**[Modify response text of requests to 'example2.json'](http://jpillora.com/xhook#jquery)**
 
 ``` javascript
-XHRHook(function(xhr) {
+xhook(function(xhr) {
   xhr.on('set:responseText', function(curr, prev) {
     if(xhr.url.match(/example2\.json$/))
       return curr.replace(/[aeiou]/g,'z');
@@ -21,20 +29,23 @@ XHRHook(function(xhr) {
 
 ### *See all examples here*
 
-> ### http://jpillora.com/xhr-hook
+> ### http://jpillora.com/xhook
 
 ## Download
 
-* Development [xhr-hook.js](https://raw.github.com/jpillora/xhr-hook/ghpages/dist/xhr-hook.js) 5KB
-* Production [xhr-hook.min.js](https://raw.github.com/jpillora/xhr-hook/ghpages/dist/xhr-hook.min.js) 2.3KB
+* Development [xhook.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.js) 5KB
+* Production [xhook.min.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.min.js) 2.3KB
+
+* Note: It's **important** to include XHook first as other libraries may
+  store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 
-### XHRHook(`callback(xhr)`)
+### xhook(`callback(xhr)`)
 
 Adds a hook
 
-`callback` will be called with an `xhr` instance
+`callback` will be called with an xhook `xhr` instance
 
 ### `xhr`.`onChange`(`propertyName`, `callback(curr, prev)`)
 
@@ -56,6 +67,21 @@ Intercept a method call
 Manually trigger XHR events
 
 *In progress...*
+
+### `xhr`.`triggerProgress`(`value`)
+
+*In progress...*
+
+### `xhr`.`triggerComplete`(`responseText`, `responseHeaders`)
+
+*In progress...*
+
+### Warnings
+
+It should be noted that XHook does **not** attempt to resolve any browser compatibility issues,
+it simply proxies and modifies calls to and from XMLHttpRequest (and ActiveXObject). Libraries like jQuery 
+and https://github.com/ilinsky/xmlhttprequest already attempt to do this, which you may use in
+conjunction with XHook, although they should be loaded **after** XHook.
 
 ### Reference
 

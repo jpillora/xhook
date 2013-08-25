@@ -10,10 +10,10 @@ create = (parent) ->
   new F
 
 #main method
-XHRHook = (callback) ->
-  XHRHook.s.push callback
+xhook = (callback) ->
+  xhook.s.push callback
 #array of xhr hook (callback)s
-XHRHook.s = []
+xhook.s = []
 
 #patch XMLHTTP
 patchClass = (name) ->
@@ -138,12 +138,12 @@ patchXhr = (xhr, Class) ->
       
 
   #provide api into this XHR to the user 
-  for callback in XHRHook.s
+  for callback in xhook.s
     callback.call null, user
 
   #return facade XHR
   return x
 
 #publicise
-window.XHRHook = XHRHook
+window.xhook = xhook
 
