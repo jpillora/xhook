@@ -1,6 +1,8 @@
 
-<h5>example1.txt</h5>
-<pre id="one"></pre>
+<h5>response headers</h5>
+<pre id="res"></pre>
+
+<h6>see devtools for request headers</h6>
 
 <script src="../dist/xhook.js"></script>
 
@@ -17,7 +19,7 @@ xhook(function(xhr) {
 var xhr = new XMLHttpRequest();
 xhr.open('GET', 'example1.txt');
 xhr.onload = function(e) {
-  document.getElementById('one').innerText = xhr.getAllResponseHeaders();
+  document.getElementById('res').innerHTML = xhr.getAllResponseHeaders();
 }
 xhr.send();
 </script>

@@ -1,6 +1,6 @@
 
-<h5>example1.txt</h5>
-<pre id="one"></pre>
+<h5>example3.txt (which does not actually exist)</h5>
+<pre id="res"></pre>
 
 <script src="../dist/xhook.js"></script>
 
@@ -24,9 +24,7 @@ xhook(function(xhr) {
 var xhr = new XMLHttpRequest();
 xhr.open('GET', 'example1.txt');
 xhr.onload = function(e) {
-  document.getElementById('one').innerText = xhr.responseText;
-  console.log(xhr.getAllResponseHeaders());
-  console.log(e)
+  document.getElementById('res').innerHTML = xhr.responseText;
 }
 xhr.send();
 </script>

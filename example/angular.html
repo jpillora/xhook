@@ -24,11 +24,11 @@ var app = angular.module('app', []);
 app.run(function($http) {
 
   $http.get('example1.txt').success(function(str) {
-    document.getElementById('one').innerText = str;
+    document.getElementById('one').innerHTML = str;
   });
 
   $http.get('example2.txt').success(function(str) {
-    document.getElementById('two').innerText = str;
+    document.getElementById('two').innerHTML = str;
   });
 
 });
