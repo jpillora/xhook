@@ -4,6 +4,6 @@
   "version": "0.1.0",
   "homepage": "https://github.com/jpillora/xhook",
   "author": "Jaime Pillora <dev@jpillora.com>",
-  "source": "~/Code/JavaScript/grunt-source-jslib",
+  "source": "~/.grunt-sources/jslib",
   "repo": "https://github.com/jpillora/grunt-source-jslib.git"
 }

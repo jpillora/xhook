@@ -33,8 +33,8 @@ xhook(function(xhr) {
 
 ## Download
 
-* Development [xhook.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.js) 7.5KB
-* Production [xhook.min.js](https://raw.github.com/jpillora/xhook/ghpages/dist/xhook.min.js) 3.1KB (0.7KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/xhook.js) 7.5KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/xhook.min.js) 3.1KB (0.7KB Gzip)
 
 * Note: It's **important** to include XHook first as other libraries may
   store a reference to `XMLHttpRequest` before XHook can patch it*
