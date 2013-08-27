@@ -214,7 +214,6 @@ patchXhr = function(xhr, Class) {
         callback = callbacks[_j];
         result = callback(args);
         if (result === false) {
-          console.log("cancel call ", key);
           return;
         }
         if (result) {
@@ -333,8 +332,6 @@ patchXhr = function(xhr, Class) {
     return xhr;
   }
 };
-
-console.log("public!");
 
 window.xhook = xhook;
 }(window,document));

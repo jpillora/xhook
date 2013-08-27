@@ -161,7 +161,7 @@ patchXhr = (xhr, Class) ->
           result = callback args
           #cancel call
           if result is false
-            console.log "cancel call ",key
+            # console.log "cancel call ",key
             return 
           newargs = result if result
 
@@ -252,7 +252,7 @@ patchXhr = (xhr, Class) ->
     callback.call null, user
 
   return if hooked then x else xhr
-console.log "public!"
+# console.log "public!"
 #publicise
 window.xhook = xhook
 
