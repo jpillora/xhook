@@ -1,41 +1,45 @@
-# *In progress*
-
----
-
 # XHook
 
-> Hook (monkey-patch) XHR to easily modify requests and responses
+> Easily intercept and modify XHR request and response
 
 With XHook, you could easily implement functionality to:
 * Cache requests in memory
 * Insert authentication headers
 * Simulate responses
-  * For testing purposes, just add your test hooks and everything else stays the same
-  * For cross-domain requests, offload requests to an iframe then simulate a successful response, see [XDomain](http://jpillora.com/xhook)
-* Error tracking to Google Analytics
+  * For testing purposes, just add your test hooks and your code can remain the same
+* Sending Error statistics to Google Analytics
+* Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xhook)
+* Devious practical jokes
 
+## Features
 
-## Examples
+* Intercept and modify XHR value changes
+* Intercept and modify XHR method calls 
+* Manually trigger XHR events 
 
-**[Modify response text of requests to 'example2.json'](http://jpillora.com/xhook#jquery)**
+## Example
+
+We could use XHook all requests to 'example.json' and convert all vowels to **z**'s like:
 
 ``` javascript
 xhook(function(xhr) {
   xhr.on('set:responseText', function(curr, prev) {
-    if(xhr.url.match(/example2\.json$/))
+    if(xhr.url.match(/example\.json$/))
       return curr.replace(/[aeiou]/g,'z');
   });
 });
 ```
 
-### *See all examples here*
+## Live Demos
 
-> ### http://jpillora.com/xhook
+See the above example and more here:
+
+### *http://jpillora.com/xhook*
 
 ## Download
 
-* Development [xhook.js](http://jpillora.com/xhook/dist/xhook.js) 7.5KB
-* Production [xhook.min.js](http://jpillora.com/xhook/dist/xhook.min.js) 3.1KB (0.7KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/xhook.js) 8.9KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/xhook.min.js) 3.6KB (0.9KB Gzip)
 
 * Note: It's **important** to include XHook first as other libraries may
   store a reference to `XMLHttpRequest` before XHook can patch it*
@@ -78,17 +82,15 @@ Intercept a method call
 
 `args` is a modifiable array of arguments
 
-If you return `undefined` (or equivalently return nothing), `args`
+If you return `undefined` (or equivalently not returning or return nothing), `args`
 will be used. If you return a new array, it will be used. If you
 return `false` the method call will be cancelled.
 
-> Tip: `"open"` has args `[method, url]`
+> Tip: `"open"` has `args` `[method, url]`
 
 ### `xhr`.`trigger`(`event`, `obj` = {})
 
-Manually trigger XHR events
-
-Will set `obj.type = event`
+Manually trigger XHR events passing the handler `obj`. (Will set `obj.type = event`.)
 
 ### Issues
 
