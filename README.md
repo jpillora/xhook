@@ -2,6 +2,10 @@
 
 > Easily intercept and modify XHR request and response
 
+<a href="https://twitter.com/intent/tweet?hashtags=xhook%2Cjavascrip%2Cxhr&original_referer=http%3A%2F%2Fgithub.com%2F&text=XHook%3A+Easily+intercept+and+modify+XHR+request+and+response&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fjpillora%2Fxhook" target="_blank">
+  <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
+</a>
+
 With XHook, you could easily implement functionality to:
 * Cache requests in memory
 * Insert authentication headers
