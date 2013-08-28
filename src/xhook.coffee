@@ -1,6 +1,6 @@
 
 #XMLHTTP Object Properties
-FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType", "addEventListener", "removeEventListener", "dispatchEvent"]
+FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType"] #"addEventListener", "removeEventListener", "dispatchEvent"
 EVENTS = ["onreadystatechange", "onprogress", "onloadstart", "onloadend", "onload", "onerror", "onabort"]
 PROPS = ["readyState", "responseText", "withCredentials", "statusText", "status", "response", "responseType", "responseXML", "upload"]
 
@@ -13,7 +13,7 @@ create = (parent) ->
   F = ->
   F.prototype = parent
   new F
-
+  
 #main method
 xhook = (callback) ->
   xhook.s.push callback
@@ -36,6 +36,7 @@ convertHeaders = (h, dest = {}) ->
   return
 
 xhook.headers = convertHeaders
+xhook.PROPS = PROPS
 
 #patch XMLHTTP
 patchClass = (name) ->
@@ -50,6 +51,8 @@ patchClass "XMLHttpRequest"
 
 #make patched version
 patchXhr = (xhr, Class) ->
+
+  return xhr if xhook.s.length is 0
 
   #if not set - will return original xhr
   hooked = false
@@ -80,12 +83,10 @@ patchXhr = (xhr, Class) ->
   user.set = (prop, val) ->
     hooked = true
     userSets[prop] = 1
-
     if prop is READY_STATE
       while x[READY_STATE] < val
         x[READY_STATE]++
         continue if x[READY_STATE] is xhr[READY_STATE]
-        user.set READY_STATE, x[READY_STATE]
         user.trigger 'readystatechange'
         if x[READY_STATE] is 1
           user.trigger 'loadstart'
@@ -96,7 +97,7 @@ patchXhr = (xhr, Class) ->
       x[prop] = val
 
   #user headers take precedence
-  userRequestHeaders = {}
+  userRequestHeaders = create requestHeaders
   user.setRequestHeader = (key, val) ->
     hooked = true
     userRequestHeaders[key] = val
@@ -122,20 +123,25 @@ patchXhr = (xhr, Class) ->
     # console.log 'user trigger', event, obj
     x['on'+event]?.call x, obj
 
-  user.triggerComplete = ->
-    user.set READY_STATE, 4
-    null
-
   user.serialize = ->
     props = {}
     for p in PROPS
       props[p] = x[p]
+
+    res = {}
+    for k,v of userResponseHeaders
+      res[k] = v
+
+    req = {}
+    for k,v of userRequestHeaders
+      req[k] = v
+
     method: data.method
     url: data.url
     async: data.async
     body: data.body
-    responseHeaders: userResponseHeaders
-    requestHeaders: userRequestHeaders
+    responseHeaders: res
+    requestHeaders: req
     props: props
 
   user.deserialize = (obj) ->
@@ -144,48 +150,51 @@ patchXhr = (xhr, Class) ->
     for h, v of obj.responseHeaders or {}
       user.setResponseHeader h, v
     for h, v of obj.requestHeaders or {}
-      user.setRequestHeader h, v
+      user.setRequestHeader h, v  
     for p, v of obj.props or {}
       user.set p,v
     return
 
   #send method calls TO xhr
   for fn in FNS
-    ((key) ->
-      x[key] = (args...)->
+    if xhr[fn]
+      ((key) ->
+        x[key] = (args...)->
+          #extract data
+          data.opened = not data.opened and key is 'open'
+          data.sent = not data.sent and key is 'send'
 
-        #run all hooks
-        newargs = args
-        callbacks = userOnCalls[key] or []
-        for callback in callbacks
-          result = callback args
-          #cancel call
-          if result is false
-            # console.log "cancel call ",key
-            return 
-          newargs = result if result
+          switch key
+            #dont hook getResponseHeaders
+            when "getAllResponseHeaders"
+              return convertHeaders userResponseHeaders
+            when "send"
+              data.body = args[0]
+            when "open"
+              data.method = args[0]
+              data.url = args[1]
+              data.async = args[2]
 
-        #extract info
-        switch key
-          when "getAllResponseHeaders"
-            return convertHeaders userResponseHeaders
-          when "send"
-            data.body = newargs[0]
-          when "open"
-            data.method = newargs[0]
-            data.url = newargs[1]
-            data.async = newargs[2]
-          when "setRequestHeader"
+          #run all hooks
+          newargs = args
+          callbacks = userOnCalls[key] or []
+          for callback in callbacks
+            result = callback args
+            #cancel call
+            if result is false
+              # console.log "cancel call ",key
+              return 
+            newargs = result if result
+
+          #make the original call - except for setting headers
+          if key is "setRequestHeader"
             requestHeaders[newargs[0]] = newargs[1]
-            return if userRequestHeaders[newargs[0]] isnt `undefined`
-
-        #data
-        data.opened = not data.opened and key is 'open'
-        data.sent = not data.sent and key is 'send'
-
-        #call on xhr if able
-        xhr[key].apply xhr, newargs if xhr[key]
-    )(fn)
+            #block if already set by user
+            if userRequestHeaders[args[0]] isnt `undefined`
+              return
+          #call on xhr if able
+          xhr[key].apply xhr, newargs if xhr[key]
+      )(fn)
   
   #dirty check
   setAllValues = ->
@@ -202,12 +211,12 @@ patchXhr = (xhr, Class) ->
     return if curr is prev
     xhrDup[prop] = curr
 
+    #react to *real* xhr ready state changes
     if prop is READY_STATE
       #opened
       if curr is 1
         for key, val of userRequestHeaders
           xhr.setRequestHeader key, val
-
       #recieved header
       if curr is 2
         data.statusCode = xhr.status
@@ -222,8 +231,8 @@ patchXhr = (xhr, Class) ->
     #already set by the user
     return if userSets[prop]
 
-    x[prop] = if override is `undefined` then curr else override
     # console.log 'set %s: "%s" -> "%s"', prop, prev, x[prop]
+    x[prop] = if override is `undefined` then curr else override
 
   #recieve event calls FROM xhr
   for eventName in EVENTS
@@ -233,6 +242,7 @@ patchXhr = (xhr, Class) ->
         copy = cloneEvent(event) if event
         # console.log 'caught %s ', eventName
         (window.E = window.E or []).push copy
+
         if x[eventName]
           # console.log 'caught AND CALLING %s with', eventName, data.url,copy
           x[eventName].call x, copy
@@ -240,12 +250,6 @@ patchXhr = (xhr, Class) ->
 
   #set initial values
   setAllValues()
-
-  #fill in the gaps
-  for key of xhr
-    if x[key] is `undefined` and key not in EVENTS
-      try
-        x[key] = xhr[key]
   
   #provide api into this XHR to the user 
   for callback in xhook.s

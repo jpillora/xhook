@@ -6,13 +6,14 @@
 
 > Hook (monkey-patch) XHR to easily modify requests and responses
 
-With XHook, you can easily implement functionality to:
+With XHook, you could easily implement functionality to:
 * Cache requests in memory
 * Insert authentication headers
 * Simulate responses
   * For testing purposes, just add your test hooks and everything else stays the same
   * For cross-domain requests, offload requests to an iframe then simulate a successful response, see [XDomain](http://jpillora.com/xhook)
-* Error tracking
+* Error tracking to Google Analytics
+
 
 ## Examples
 
@@ -51,6 +52,9 @@ Adds a hook
 
 Sets a property to a new value, which the underlying XHR cannot modify
 
+*Note, when setting `readyState`: This will `xhr.trigger()` all of the remaining *unfired* events (`readystatechange`,`onload`,etc.). So make you `xhr.set()`/`setResponseHeader()` the appropriate values (`responseText`, `status`,etc.)
+prior to setting `readyState`.*
+
 *Will not fire the `onChange()` handler*
 
 ### `xhr`.`setRequestHeader`(`key`, `value`)
@@ -84,24 +88,16 @@ return `false` the method call will be cancelled.
 
 Manually trigger XHR events
 
-
-
 Will set `obj.type = event`
-
-### `xhr`.`triggerComplete`()
-
-Short hand for `xhr.trigger()`ing the remaining events. It is up
-to you to `xhr.set()`/`setResponseHeader()` the appropriate values
-before calling this method.
 
 ### Issues
 
-* `instanceof XMLHttpRequest` checks will return `false`
+* `xhr instanceof XMLHttpRequest` checks will return `false`
 
-* It should be noted that XHook does **not** attempt to resolve any browser compatibility issues,
-it simply proxies and modifies calls to and from XMLHttpRequest (and ActiveXObject). Libraries like jQuery 
-and https://github.com/ilinsky/xmlhttprequest already attempt to do this, which you may use in
-conjunction with XHook, although they should be loaded **after** XHook.
+* XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
+and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies and
+modifies calls to and from XMLHttpRequest (and ActiveXObject), so you may use any library
+conjunction with XHook, just make sure to load XHook **first**. 
 
 ### Reference
 

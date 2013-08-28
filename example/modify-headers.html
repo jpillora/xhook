@@ -5,6 +5,7 @@
 <h6>see devtools for request headers</h6>
 
 <script src="../dist/xhook.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
 
 <script type="text/javascript">
 // hook and generate fake 'responseText'
@@ -15,11 +16,8 @@ xhook(function(xhr) {
   xhr.setResponseHeader('Foo', 42);
 });
 
-//vanilla call
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'example1.txt');
-xhr.onload = function(e) {
-  document.getElementById('res').innerHTML = xhr.getAllResponseHeaders();
-}
-xhr.send();
+//jquery call
+$.get('example1.txt').always(function(res, success, xhr) {
+  $("#res").html(xhr.getAllResponseHeaders());
+});
 </script>

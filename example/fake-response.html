@@ -13,8 +13,10 @@ xhook(function(xhr) {
       xhr.set('status', 200);
       xhr.set('responseText', 'this is the third text file example (example3.txt)')
       xhr.setResponseHeader('Foo', 'Bar');
-      xhr.triggerComplete();
-    }, 1000);
+      //modifying the readyState is special
+      //it will cause 'xhr.trigger()'s of the remaining events
+      xhr.set('readyState', 4);
+    }, 500);
     //cancel call
     return false;
   });
@@ -23,7 +25,7 @@ xhook(function(xhr) {
 //vanilla call
 var xhr = new XMLHttpRequest();
 xhr.open('GET', 'example1.txt');
-xhr.onload = function(e) {
+xhr.onreadystatechange = function(e) {
   document.getElementById('res').innerHTML = xhr.responseText;
 }
 xhr.send();

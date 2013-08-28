@@ -1,11 +1,10 @@
 // XHook - v0.1.0 - https://github.com/jpillora/xhook
-// © Jaime Pillora <dev@jpillora.com>  2013
+// © Jaime Pillora <dev@jpillora.com> 2013
 (function(window,document,undefined) {
 var EVENTS, FNS, PROPS, READY_STATE, RESPONSE_TEXT, WITH_CREDS, convertHeaders, create, patchClass, patchXhr, xhook,
-  __slice = [].slice,
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  __slice = [].slice;
 
-FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType", "addEventListener", "removeEventListener", "dispatchEvent"];
+FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType"];
 
 EVENTS = ["onreadystatechange", "onprogress", "onloadstart", "onloadend", "onload", "onerror", "onabort"];
 
@@ -59,6 +58,8 @@ convertHeaders = function(h, dest) {
 
 xhook.headers = convertHeaders;
 
+xhook.PROPS = PROPS;
+
 patchClass = function(name) {
   var Class;
   Class = window[name];
@@ -78,7 +79,10 @@ patchClass("ActiveXObject");
 patchClass("XMLHttpRequest");
 
 patchXhr = function(xhr, Class) {
-  var callback, cloneEvent, data, eventName, fn, hooked, key, requestHeaders, responseHeaders, setAllValues, setValue, user, userOnCalls, userOnChanges, userRequestHeaders, userResponseHeaders, userSets, x, xhrDup, _fn, _fn1, _i, _j, _k, _len, _len1, _len2, _ref;
+  var callback, cloneEvent, data, eventName, fn, hooked, requestHeaders, responseHeaders, setAllValues, setValue, user, userOnCalls, userOnChanges, userRequestHeaders, userResponseHeaders, userSets, x, xhrDup, _fn, _i, _j, _k, _len, _len1, _len2, _ref;
+  if (xhook.s.length === 0) {
+    return xhr;
+  }
   hooked = false;
   xhrDup = {};
   x = {};
@@ -108,7 +112,6 @@ patchXhr = function(xhr, Class) {
         if (x[READY_STATE] === xhr[READY_STATE]) {
           continue;
         }
-        user.set(READY_STATE, x[READY_STATE]);
         user.trigger('readystatechange');
         if (x[READY_STATE] === 1) {
           user.trigger('loadstart');
@@ -125,7 +128,7 @@ patchXhr = function(xhr, Class) {
       return x[prop] = val;
     }
   };
-  userRequestHeaders = {};
+  userRequestHeaders = create(requestHeaders);
   user.setRequestHeader = function(key, val) {
     hooked = true;
     userRequestHeaders[key] = val;
@@ -158,24 +161,30 @@ patchXhr = function(xhr, Class) {
     obj.type = event;
     return (_ref = x['on' + event]) != null ? _ref.call(x, obj) : void 0;
   };
-  user.triggerComplete = function() {
-    user.set(READY_STATE, 4);
-    return null;
-  };
   user.serialize = function() {
-    var p, props, _i, _len;
+    var k, p, props, req, res, v, _i, _len;
     props = {};
     for (_i = 0, _len = PROPS.length; _i < _len; _i++) {
       p = PROPS[_i];
       props[p] = x[p];
+    }
+    res = {};
+    for (k in userResponseHeaders) {
+      v = userResponseHeaders[k];
+      res[k] = v;
+    }
+    req = {};
+    for (k in userRequestHeaders) {
+      v = userRequestHeaders[k];
+      req[k] = v;
     }
     return {
       method: data.method,
       url: data.url,
       async: data.async,
       body: data.body,
-      responseHeaders: userResponseHeaders,
-      requestHeaders: userRequestHeaders,
+      responseHeaders: res,
+      requestHeaders: req,
       props: props
     };
   };
@@ -204,49 +213,50 @@ patchXhr = function(xhr, Class) {
       user.set(p, v);
     }
   };
-  _fn = function(key) {
-    return x[key] = function() {
-      var args, callback, callbacks, newargs, result, _j, _len1;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      newargs = args;
-      callbacks = userOnCalls[key] || [];
-      for (_j = 0, _len1 = callbacks.length; _j < _len1; _j++) {
-        callback = callbacks[_j];
-        result = callback(args);
-        if (result === false) {
-          return;
-        }
-        if (result) {
-          newargs = result;
-        }
-      }
-      switch (key) {
-        case "getAllResponseHeaders":
-          return convertHeaders(userResponseHeaders);
-        case "send":
-          data.body = newargs[0];
-          break;
-        case "open":
-          data.method = newargs[0];
-          data.url = newargs[1];
-          data.async = newargs[2];
-          break;
-        case "setRequestHeader":
-          requestHeaders[newargs[0]] = newargs[1];
-          if (userRequestHeaders[newargs[0]] !== undefined) {
-            return;
-          }
-      }
-      data.opened = !data.opened && key === 'open';
-      data.sent = !data.sent && key === 'send';
-      if (xhr[key]) {
-        return xhr[key].apply(xhr, newargs);
-      }
-    };
-  };
   for (_i = 0, _len = FNS.length; _i < _len; _i++) {
     fn = FNS[_i];
-    _fn(fn);
+    if (xhr[fn]) {
+      (function(key) {
+        return x[key] = function() {
+          var args, callback, callbacks, newargs, result, _j, _len1;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          data.opened = !data.opened && key === 'open';
+          data.sent = !data.sent && key === 'send';
+          switch (key) {
+            case "getAllResponseHeaders":
+              return convertHeaders(userResponseHeaders);
+            case "send":
+              data.body = args[0];
+              break;
+            case "open":
+              data.method = args[0];
+              data.url = args[1];
+              data.async = args[2];
+          }
+          newargs = args;
+          callbacks = userOnCalls[key] || [];
+          for (_j = 0, _len1 = callbacks.length; _j < _len1; _j++) {
+            callback = callbacks[_j];
+            result = callback(args);
+            if (result === false) {
+              return;
+            }
+            if (result) {
+              newargs = result;
+            }
+          }
+          if (key === "setRequestHeader") {
+            requestHeaders[newargs[0]] = newargs[1];
+            if (userRequestHeaders[args[0]] !== undefined) {
+              return;
+            }
+          }
+          if (xhr[key]) {
+            return xhr[key].apply(xhr, newargs);
+          }
+        };
+      })(fn);
+    }
   }
   setAllValues = function() {
     var err, prop, _j, _len1, _results;
@@ -296,7 +306,7 @@ patchXhr = function(xhr, Class) {
     }
     return x[prop] = override === undefined ? curr : override;
   };
-  _fn1 = function(eventName) {
+  _fn = function(eventName) {
     return xhr[eventName] = function(event) {
       var copy;
       setAllValues();
@@ -311,16 +321,9 @@ patchXhr = function(xhr, Class) {
   };
   for (_j = 0, _len1 = EVENTS.length; _j < _len1; _j++) {
     eventName = EVENTS[_j];
-    _fn1(eventName);
+    _fn(eventName);
   }
   setAllValues();
-  for (key in xhr) {
-    if (x[key] === undefined && __indexOf.call(EVENTS, key) < 0) {
-      try {
-        x[key] = xhr[key];
-      } catch (_error) {}
-    }
-  }
   _ref = xhook.s;
   for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
     callback = _ref[_k];

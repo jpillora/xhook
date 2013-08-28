@@ -1,4 +1,4 @@
-
+<!DOCTYPE HTML>
 <html>
   <head>
     <title>XHR Hook Examples</title>
@@ -47,10 +47,11 @@
 
     <div id="controls">
       <select>
-        <option value="modify-headers">Modify Headers</option>
-        <option value="fake-response">Fake response</option>
+        <option value="vanilla">With Vanilla</option>
         <option value="jquery">With jQuery</option>
         <option value="angular">With Angular</option>
+        <option value="modify-headers">Modify Headers</option>
+        <option value="fake-response">Fake response</option>
         <option value="modify-method-url">Modify Method and URL</option>
         <option value="track-errors">Track Error Codes</option>
       </select><br>
@@ -58,7 +59,7 @@
     </div>
 
     <div id="ace"></div>
-    <textarea id="ta"></textarea>
+    <textarea id="ta" readonly="readonly"></textarea>
 
     <iframe frameborder="0"></iframe>
 
@@ -99,7 +100,8 @@
           }
         }
 
-        var url = null;
+        var url = null,
+            initEg = window.location.hash.substr(1) || 'vanilla';
 
         $("select").change(function() {
           var eg = $(this).find(':selected').val();
@@ -113,7 +115,7 @@
             set(code);
           });
         })
-          .val(window.location.hash.substr(1))
+          .val(initEg)
           .trigger('change');
 
         $("button").click(function() {
