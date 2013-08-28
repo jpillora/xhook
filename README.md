@@ -8,7 +8,7 @@ With XHook, you could easily implement functionality to:
 * Simulate responses
   * For testing purposes, just add your test hooks and your code can remain the same
 * Sending Error statistics to Google Analytics
-* Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xhook)
+* Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
 
 ## Features
