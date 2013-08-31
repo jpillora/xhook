@@ -50,18 +50,43 @@ See the above example and more here:
 
 ## API
 
+This library assumes minor knowledge of:
+
+https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+
 ### xhook(`callback(xhr)`)
 
 Adds a hook
 
 `callback` will be called with an xhook `xhr` instance
 
+### `xhr`.`method`
+
+The HTTP method in use (set after the underlying XHR calls `open()`)
+
+### `xhr`.`url`
+
+The URL in use (set after the underlying XHR calls `open()`)
+
+### `xhr`.`requestHeaders`
+
+The request headers that will be used (set after the underlying XHR calls `setRequestHeader()`)
+
+### `xhr`.`body`
+
+The POST/PUT/etc. body in use (set after the underlying XHR calls `send()`)
+
+### `xhr`.`responseHeaders`
+
+The response headers that were recieved (set after the underlying XHR has `readyState` of `2`)
+
 ### `xhr`.`set`(`propertyName`, `value`)
 
 Sets a property to a new value, which the underlying XHR cannot modify
 
-*Note, when setting `readyState`: This will `xhr.trigger()` all of the remaining *unfired* events (`readystatechange`,`onload`,etc.). So make you `xhr.set()`/`setResponseHeader()` the appropriate values (`responseText`, `status`,etc.)
-prior to setting `readyState`.*
+**Note** *When setting `readyState`: This will `xhr.trigger()` all of the remaining 
+unfired events (`readystatechange`,`onload`,etc.). So make you `xhr.set()`/`setResponseHeader()`
+the appropriate values (`responseText`, `status`,etc.) prior to setting `readyState`.*
 
 *Will not fire the `onChange()` handler*
 
@@ -104,12 +129,6 @@ Manually trigger XHR events passing the handler `obj`. (Will set `obj.type = eve
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies and
 modifies calls to and from XMLHttpRequest (and ActiveXObject), so you may use any library
 conjunction with XHook, just make sure to load XHook **first**. 
-
-### Reference
-
-For the complete list of properties, methods and events, see:
-
-https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
 
 #### MIT License
 
