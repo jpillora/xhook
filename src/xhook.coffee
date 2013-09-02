@@ -14,12 +14,13 @@ create = (parent) ->
   F.prototype = parent
   new F
   
-#main method
-xhook = (callback) ->
-  xhook.s.push callback
 #array of xhr hook (callback)s
-xhook.s = []
+xhooks = []
+#main method
+xhook = (callback, i = xhooks.length) ->
+  xhooks.splice i, 0, callback
 
+#helper
 convertHeaders = (h, dest = {}) ->
   switch  typeof h
     when "object"
@@ -52,7 +53,7 @@ patchClass "XMLHttpRequest"
 #make patched version
 patchXhr = (xhr, Class) ->
 
-  return xhr if xhook.s.length is 0
+  return xhr if xhooks.length is 0
 
   #if not set - will return original xhr
   hooked = false
@@ -252,7 +253,7 @@ patchXhr = (xhr, Class) ->
   setAllValues()
   
   #provide api into this XHR to the user 
-  for callback in xhook.s
+  for callback in xhooks
     callback.call null, user
 
   return if hooked then x else xhr
