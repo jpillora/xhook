@@ -1,0 +1,43 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<pre id="status"></pre>
+
+<script src="../dist/xhook.js"></script>
+
+<script type="text/javascript">
+//hook and modify 'responseText' of 'example2.txt'
+xhook(function(xhr) {
+  xhr.onChange('responseText', function(curr, prev) {
+    return curr.replace(/[aeiou]/g,'z');
+  });
+});
+
+//vanilla calls
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'example2.txt');
+
+xhr.addEventListener('readystatechange', function(e) {
+  document.getElementById('one').innerHTML = xhr.responseText;
+});
+
+xhr.addEventListener('load', function() {
+  document.getElementById('status').innerHTML = "loaded";
+});
+
+xhr.addEventListener('load', function() {
+  document.getElementById('status').innerHTML = "loaded!!!";
+});
+
+function xtreme() {
+  document.getElementById('status').innerHTML = "LOADED!!!11111";
+}
+
+xhr.addEventListener('load', xtreme);
+
+//too extreme...
+xhr.removeEventListener('load', xtreme)
+
+xhr.send();
+</script>

@@ -25,8 +25,8 @@ xhook(function(xhr) {
 //vanilla call
 var xhr = new XMLHttpRequest();
 xhr.open('GET', 'example1.txt');
-xhr.onreadystatechange = function(e) {
+xhr.addEventListener('readystatechange', function(e) {
   document.getElementById('res').innerHTML = xhr.responseText;
-}
+});
 xhr.send();
 </script>

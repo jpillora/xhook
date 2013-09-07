@@ -1,7 +1,7 @@
 
 #XMLHTTP Object Properties
-FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType", "addEventListener", "removeEventListener", "dispatchEvent"]
-EVENTS = ["onreadystatechange", "onprogress", "onloadstart", "onloadend", "onload", "onerror", "onabort"]
+FNS = ["open", "setRequestHeader", "send", "abort", "getAllResponseHeaders", "getResponseHeader", "overrideMimeType"]
+EVENTS = ["readystatechange", "progress", "loadstart", "loadend", "load", "error", "abort"]
 PROPS = ["readyState", "responseText", "withCredentials", "statusText", "status", "response", "responseType", "responseXML", "upload"]
 
 #for compression
@@ -55,9 +55,6 @@ patchXhr = (xhr, Class) ->
 
   return xhr if xhooks.length is 0
 
-  #if not set - will return original xhr
-  hooked = false
-
   #keeps track of changes using "dirty-checking"
   xhrDup = {}
 
@@ -70,19 +67,35 @@ patchXhr = (xhr, Class) ->
   responseHeaders = {}
   data = {}
 
+  eventListeners = {}
+
   #make fake events
   cloneEvent = (e) ->
     clone = {}
-    for key, val of e
+    for key, val of e or {}
       clone[key] = if val is xhr then x else val
     clone
+
+  x.addEventListener = (event, fn) ->
+    (eventListeners[event] = eventListeners[event] or []).push fn
+
+  x.removeEventListener = (event, fn) ->
+    fi = -1
+    for f, i in eventListeners[event] or []
+      if f is fn
+        fi = i
+    return if fi is -1
+    eventListeners[event].splice fi, 1
+
+  x.dispatchEvent = (event) ->
+    user.trigger event
 
   #presented to the user for modifying
   user = create data
 
   userSets = {}
   user.set = (prop, val) ->
-    hooked = true
+    
     userSets[prop] = 1
     if prop is READY_STATE
       while x[READY_STATE] < val
@@ -100,29 +113,33 @@ patchXhr = (xhr, Class) ->
   #user headers take precedence
   userRequestHeaders = create requestHeaders
   user.setRequestHeader = (key, val) ->
-    hooked = true
+    
     userRequestHeaders[key] = val
     return unless data.opened
     xhr.setRequestHeader key, val
 
   userResponseHeaders = create responseHeaders
   user.setResponseHeader = (key, val) ->
-    hooked = true
+    
     userResponseHeaders[key] = val
 
   userOnChanges = {}
   userOnCalls = {}
   user.onChange = (event, callback) ->
-    hooked = true
+    
     (userOnChanges[event] = userOnChanges[event] or []).push callback
   user.onCall = (event, callback) ->
-    hooked = true
+    
     (userOnCalls[event] = userOnCalls[event] or []).push callback
   user.trigger = (event, obj = {}) ->
     event = event.replace /^on/,''
     obj.type = event
-    # console.log 'user trigger', event, obj
+
     x['on'+event]?.call x, obj
+    #addEventListener(blah, ...)
+    for fn in eventListeners[event] or []
+      fn.call x,obj
+    return
 
   user.serialize = ->
     props = {}
@@ -193,6 +210,7 @@ patchXhr = (xhr, Class) ->
             #block if already set by user
             if userRequestHeaders[args[0]] isnt `undefined`
               return
+
           #call on xhr if able
           xhr[key].apply xhr, newargs if xhr[key]
       )(fn)
@@ -240,14 +258,8 @@ patchXhr = (xhr, Class) ->
     ((eventName) ->
       xhr[eventName] = (event) ->
         setAllValues()
-        copy = cloneEvent(event) if event
-        # console.log 'caught %s ', eventName
-        (window.E = window.E or []).push copy
-
-        if x[eventName]
-          # console.log 'caught AND CALLING %s with', eventName, data.url,copy
-          x[eventName].call x, copy
-    )(eventName)
+        user.trigger eventName, cloneEvent(event)
+    )("on#{eventName}")
 
   #set initial values
   setAllValues()
@@ -256,8 +268,7 @@ patchXhr = (xhr, Class) ->
   for callback in xhooks
     callback.call null, user
 
-  return if hooked then x else xhr
-# console.log "public!"
+  return x
 #publicise
 window.xhook = xhook
 
