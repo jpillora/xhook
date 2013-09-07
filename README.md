@@ -6,14 +6,18 @@
   <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
 </a>
 
+**The v1.x rewrite is in progress**
+
 With XHook, you could easily implement functionality to:
-* Cache requests in memory
+* Cache requests in memory, localStorage, etc.
 * Insert authentication headers
+  * S3 Request Signing
 * Simulate responses
   * For testing purposes, just add your test hooks and your code can remain the same
 * Sending Error statistics to Google Analytics
 * Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
+* Preflight GZip compression
 
 ## Features
 
@@ -93,6 +97,9 @@ the appropriate values (`responseText`, `status`,etc.) prior to setting `readySt
 ### `xhr`.`setRequestHeader`(`key`, `value`)
 
 Sets a request header, which the underlying XHR cannot modify
+
+**Note** *Must be called before the underlying XHR is openned, so it may be called
+inside the `onCall("open",fn)` intercept `fn`, but not after.*
 
 ### `xhr`.`setResponseHeader`(`key`, `value`)
 
