@@ -3,4 +3,6 @@ mocha.setup({
   reporter: 'tap'
 });
 
-var expect = chai.expect;
+function assert(expr, msg) {
+  if (!expr) throw new Error(msg || 'failed');
+}
