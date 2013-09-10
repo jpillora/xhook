@@ -8,7 +8,7 @@
 <script type="text/javascript">
 
 //read response
-xhook.afterSend(function(request, response) {
+xhook.after(function(request, response) {
   if(response.status !== 200)
     $("pre").append("Non-200 error code detected: " + response.status);
 });

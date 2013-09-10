@@ -10,7 +10,7 @@
 
 <script type="text/javascript">
 //hook and modify 'responseText' of 'example2.txt'
-xhook.afterSend(function(request, response) {
+xhook.after(function(request, response) {
   if(request.url.match(/example2\.txt$/))
     response.text = response.text.replace(/[aeiou]/g,'z');
 });

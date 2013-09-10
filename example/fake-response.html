@@ -5,7 +5,7 @@
 <script src="../dist/1/xhook.js"></script>
 <script type="text/javascript">
 
-xhook.beforeSend(function(request, callback) {
+xhook.before(function(request, callback) {
   //asynchronously...
   setTimeout(function() {
     //callback with a fake response

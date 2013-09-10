@@ -1,6 +1,6 @@
 #for compression
-BEFORE_SEND = 'beforeSend'
-AFTER_SEND = 'afterSend'
+BEFORE = 'before'
+AFTER = 'after'
 READY_STATE = 'readyState'
 INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation."
 
@@ -10,6 +10,7 @@ Array::indexOf or= (item) ->
     return i if x is item
   return -1
 
+#tiny event emitter
 EventEmitter = (ctx) ->
   events = {}
   listeners = (event) ->
@@ -33,14 +34,14 @@ EventEmitter = (ctx) ->
       return
   return emitter
 
-#array of xhr hook (callback)s
+#use event emitter to store hooks
 pluginEvents = EventEmitter()
 #main method
 xhook = {}
-xhook[BEFORE_SEND] = (handler, i) ->
-  pluginEvents.on BEFORE_SEND, handler, i
-xhook[AFTER_SEND] = (handler, i) ->
-  pluginEvents.on AFTER_SEND, handler, i
+xhook[BEFORE] = (handler, i) ->
+  pluginEvents.on BEFORE, handler, i
+xhook[AFTER] = (handler, i) ->
+  pluginEvents.on AFTER, handler, i
 
 #helper
 convertHeaders = (h, dest = {}) ->
@@ -66,13 +67,13 @@ patchClass = (name) ->
   return unless Class
   window[name] = (arg) ->
     return if typeof arg is "string" and not /\.XMLHTTP/.test(arg)
-    patchXhr new Class(arg)
+    createXHRFacade new Class(arg)
 
 patchClass "ActiveXObject"
 patchClass "XMLHttpRequest"
 
 #make patched version
-patchXhr = (xhr) ->
+createXHRFacade = (xhr) ->
 
   #==========================
   # Extra state
@@ -85,7 +86,6 @@ patchXhr = (xhr) ->
 
   #==========================
   # Private API
-
   readyHead = ->
     face.status = response.status
     face.statusText = response.statusText
@@ -118,7 +118,7 @@ patchXhr = (xhr) ->
 
     return fire() if n < 4
 
-    hooks = pluginEvents.listeners AFTER_SEND
+    hooks = pluginEvents.listeners AFTER
     process = ->
       unless hooks.length
         return fire()
@@ -146,7 +146,6 @@ patchXhr = (xhr) ->
 
   #==========================
   # Event Handlers
-
 
   #react to *real* xhr ready state changes
   xhr.onreadystatechange = (event) ->
@@ -185,7 +184,6 @@ patchXhr = (xhr) ->
   face.removeEventListener = xhrEvents.off
   face.dispatchEvent = ->
 
-
   face.open = (method, url, async) ->
     #TODO - user/password args
     request.method = method
@@ -206,13 +204,12 @@ patchXhr = (xhr) ->
       xhr.send request.body
       return
 
-    hooks = pluginEvents.listeners BEFORE_SEND
+    hooks = pluginEvents.listeners BEFORE
 
     process = ->
       unless hooks.length
         return send()
       hook = hooks.shift()
-
       done = (resp) ->
         #dont send - dummy response
         if typeof resp is 'object' and typeof resp.status is 'number'
@@ -222,7 +219,7 @@ patchXhr = (xhr) ->
         #continue processing until no hooks left
         else
           process()
-
+      #async or sync?
       if hook.length is 1
         done hook request
       else if hook.length is 2
@@ -235,7 +232,6 @@ patchXhr = (xhr) ->
 
   face.abort = ->
     xhr.abort() if transiting
-
   face.setRequestHeader = (header, value) ->
     request.headers[header] = value
   face.getResponseHeader = (header) ->

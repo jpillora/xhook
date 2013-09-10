@@ -7,7 +7,7 @@
 
 <script type="text/javascript">
 // hook and modify request from POST -> GET to and 'example1' -> 'example2'
-xhook.beforeSend(function(request) {
+xhook.before(function(request) {
   request.method = 'GET';
   request.url = 'example2.txt';
 });

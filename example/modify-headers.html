@@ -9,12 +9,12 @@
 
 <script type="text/javascript">
 // hook and generate fake 'responseText'
-xhook.beforeSend(function(request) {
+xhook.before(function(request) {
   //override request header 'Content-type'
   request.headers['Content-type'] = 'awesome/file';
 });
 
-xhook.afterSend(function(request, response) {
+xhook.after(function(request, response) {
   response.headers['Foo'] = 'Bar';
 });
 

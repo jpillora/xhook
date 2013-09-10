@@ -1,12 +1,12 @@
 // XHook - v1.0.0 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2013
 (function(window,document,undefined) {
-var AFTER_SEND, BEFORE_SEND, EventEmitter, INVALID_PARAMS_ERROR, READY_STATE, convertHeaders, patchClass, patchXhr, pluginEvents, xhook, _base,
+var AFTER, BEFORE, EventEmitter, INVALID_PARAMS_ERROR, READY_STATE, convertHeaders, createXHRFacade, patchClass, pluginEvents, xhook, _base,
   __slice = [].slice;
 
-BEFORE_SEND = 'beforeSend';
+BEFORE = 'before';
 
-AFTER_SEND = 'afterSend';
+AFTER = 'after';
 
 READY_STATE = 'readyState';
 
@@ -66,12 +66,12 @@ pluginEvents = EventEmitter();
 
 xhook = {};
 
-xhook[BEFORE_SEND] = function(handler, i) {
-  return pluginEvents.on(BEFORE_SEND, handler, i);
+xhook[BEFORE] = function(handler, i) {
+  return pluginEvents.on(BEFORE, handler, i);
 };
 
-xhook[AFTER_SEND] = function(handler, i) {
-  return pluginEvents.on(AFTER_SEND, handler, i);
+xhook[AFTER] = function(handler, i) {
+  return pluginEvents.on(AFTER, handler, i);
 };
 
 convertHeaders = function(h, dest) {
@@ -113,7 +113,7 @@ patchClass = function(name) {
     if (typeof arg === "string" && !/\.XMLHTTP/.test(arg)) {
       return;
     }
-    return patchXhr(new Class(arg));
+    return createXHRFacade(new Class(arg));
   };
 };
 
@@ -121,7 +121,7 @@ patchClass("ActiveXObject");
 
 patchClass("XMLHttpRequest");
 
-patchXhr = function(xhr) {
+createXHRFacade = function(xhr) {
   var checkEvent, currentState, extractListeners, face, readyBody, readyHead, request, response, setReadyState, transiting, xhrEvents;
   transiting = false;
   request = {
@@ -163,7 +163,7 @@ patchXhr = function(xhr) {
     if (n < 4) {
       return fire();
     }
-    hooks = pluginEvents.listeners(AFTER_SEND);
+    hooks = pluginEvents.listeners(AFTER);
     process = function() {
       var hook;
       if (!hooks.length) {
@@ -256,7 +256,7 @@ patchXhr = function(xhr) {
       }
       xhr.send(request.body);
     };
-    hooks = pluginEvents.listeners(BEFORE_SEND);
+    hooks = pluginEvents.listeners(BEFORE);
     process = function() {
       var done, hook;
       if (!hooks.length) {

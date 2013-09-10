@@ -1,6 +1,6 @@
 # XHook
 
-v1.0
+v1.0 (**Attention: XHook has been rewritten with a largely simplified API**)
 
 > Easily intercept and modify XHR request and response
 
@@ -13,8 +13,6 @@ v1.0
 <!--
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
 -->
-
-**Attention: XHook has been rewritten with a largely simplified API**
 
 With XHook, you could easily implement functionality to:
 
@@ -30,18 +28,22 @@ With XHook, you could easily implement functionality to:
 
 ## Features
 
-* Intercept and modify XHR value changes
-* Intercept and modify XHR method calls 
-* Manually trigger XHR events 
+* Intercept and modify XHR **request** and **response**
+* Simulate **responses** transparently
+* Implements a backwards compatible `addEventListener` `removeEventListener`
+
+## Future Features
+
+* Add backwards compatible user controlled progress (download/upload) events
 
 ## Example
 
-We could use XHook all requests to 'example.json' and convert all vowels to **z**'s like:
+Here, we're converting vowels to **z**'s in all requests to 'example.txt':
 
 ``` javascript
 //modify 'responseText' of 'example2.txt'
-xhook.afterSend(function(request, response) {
-  if(request.url.match(/example2\.txt$/)) 
+xhook.after(function(request, response) {
+  if(request.url.match(/example\.txt$/)) 
     response.text = response.text.replace(/[aeiou]/g,'z');
 });
 ```
@@ -58,7 +60,7 @@ See the above example and more here:
 * Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.3KB (0.8KB Gzip)
 
 * Note: It's **important** to include XHook first as other libraries may
-  store a reference to `XMLHttpRequest` before XHook can patch it*
+  store a reference to `XMLHttpRequest` before XHook can patch it
 
 ## API
 
@@ -66,20 +68,20 @@ This library assumes minor knowledge of:
 
 https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
 
-### xhook.`beforeSend`(`handler(request [, callback])`)
+### xhook.`before`(`handler(request[, callback([response])])`)
 
-We can modify the `request` before the XHR is sent.
+We can **modify** the `request` before the XHR is sent.
 
 To use provide a **fake** response, simply return a `response` object.
 
-If our handler is asynchronous, just include the `callback` argument, which
+If our `handler` is asynchronous, just include the `callback` argument, which
 also accepts an optional `response` object.
 
-### xhook.`afterSend`(`handler(request, response, [, callback])`)
+### xhook.`after`(`handler(request, response[, callback()])`)
 
-We can read the `request` and modify the `response` before the XHR is recieved.
+We can **read** the `request` and **modify** the `response` before the XHR is recieved.
 
-If our handler is asynchronous, just include the `callback` argument.
+If our `handler` is asynchronous, just include the `callback` argument.
 
 ### `request` Object
 
@@ -94,14 +96,16 @@ If our handler is asynchronous, just include the `callback` argument.
 * `type` (String) *Default: `""`* - The type of response
 * `text` (String) - The HTTP response text
 * `body` (Varies by `type`) - *Currently equivalent to `text` - JSON type in progress*
-* `xml` (XML) - Parsed `text` when `type` is `"xml"`
+* `xml` (XML) - Parsed `text` into XML (when `type` is `"xml"`)
 * `headers` (Object) - Response Headers
 
 ### Overview
 
 <img src="https://docs.google.com/drawings/d/1PTxHDqdW9iNqagDwtaO0ggXZkJp7ILiRDVWAMHInFGQ/pub?w=498&amp;h=235">
 
-*The dark red `beforeSend` hook is returning a `response` object, which will cancel the underlying XHR and use `response` as a fake response.*
+*The dark red `before` hook is returning a `response` object, which will trigger the `after`
+hooks, then trigger the appropriate events, so it **appears** as if `response` came from 
+the server.*
 
 ### Issues
 
