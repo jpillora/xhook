@@ -4,16 +4,18 @@
 
 <h6>see devtools for request headers</h6>
 
-<script src="../dist/xhook.js"></script>
+<script src="../dist/1/xhook.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
 
 <script type="text/javascript">
 // hook and generate fake 'responseText'
-xhook(function(xhr) {
+xhook.beforeSend(function(request) {
   //override request header 'Content-type'
-  xhr.setRequestHeader('Content-type', 'awesome/file');
-  //add response header 'Foo'
-  xhr.setResponseHeader('Foo', 42);
+  request.headers['Content-type'] = 'awesome/file';
+});
+
+xhook.afterSend(function(request, response) {
+  response.headers['Foo'] = 'Bar';
 });
 
 //jquery call

@@ -1,19 +1,23 @@
 # XHook
 
+v1.0
+
 > Easily intercept and modify XHR request and response
 
 <a href="https://twitter.com/intent/tweet?hashtags=xhook%2Cjavascript%2Cxhr&original_referer=http%3A%2F%2Fgithub.com%2F&text=XHook%3A+Easily+intercept+and+modify+XHR+request+and+response&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fjpillora%2Fxhook" target="_blank">
   <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
 </a>
 
-**The v1.x rewrite is in progress**
-
 **Automated browser testing in progress**
 
+<!--
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
+-->
 
+**Attention: XHook has been rewritten with a largely simplified API**
 
 With XHook, you could easily implement functionality to:
+
 * Cache requests in memory, localStorage, etc.
 * Insert authentication headers
   * S3 Request Signing
@@ -22,7 +26,7 @@ With XHook, you could easily implement functionality to:
 * Sending Error statistics to Google Analytics
 * Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
-* Preflight GZip compression
+* Preflight GZip compression, see [XZip](http://jpillora.com/xzip)
 
 ## Features
 
@@ -35,11 +39,10 @@ With XHook, you could easily implement functionality to:
 We could use XHook all requests to 'example.json' and convert all vowels to **z**'s like:
 
 ``` javascript
-xhook(function(xhr) {
-  xhr.on('set:responseText', function(curr, prev) {
-    if(xhr.url.match(/example\.json$/))
-      return curr.replace(/[aeiou]/g,'z');
-  });
+//modify 'responseText' of 'example2.txt'
+xhook.afterSend(function(request, response) {
+  if(request.url.match(/example2\.txt$/)) 
+    response.text = response.text.replace(/[aeiou]/g,'z');
 });
 ```
 
@@ -51,8 +54,8 @@ See the above example and more here:
 
 ## Download
 
-* Development [xhook.js](http://jpillora.com/xhook/dist/xhook.js) 8.9KB
-* Production [xhook.min.js](http://jpillora.com/xhook/dist/xhook.min.js) 3.6KB (0.9KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 8.9KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.6KB (0.9KB Gzip)
 
 * Note: It's **important** to include XHook first as other libraries may
   store a reference to `XMLHttpRequest` before XHook can patch it*
@@ -63,75 +66,40 @@ This library assumes minor knowledge of:
 
 https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
 
-### xhook(`callback(xhr)`)
+### xhook.`beforeSend`(`handler(request [, callback])`)
 
-Adds a hook
+We can modify the `request` before the XHR is sent.
 
-`callback` will be called with an xhook `xhr` instance
+To use provide a **fake** response, simply return a `response` object.
 
-### `xhr`.`method`
+If our handler is asynchronous, just include the `callback` argument, which
+also accepts an optional `response` object.
 
-The HTTP method in use (set after the underlying XHR calls `open()`)
+### xhook.`afterSend`(`handler(request, response, [, callback])`)
 
-### `xhr`.`url`
+We can read the `request` and modify the `response` before the XHR is recieved.
 
-The URL in use (set after the underlying XHR calls `open()`)
+If our handler is asynchronous, just include the `callback` argument.
 
-### `xhr`.`requestHeaders`
+### `request` Object
 
-The request headers that will be used (set after the underlying XHR calls `setRequestHeader()`)
+* `method` (String) - HTTP Method
+* `url` (String) - URL
 
-### `xhr`.`body`
+### `response` Object
 
-The POST/PUT/etc. body in use (set after the underlying XHR calls `send()`)
+* `status` (Number) - HTTP Status Code **(Required when for fake `response`s)**
+* `statusText` (String) - String representation of the status code
+* `type` (String) *Default: `""`* - The type of response
+* `text` (String) - The HTTP response text
+* `body` (Varies by `type`) - *Currently equivalent to `text` - JSON type in progress*
+* `xml` (XML) - Parsed `text` when `type` is `"xml"`
 
-### `xhr`.`responseHeaders`
+### Overview
 
-The response headers that were recieved (set after the underlying XHR has `readyState` of `2`)
+<img src="https://docs.google.com/drawings/d/1PTxHDqdW9iNqagDwtaO0ggXZkJp7ILiRDVWAMHInFGQ/pub?w=498&amp;h=235">
 
-### `xhr`.`set`(`propertyName`, `value`)
-
-Sets a property to a new value, which the underlying XHR cannot modify
-
-**Note** *When setting `readyState`: This will `xhr.trigger()` all of the remaining 
-unfired events (`readystatechange`,`onload`,etc.). So make you `xhr.set()`/`setResponseHeader()`
-the appropriate values (`responseText`, `status`,etc.) prior to setting `readyState`.*
-
-*Will not fire the `onChange()` handler*
-
-### `xhr`.`setRequestHeader`(`key`, `value`)
-
-Sets a request header, which the underlying XHR cannot modify
-
-**Note** *Must be called before the underlying XHR is openned, so it may be called
-inside the `onCall("open",fn)` intercept `fn`, but not after.*
-
-### `xhr`.`setResponseHeader`(`key`, `value`)
-
-Sets a response header, which the underlying XHR cannot modify
-
-### `xhr`.`onChange`(`propertyName`, `callback(curr, prev)`)
-
-Intercept a property change
-
-`curr` is the current, `prev` is the previous values of that property,
-to use a value other than `curr`, simply return different value.
-
-### `xhr`.`onCall`(`methodName`, `callback(args)`)
-
-Intercept a method call
-
-`args` is a modifiable array of arguments
-
-If you return `undefined` (or equivalently not returning or return nothing), `args`
-will be used. If you return a new array, it will be used. If you
-return `false` the method call will be cancelled.
-
-> Tip: `"open"` has `args` `[method, url]`
-
-### `xhr`.`trigger`(`event`, `obj` = {})
-
-Manually trigger XHR events passing the handler `obj`. (Will set `obj.type = event`.)
+*The dark red `beforeSend` hook is returning a `response` object, which will cancel the underlying XHR and use `response` as a **fake** response.*
 
 ### Issues
 
@@ -141,6 +109,10 @@ Manually trigger XHR events passing the handler `obj`. (Will set `obj.type = eve
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies and
 modifies calls to and from XMLHttpRequest (and ActiveXObject), so you may use any library
 conjunction with XHook, just make sure to load XHook **first**. 
+
+### Old Version
+
+Version 0.x docs and downloads can be found [here](https://github.com/jpillora/xhook/tree/a42c8814bd052f03cfb3a1d7848a37df5a5d0563) 
 
 #### MIT License
 

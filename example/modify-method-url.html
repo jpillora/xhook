@@ -2,16 +2,14 @@
 <h5>modified request</h5>
 <pre></pre>
 
-<script src="../dist/xhook.js"></script>
+<script src="../dist/1/xhook.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
 
 <script type="text/javascript">
 // hook and modify request from POST -> GET to and 'example1' -> 'example2'
-xhook(function(xhr) {
-  xhr.onCall('open', function(args) {
-    args[0] = 'GET';
-    args[1] = 'example2.txt';
-  });
+xhook.beforeSend(function(request) {
+  request.method = 'GET';
+  request.url = 'example2.txt';
 });
 
 //jquery call

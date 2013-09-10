@@ -5,15 +5,13 @@
 <h5>example2.txt</h5>
 <pre id="two"></pre>
 
-<script src="../dist/xhook.js"></script>
-
+<script src="../dist/1/xhook.js"></script>
 <script type="text/javascript">
+
 //hook and modify 'responseText' of 'example2.txt'
-xhook(function(xhr) {
-  xhr.onChange('responseText', function(curr, prev) {
-    if(xhr.url.match(/example2\.txt$/))
-      return curr.replace(/[aeiou]/g,'z');
-  });
+xhook.afterSend(function(request, response) {
+  if(request.url.match(/example2\.txt$/)) 
+    response.text = response.text.replace(/[aeiou]/g,'z');
 });
 
 //vanilla calls

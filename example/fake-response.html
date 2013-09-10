@@ -1,25 +1,22 @@
 
-<h5>example3.txt (which does not actually exist)</h5>
+<h5>example3.txt (which does not actually exist - verify in devtools)</h5>
 <pre id="res"></pre>
 
-<script src="../dist/xhook.js"></script>
-
+<script src="../dist/1/xhook.js"></script>
 <script type="text/javascript">
-// hook and generate fake 'responseText'
-xhook(function(xhr) {
-  xhr.onCall('send', function() {
-    setTimeout(function() {
-      //trigger fake call
-      xhr.set('status', 200);
-      xhr.set('responseText', 'this is the third text file example (example3.txt)')
-      xhr.setResponseHeader('Foo', 'Bar');
-      //modifying the readyState is special
-      //it will cause 'xhr.trigger()'s of the remaining events
-      xhr.set('readyState', 4);
-    }, 500);
-    //cancel call
-    return false;
-  });
+
+xhook.beforeSend(function(request, callback) {
+  //asynchronously...
+  setTimeout(function() {
+    //callback with a fake response
+    callback({
+      status: 200,
+      body: 'this is the third text file example (example3.txt)',
+      headers: {
+        Foo: 'Bar'
+      }
+    });
+  }, 500);
 });
 
 //vanilla call

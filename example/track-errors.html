@@ -2,17 +2,15 @@
 <h5>Errors:</h5>
 <pre></pre>
 
-<script src="../dist/xhook.js"></script>
+<script src="../dist/1/xhook.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
 
 <script type="text/javascript">
 
-xhook(function(xhr) {
-  xhr.onChange('status', function(code) {
-    if(code !== 200) {
-      $("pre").append("Non-200 error code detected: "+ code);
-    }
-  });
+//read response
+xhook.afterSend(function(request, response) {
+  if(response.status !== 200)
+    $("pre").append("Non-200 error code detected: " + response.status);
 });
 
 $.get('exampleX.txt');

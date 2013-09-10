@@ -1,43 +1,50 @@
 # EVENTS = ["readystatechange", "progress", "loadstart", "loadend", "load", "error", "abort"]
 
+
 #for compression
+BEFORE_SEND = 'beforeSend'
+AFTER_SEND = 'afterSend'
 XHOOK = 'xhook'
 READY_STATE = 'readyState'
+INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation."
+
+#add coffeescripts indexOf method to Array
+Array::indexOf or= (item) ->
+  for x, i in this
+    return i if x is item
+  return -1
 
 EventEmitter = (ctx) ->
-  stats: {}
   events = {}
+  listeners = (event) ->
+    events[event] or []
   emitter =
-    stats: stats
+    listeners: (event) -> Array::slice.call listeners event
     on: (event, callback, i) ->
-      events[event] = [] unless events[event]
-      events[event].splice i or events[event].length, 0, callback
+      events[event] = listeners event
+      return if events[event].indexOf(callback) >= 0
+      i = if i is `undefined` then events[event].length else i
+      events[event].splice i, 0, callback
       return
     off: (event, callback) ->
-      return unless events[event]
-      r = -1
-      for f, i in events[event]
-        if f is fn
-          r = i
-      return if r is -1
-      events[event].splice r, 1
-      return
-    each: (event, callback) ->
-      return unless events[event]
-      stats[event] = (stats[event] + 1) or 1
-      for cb in events[event]
-        callback cb
+      i = listeners(event).indexOf callback
+      return if i is -1
+      listeners(event).splice i, 1
       return
     fire: (event, args...) ->
-      emitter.each event, (fn) ->
-        fn.apply ctx, args
+      for listener in listeners event
+        listener.apply ctx, args
       return
   return emitter
 
 #array of xhr hook (callback)s
 pluginEvents = EventEmitter()
 #main method
-xhook = (callback, i) -> pluginEvents.on XHOOK, callback, i
+xhook = {}
+xhook[BEFORE_SEND] = (handler, i) ->
+  pluginEvents.on BEFORE_SEND, handler, i
+xhook[AFTER_SEND] = (handler, i) ->
+  pluginEvents.on AFTER_SEND, handler, i
 
 #helper
 convertHeaders = (h, dest = {}) ->
@@ -56,7 +63,6 @@ convertHeaders = (h, dest = {}) ->
   return
 
 xhook.headers = convertHeaders
-xhook.PROPS = PROPS
 
 #patch XMLHTTP
 patchClass = (name) ->
@@ -74,36 +80,73 @@ patchXhr = (xhr) ->
 
   #==========================
   # Extra state
-  readys = []
-  targetState = 0
-  request = { headers: {} }
-  response = { headers: {} }
+  transiting = false
+  request = 
+    timeout: 0
+    headers: {}
+  response = null
   xhrEvents = EventEmitter()
 
   #==========================
-  # User API
-  user = { request, response }
-
-  user.serialize = ->
-    { request, response }
-
-  user.deserialize = (obj) ->
-    request = obj.request
-    response = obj.response
-
-  #==========================
   # Private API
-  
 
+  readyHead = ->
+    face.status = response.status
+    face.statusText = response.statusText
+    response.headers or= {}
+    return
+
+  readyBody = ->
+    face.responseType = response.type or ''
+    face.response = response.body or null
+    face.responseText = response.text or response.body or ''
+    face.responseXML = response.xml or null
+    return
+
+  currentState = 0
   setReadyState = (n) ->
-    face[READY_STATE] = n
-    xhrEvents.fire "readystatechange"
+    #pull in listeners
+    extractListeners()
+    #fire off events after hooks have run
+    fire = ->
+      while n > currentState and currentState < 4
+        face[READY_STATE] = ++currentState
+        if currentState is 2
+          readyHead()
+        if currentState is 4
+          readyBody()
+        xhrEvents.fire "readystatechange"
+        if currentState is 4
+          xhrEvents.fire "load"
+      return
+
+    return fire() if n < 4
+
+    hooks = pluginEvents.listeners AFTER_SEND
+    process = ->
+      unless hooks.length
+        return fire()
+      hook = hooks.shift()
+      if hook.length is 2
+        hook request, response
+        process()
+      else if hook.length is 3
+        hook request, response, process
+      else
+        throw INVALID_PARAMS_ERROR
+    process()
+    return
 
   checkEvent = (e) ->
     clone = {}
     for key, val of e
       clone[key] = if val is xhr then face else val
     clone
+
+  extractListeners = ->
+    for key, fn of face
+      if typeof fn is 'function' and /^on(\w+)/.test key
+        xhrEvents.on RegExp.$1, fn
 
   #==========================
   # Event Handlers
@@ -112,8 +155,6 @@ patchXhr = (xhr) ->
   #react to *real* xhr ready state changes
   xhr.onreadystatechange = (event) ->
 
-    readys.push checkEvent event
-
     #pull status and headers
     if xhr[READY_STATE] is 2
       response.status = xhr.status
@@ -121,60 +162,94 @@ patchXhr = (xhr) ->
       for key, val of convertHeaders xhr.getAllResponseHeaders()
         unless response.headers[key]
           response.headers[key] = val
+
+    # simulate progress events?
+    # TODO
+    # if xhr[READY_STATE] is 3
+
     #pull response body
     if xhr[READY_STATE] is 4
-      response.resp = xhr.response
-      response.body = xhr.responseText
+      transiting = false
+      response.type = xhr.responseType
+      response.text = xhr.responseText
+      response.body = xhr.response or response.text
       response.xml = xhr.responseXML
+      setReadyState xhr[READY_STATE]
 
-    # xhrEvents.fire eventName, cloneEvent(event)
+    return
 
   #==========================
   # Facade XHR
-  face = { withCredentials: false} # initialise 'withCredentials' on object so jQuery thinks we have CORS
+  face =
+    withCredentials: false # initialise 'withCredentials' on object so jQuery thinks we have CORS
+    response: null
+    status: 0
+
   face.addEventListener = xhrEvents.on
   face.removeEventListener = xhrEvents.off
   face.dispatchEvent = ->
 
+
   face.open = (method, url, async) ->
+    #TODO - user/password args
     request.method = method
     request.url = url
     request.async = async
-    targetState = 1
+    setReadyState 1
     return
 
   face.send = (body) ->
     request.body = body
     send = ->
+      #prepare response
+      response = { headers: {} }
+      transiting = true
       xhr.open request.method, request.url, request.async
+      for header, value of request.headers
+        xhr.setRequestHeader header, value
       xhr.send request.body
-      targetState = 4
+      return
 
-    if user.beforeSend
-      user.beforeSend send
-    else      
-      send()
+    hooks = pluginEvents.listeners BEFORE_SEND
+
+    process = ->
+      unless hooks.length
+        return send()
+      hook = hooks.shift()
+
+      done = (resp) ->
+        #dont send - dummy response
+        if typeof resp is 'object' and typeof resp.status is 'number'
+          response = resp
+          setReadyState 4
+          return
+        #continue processing until no hooks left
+        else
+          process()
+
+      if hook.length is 1
+        done hook request
+      else if hook.length is 2
+        hook request, done
+      else
+        throw INVALID_PARAMS_ERROR
+      
+    process()
     return
 
   face.abort = ->
+    xhr.abort() if transiting
 
   face.setRequestHeader = (header, value) ->
     request.headers[header] = value
-
   face.getResponseHeader = (header) ->
     response.headers[header]
   face.getAllResponseHeaders = ->
     convertHeaders response.headers
-
   face.overrideMimeType = ->
     #TODO
-
   face.upload = {}
     #TODO
-
-
-  #provide api into this XHR to the user 
-  pluginEvents.fire XHOOK, user
 
   return face
 #publicise
