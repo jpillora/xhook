@@ -1,12 +1,15 @@
 # XHook
 
-v1.0 (**Attention: XHook has been rewritten with a largely simplified API**)
+v1.0
 
-> Easily intercept and modify XHR request and response
+> ### Easily intercept and modify XHR request and response
 
 <a href="https://twitter.com/intent/tweet?hashtags=xhook%2Cjavascript%2Cxhr&original_referer=http%3A%2F%2Fgithub.com%2F&text=XHook%3A+Easily+intercept+and+modify+XHR+request+and+response&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fjpillora%2Fxhook" target="_blank">
   <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
 </a>
+
+
+**Attention: XHook has been rewritten to simplify the API**
 
 **Automated browser testing in progress**
 
@@ -30,11 +33,11 @@ With XHook, you could easily implement functionality to:
 
 * Intercept and modify XHR **request** and **response**
 * Simulate **responses** transparently
-* Implements a backwards compatible `addEventListener` `removeEventListener`
+* Backwards compatible `addEventListener` `removeEventListener`
 
 ## Future Features
 
-* Add backwards compatible user controlled progress (download/upload) events
+* Backwards compatible user controlled progress (download/upload) events
 
 ## Example
 
@@ -59,25 +62,19 @@ See the above example and more here:
 * Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 7.8KB
 * Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.3KB (0.8KB Gzip)
 
-* Note: It's **important** to include XHook first as other libraries may
-  store a reference to `XMLHttpRequest` before XHook can patch it
+  *Note: It's **important** to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 
-This library assumes minor knowledge of:
-
-https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-
-### xhook.`before`(`handler(request[, callback([response])])`)
+### `xhook`.`before`(`handler(request[, callback])`)
 
 We can **modify** the `request` before the XHR is sent.
 
 To use provide a **fake** response, simply return a `response` object.
 
-If our `handler` is asynchronous, just include the `callback` argument, which
-also accepts an optional `response` object.
+If our `handler` is asynchronous, just include the `callback` argument, which accepts an optional `response` object (instead of returning it).
 
-### xhook.`after`(`handler(request, response[, callback()])`)
+### `xhook`.`after`(`handler(request, response[, callback])`)
 
 We can **read** the `request` and **modify** the `response` before the XHR is recieved.
 
@@ -107,13 +104,16 @@ If our `handler` is asynchronous, just include the `callback` argument.
 hooks, then trigger the appropriate events, so it **appears** as if `response` came from 
 the server.*
 
+### Reference
+
+https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+
 ### Issues
 
 * `xhr instanceof XMLHttpRequest` checks will return `false`
 
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
-and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies and
-modifies calls to and from XMLHttpRequest (and ActiveXObject), so you may use any library
+and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest` and `ActiveXObject`, so you may use any library
 conjunction with XHook, just make sure to load XHook **first**. 
 
 ### Old Version
