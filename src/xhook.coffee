@@ -1,10 +1,6 @@
-# EVENTS = ["readystatechange", "progress", "loadstart", "loadend", "load", "error", "abort"]
-
-
 #for compression
 BEFORE_SEND = 'beforeSend'
 AFTER_SEND = 'afterSend'
-XHOOK = 'xhook'
 READY_STATE = 'readyState'
 INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation."
 
@@ -253,5 +249,5 @@ patchXhr = (xhr) ->
 
   return face
 #publicise
-window[XHOOK] = xhook
+window.xhook = xhook
 

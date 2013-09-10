@@ -26,7 +26,7 @@ With XHook, you could easily implement functionality to:
 * Sending Error statistics to Google Analytics
 * Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
-* Preflight GZip compression, see [XZip](http://jpillora.com/xzip)
+* Preflight GZip compression, see [XZip](http://github.com/jpillora/xzip) (In progress)
 
 ## Features
 
@@ -54,8 +54,8 @@ See the above example and more here:
 
 ## Download
 
-* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 8.9KB
-* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.6KB (0.9KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 7.8KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.3KB (0.8KB Gzip)
 
 * Note: It's **important** to include XHook first as other libraries may
   store a reference to `XMLHttpRequest` before XHook can patch it*
@@ -85,6 +85,7 @@ If our handler is asynchronous, just include the `callback` argument.
 
 * `method` (String) - HTTP Method
 * `url` (String) - URL
+* `headers` (Object) - Request Headers
 
 ### `response` Object
 
@@ -94,12 +95,13 @@ If our handler is asynchronous, just include the `callback` argument.
 * `text` (String) - The HTTP response text
 * `body` (Varies by `type`) - *Currently equivalent to `text` - JSON type in progress*
 * `xml` (XML) - Parsed `text` when `type` is `"xml"`
+* `headers` (Object) - Response Headers
 
 ### Overview
 
 <img src="https://docs.google.com/drawings/d/1PTxHDqdW9iNqagDwtaO0ggXZkJp7ILiRDVWAMHInFGQ/pub?w=498&amp;h=235">
 
-*The dark red `beforeSend` hook is returning a `response` object, which will cancel the underlying XHR and use `response` as a **fake** response.*
+*The dark red `beforeSend` hook is returning a `response` object, which will cancel the underlying XHR and use `response` as a fake response.*
 
 ### Issues
 
