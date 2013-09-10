@@ -94,8 +94,8 @@ createXHRFacade = (xhr) ->
 
   readyBody = ->
     face.responseType = response.type or ''
-    face.response = response.body or null
-    face.responseText = response.text or response.body or ''
+    face.response = response.data or null
+    face.responseText = response.text or response.data or ''
     face.responseXML = response.xml or null
     return
 
@@ -162,12 +162,12 @@ createXHRFacade = (xhr) ->
     # TODO
     # if xhr[READY_STATE] is 3
 
-    #pull response body
+    #pull response data
     if xhr[READY_STATE] is 4
       transiting = false
       response.type = xhr.responseType
       response.text = xhr.responseText
-      response.body = xhr.response or response.text
+      response.data = xhr.response or response.text
       response.xml = xhr.responseXML
       setReadyState xhr[READY_STATE]
 
@@ -205,11 +205,10 @@ createXHRFacade = (xhr) ->
       return
 
     hooks = pluginEvents.listeners BEFORE
-
+    #process 1 hook
     process = ->
       unless hooks.length
         return send()
-      hook = hooks.shift()
       done = (resp) ->
         #dont send - dummy response
         if typeof resp is 'object' and typeof resp.status is 'number'
@@ -219,6 +218,7 @@ createXHRFacade = (xhr) ->
         #continue processing until no hooks left
         else
           process()
+      hook = hooks.shift()
       #async or sync?
       if hook.length is 1
         done hook request
@@ -226,7 +226,7 @@ createXHRFacade = (xhr) ->
         hook request, done
       else
         throw INVALID_PARAMS_ERROR
-      
+    #kick off
     process()
     return
 

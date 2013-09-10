@@ -137,8 +137,8 @@ createXHRFacade = function(xhr) {
   };
   readyBody = function() {
     face.responseType = response.type || '';
-    face.response = response.body || null;
-    face.responseText = response.text || response.body || '';
+    face.response = response.data || null;
+    face.responseText = response.text || response.data || '';
     face.responseXML = response.xml || null;
   };
   currentState = 0;
@@ -220,7 +220,7 @@ createXHRFacade = function(xhr) {
       transiting = false;
       response.type = xhr.responseType;
       response.text = xhr.responseText;
-      response.body = xhr.response || response.text;
+      response.data = xhr.response || response.text;
       response.xml = xhr.responseXML;
       setReadyState(xhr[READY_STATE]);
     }
@@ -262,7 +262,6 @@ createXHRFacade = function(xhr) {
       if (!hooks.length) {
         return send();
       }
-      hook = hooks.shift();
       done = function(resp) {
         if (typeof resp === 'object' && typeof resp.status === 'number') {
           response = resp;
@@ -271,6 +270,7 @@ createXHRFacade = function(xhr) {
           return process();
         }
       };
+      hook = hooks.shift();
       if (hook.length === 1) {
         return done(hook(request));
       } else if (hook.length === 2) {

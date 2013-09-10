@@ -84,17 +84,18 @@ If our `handler` is asynchronous, just include the `callback` argument.
 
 * `method` (String) - HTTP Method
 * `url` (String) - URL
+* `body` (String) - HTTP Body (**May implement binary data in the future**)
 * `headers` (Object) - Request Headers
 
 ### `response` Object
 
 * `status` (Number) - HTTP Status Code **(Required when for fake `response`s)**
 * `statusText` (String) - String representation of the status code
-* `type` (String) *Default: `""`* - The type of response
 * `text` (String) - The HTTP response text
-* `body` (Varies by `type`) - *Currently equivalent to `text` - JSON type in progress*
-* `xml` (XML) - Parsed `text` into XML (when `type` is `"xml"`)
 * `headers` (Object) - Response Headers
+* `type` (String) *Default: `""`* - The type of response
+* `xml` (XML) - Parsed `text` into XML (when `type` is `"xml"`)
+* `data` (Varies by `type`) - *Currently equivalent to `text` (JSON type in progress)*
 
 ### Overview
 
