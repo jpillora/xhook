@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "testling": {
     "server": "test/server.js",
-    "html": "test/*.html",
+    "html": "test/basic-tests.html",
     "browsers": [
-      "iexplore/8.0"
+      "ie/8.0",
+      "ie/9.0"
     ]
   },
   "devDependencies": {
