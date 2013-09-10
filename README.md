@@ -8,6 +8,11 @@
 
 **The v1.x rewrite is in progress**
 
+**Automated browser testing in progress**
+
+[![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
+
+
 With XHook, you could easily implement functionality to:
 * Cache requests in memory, localStorage, etc.
 * Insert authentication headers

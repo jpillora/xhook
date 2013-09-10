@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>Mocha</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/test/lib/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="/test/lib/chai.js"></script>
+    <script src="/test/lib/mocha.js"></script>
+    <script src="/test/lib/mocha-init.js"></script>
+
+    <script type="text/javascript">
+
+    describe("some math > ", function() {
+
+      it("should multiply correctly", function() {
+
+        expect(4*4).to.equal(16)
+
+      });
+
+
+    });
+
+    mocha.run();
+    </script>
+  </body>
+</html>

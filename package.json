@@ -1,0 +1,14 @@
+{
+  "name": "xhook-tests",
+  "version": "0.1.0",
+  "testling": {
+    "server": "test/server.js",
+    "html": "test/*.html",
+    "browsers": [
+      "iexplore/8.0"
+    ]
+  },
+  "devDependencies": {
+    "st": "~0.2.1"
+  }
+}
