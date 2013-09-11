@@ -192,7 +192,7 @@ createXHRFacade = (xhr) ->
     response: null
     status: 0
 
-  face.addEventListener = (event, fn) -> xhrEvents.on e, fn
+  face.addEventListener = (event, fn) -> xhrEvents.on event, fn
   face.removeEventListener = xhrEvents.off
   face.dispatchEvent = ->
 
@@ -211,7 +211,7 @@ createXHRFacade = (xhr) ->
       response = { headers: {} }
       transiting = true
       xhr.open request.method, request.url, request.async
-      xhr.timeout = request.timeout
+      xhr.timeout = request.timeout if request.timeout
       for header, value of request.headers
         xhr.setRequestHeader header, value
       xhr.send request.body
@@ -237,7 +237,6 @@ createXHRFacade = (xhr) ->
         done hook request
       else if hook.length is 2
         #async handlers must use an async xhr
-        request.async = true
         hook request, done
       else
         throw INVALID_PARAMS_ERROR
