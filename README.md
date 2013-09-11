@@ -70,9 +70,9 @@ See the above example and more here:
 
 We can **modify** the `request` before the XHR is sent.
 
-To use provide a **fake** response, simply return a `response` object.
+If our `handler` is asynchronous, just include the `callback` argument, which accepts an optional `response` object.
 
-If our `handler` is asynchronous, just include the `callback` argument, which accepts an optional `response` object (instead of returning it).
+To provide a **fake** response, simply `return` or `callback()` a `response` object.
 
 ### `xhook`.`after`(`handler(request, response[, callback])`)
 
@@ -82,20 +82,21 @@ If our `handler` is asynchronous, just include the `callback` argument.
 
 ### `request` Object
 
-* `method` (String) - HTTP Method
-* `url` (String) - URL
-* `body` (String) - HTTP Body (**May implement binary data in the future**)
-* `headers` (Object) - Request Headers
+* `method` (String)
+* `url` (String)
+* `body` (String) **May implement binary data in the future**
+* `headers` (Object)
+* `timeout` (Number)
 
 ### `response` Object
 
-* `status` (Number) - HTTP Status Code **(Required when for fake `response`s)**
-* `statusText` (String) - String representation of the status code
-* `text` (String) - The HTTP response text
-* `headers` (Object) - Response Headers
-* `type` (String) *Default: `""`* - The type of response
-* `xml` (XML) - Parsed `text` into XML (when `type` is `"xml"`)
-* `data` (Varies by `type`) - *Currently equivalent to `text` (JSON type in progress)*
+* `status` (Number) **Required when for fake `response`s**
+* `statusText` (String)
+* `text` (String) *(XMLHttpRequest `responseText`)*
+* `headers` (Object)
+* `type` (String) *(XMLHttpRequest `responseType`)*
+* `xml` (XML) *(XMLHttpRequest `responseXML`)*
+* `data` (Varies) *(XMLHttpRequest `response`)*
 
 ### Overview
 

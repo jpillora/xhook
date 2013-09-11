@@ -68,6 +68,7 @@ patchClass = (name) ->
   window[name] = (arg) ->
     return if typeof arg is "string" and not /\.XMLHTTP/.test(arg)
     createXHRFacade new Class(arg)
+  return
 
 patchClass "ActiveXObject"
 patchClass "XMLHttpRequest"
@@ -75,11 +76,14 @@ patchClass "XMLHttpRequest"
 #make patched version
 createXHRFacade = (xhr) ->
 
+  if pluginEvents.listeners(BEFORE).length is 0 and
+     pluginEvents.listeners(AFTER).length is 0
+    return xhr
+
   #==========================
   # Extra state
   transiting = false
-  request = 
-    timeout: 0
+  request =
     headers: {}
   response = null
   xhrEvents = EventEmitter()
@@ -101,8 +105,8 @@ createXHRFacade = (xhr) ->
 
   currentState = 0
   setReadyState = (n) ->
-    #pull in listeners
-    extractListeners()
+    #pull in properties
+    extractProps()
     #fire off events after hooks have run
     fire = ->
       while n > currentState and currentState < 4
@@ -139,10 +143,13 @@ createXHRFacade = (xhr) ->
       clone[key] = if val is xhr then face else val
     clone
 
-  extractListeners = ->
+  extractProps = ->
+    for key in ['timeout']
+      request[key] = xhr[key] if xhr[key] and request[key] is `undefined`
     for key, fn of face
       if typeof fn is 'function' and /^on(\w+)/.test key
         xhrEvents.on RegExp.$1, fn
+    return
 
   #==========================
   # Event Handlers
@@ -173,6 +180,11 @@ createXHRFacade = (xhr) ->
 
     return
 
+  #the rest of the events
+  for event in ['abort','progress']
+    xhr["on#{event}"] = (obj) ->
+      xhrEvents.fire event, checkEvent obj
+
   #==========================
   # Facade XHR
   face =
@@ -180,7 +192,7 @@ createXHRFacade = (xhr) ->
     response: null
     status: 0
 
-  face.addEventListener = xhrEvents.on
+  face.addEventListener = (event, fn) -> xhrEvents.on e, fn
   face.removeEventListener = xhrEvents.off
   face.dispatchEvent = ->
 
@@ -199,6 +211,7 @@ createXHRFacade = (xhr) ->
       response = { headers: {} }
       transiting = true
       xhr.open request.method, request.url, request.async
+      xhr.timeout = request.timeout
       for header, value of request.headers
         xhr.setRequestHeader header, value
       xhr.send request.body
@@ -223,6 +236,8 @@ createXHRFacade = (xhr) ->
       if hook.length is 1
         done hook request
       else if hook.length is 2
+        #async handlers must use an async xhr
+        request.async = true
         hook request, done
       else
         throw INVALID_PARAMS_ERROR
@@ -232,16 +247,19 @@ createXHRFacade = (xhr) ->
 
   face.abort = ->
     xhr.abort() if transiting
+    xhrEvents.fire 'abort', arguments
+    return
   face.setRequestHeader = (header, value) ->
     request.headers[header] = value
+    return
   face.getResponseHeader = (header) ->
     response.headers[header]
   face.getAllResponseHeaders = ->
     convertHeaders response.headers
-  face.overrideMimeType = ->
-    #TODO
-  face.upload = {}
-    #TODO
+  #TODO
+  # face.overrideMimeType = ->
+  #TODO
+  face.upload = EventEmitter()
 
   return face
 #publicise
