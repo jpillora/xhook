@@ -103,6 +103,19 @@ createXHRFacade = (xhr) ->
     face.responseXML = response.xml or null
     return
 
+  copyHead = ->
+    response.status = xhr.status
+    response.statusText = xhr.statusText
+    for key, val of convertHeaders xhr.getAllResponseHeaders()
+      unless response.headers[key]
+        response.headers[key] = val
+
+  copyBody = ->
+    response.type = xhr.responseType
+    response.text = xhr.responseText
+    response.data = xhr.response or response.text
+    response.xml = xhr.responseXML
+
   currentState = 0
   setReadyState = (n) ->
     #pull in properties
@@ -120,7 +133,9 @@ createXHRFacade = (xhr) ->
           xhrEvents.fire "load"
       return
 
-    return fire() if n < 4
+
+    if n < 4
+      return fire()
 
     hooks = pluginEvents.listeners AFTER
     process = ->
@@ -157,25 +172,23 @@ createXHRFacade = (xhr) ->
   #react to *real* xhr ready state changes
   xhr.onreadystatechange = (event) ->
 
-    #pull status and headers
-    if xhr[READY_STATE] is 2
-      response.status = xhr.status
-      response.statusText = xhr.statusText
-      for key, val of convertHeaders xhr.getAllResponseHeaders()
-        unless response.headers[key]
-          response.headers[key] = val
+    # simulate transit progress events?
+    # TODO
+    # if xhr[READY_STATE] is 1
 
-    # simulate progress events?
+    #pull status and headers
+    if typeof xhr.status isnt 'unknown' and xhr[READY_STATE] is 2
+      copyHead()
+
+    # simulate data progress events?
     # TODO
     # if xhr[READY_STATE] is 3
 
     #pull response data
     if xhr[READY_STATE] is 4
       transiting = false
-      response.type = xhr.responseType
-      response.text = xhr.responseText
-      response.data = xhr.response or response.text
-      response.xml = xhr.responseXML
+      copyHead()
+      copyBody()
       setReadyState xhr[READY_STATE]
 
     return
