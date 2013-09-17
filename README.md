@@ -11,8 +11,6 @@ v1.0
 
 **Attention: XHook has been rewritten to simplify the API**
 
-**Automated browser testing in progress**
-
 <!--
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
 -->
@@ -50,6 +48,10 @@ xhook.after(function(request, response) {
     response.text = response.text.replace(/[aeiou]/g,'z');
 });
 ```
+
+## Browser Support
+
+[![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
 
 ## Live Demos
 
