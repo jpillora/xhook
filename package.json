@@ -1,6 +1,9 @@
 {
   "name": "xhook-tests",
   "version": "0.1.0",
+  "devDependencies": {
+    "mocha": "~1.7.4"
+  },
   "testling": {
     "browsers": [
         "ie6", "ie7", "ie8", "ie9",
