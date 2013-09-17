@@ -1,6 +1,6 @@
 {
   "name": "xhook-tests",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "devDependencies": {
     "mocha": "~1.7.4"
   },
@@ -12,5 +12,5 @@
     "harness" : "mocha",
     "files": "test/*.js"
   },
-  "server": "test/server.js"
+  "foo-server": "test/server.js"
 }
