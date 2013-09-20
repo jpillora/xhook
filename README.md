@@ -51,7 +51,11 @@ xhook.after(function(request, response) {
 
 ## Browser Support
 
+Tested in IE8+, Chrome, Firefox, Safari
+
+<!-- 
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
+ -->
 
 ## Live Demos
 
