@@ -86,7 +86,7 @@ createXHRFacade = (xhr) ->
   request =
     headers: {}
   response = null
-  xhrEvents = EventEmitter()
+  faceEvents = EventEmitter()
 
   #==========================
   # Private API
@@ -128,9 +128,9 @@ createXHRFacade = (xhr) ->
           readyHead()
         if currentState is 4
           readyBody()
-        xhrEvents.fire "readystatechange"
+        faceEvents.fire "readystatechange"
         if currentState is 4
-          xhrEvents.fire "load"
+          faceEvents.fire "load"
       return
 
 
@@ -163,7 +163,7 @@ createXHRFacade = (xhr) ->
       request[key] = xhr[key] if xhr[key] and request[key] is `undefined`
     for key, fn of face
       if typeof fn is 'function' and /^on(\w+)/.test key
-        xhrEvents.on RegExp.$1, fn
+        faceEvents.on RegExp.$1, fn
     return
 
   #==========================
@@ -177,8 +177,10 @@ createXHRFacade = (xhr) ->
     # if xhr[READY_STATE] is 1
 
     #pull status and headers
-    if typeof xhr.status isnt 'unknown' and xhr[READY_STATE] is 2
-      copyHead()
+    try
+      if xhr[READY_STATE] is 2
+        copyHead()
+        setReadyState 2
 
     # simulate data progress events?
     # TODO
@@ -189,14 +191,14 @@ createXHRFacade = (xhr) ->
       transiting = false
       copyHead()
       copyBody()
-      setReadyState xhr[READY_STATE]
+      setReadyState 4
 
     return
 
   #the rest of the events
   for event in ['abort','progress']
     xhr["on#{event}"] = (obj) ->
-      xhrEvents.fire event, checkEvent obj
+      faceEvents.fire event, checkEvent obj
 
   #==========================
   # Facade XHR
@@ -205,8 +207,8 @@ createXHRFacade = (xhr) ->
     response: null
     status: 0
 
-  face.addEventListener = (event, fn) -> xhrEvents.on event, fn
-  face.removeEventListener = xhrEvents.off
+  face.addEventListener = (event, fn) -> faceEvents.on event, fn
+  face.removeEventListener = faceEvents.off
   face.dispatchEvent = ->
 
   face.open = (method, url, async) ->
@@ -259,7 +261,7 @@ createXHRFacade = (xhr) ->
 
   face.abort = ->
     xhr.abort() if transiting
-    xhrEvents.fire 'abort', arguments
+    faceEvents.fire 'abort', arguments
     return
   face.setRequestHeader = (header, value) ->
     request.headers[header] = value
