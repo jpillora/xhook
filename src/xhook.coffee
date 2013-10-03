@@ -131,6 +131,7 @@ createXHRFacade = (xhr) ->
         faceEvents.fire "readystatechange"
         if currentState is 4
           faceEvents.fire "load"
+          faceEvents.fire "loadend"
       return
 
 
