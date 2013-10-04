@@ -86,7 +86,7 @@ createXHRFacade = (xhr) ->
   request =
     headers: {}
   response = null
-  faceEvents = EventEmitter()
+  facadeEventEmitter = EventEmitter()
 
   #==========================
   # Private API
@@ -121,26 +121,28 @@ createXHRFacade = (xhr) ->
     #pull in properties
     extractProps()
     #fire off events after hooks have run
-    fire = ->
+    checkReadyState = ->
       while n > currentState and currentState < 4
         face[READY_STATE] = ++currentState
         if currentState is 2
           readyHead()
         if currentState is 4
           readyBody()
-        faceEvents.fire "readystatechange"
+        # make fake events here for libraries that actually check the type on
+        # the event object
+        facadeEventEmitter.fire "readystatechange", makeFakeEvent("readystatechange")
         if currentState is 4
-          faceEvents.fire "load"
+          faceEvents.fire "load", makeFakeEvent("load")
       return
 
 
     if n < 4
-      return fire()
+      return checkReadyState()
 
     hooks = pluginEvents.listeners AFTER
     process = ->
       unless hooks.length
-        return fire()
+        return checkReadyState()
       hook = hooks.shift()
       if hook.length is 2
         hook request, response
@@ -151,6 +153,14 @@ createXHRFacade = (xhr) ->
         throw INVALID_PARAMS_ERROR
     process()
     return
+
+  makeFakeEvent = (type) ->
+    if window.document.createEventObject?
+      msieEventObject = window.document.createEventObject()
+      msieEventObject.type = type
+      msieEventObject
+    else
+      new Event(type)
 
   checkEvent = (e) ->
     clone = {}
@@ -163,7 +173,7 @@ createXHRFacade = (xhr) ->
       request[key] = xhr[key] if xhr[key] and request[key] is `undefined`
     for key, fn of face
       if typeof fn is 'function' and /^on(\w+)/.test key
-        faceEvents.on RegExp.$1, fn
+        facadeEventEmitter.on RegExp.$1, fn
     return
 
   #==========================
@@ -198,7 +208,7 @@ createXHRFacade = (xhr) ->
   #the rest of the events
   for event in ['abort','progress']
     xhr["on#{event}"] = (obj) ->
-      faceEvents.fire event, checkEvent obj
+      facadeEventEmitter.fire event, checkEvent obj
 
   #==========================
   # Facade XHR
@@ -207,8 +217,8 @@ createXHRFacade = (xhr) ->
     response: null
     status: 0
 
-  face.addEventListener = (event, fn) -> faceEvents.on event, fn
-  face.removeEventListener = faceEvents.off
+  face.addEventListener = (event, fn) -> facadeEventEmitter.on event, fn
+  face.removeEventListener = facadeEventEmitter.off
   face.dispatchEvent = ->
 
   face.open = (method, url, async) ->
@@ -261,7 +271,7 @@ createXHRFacade = (xhr) ->
 
   face.abort = ->
     xhr.abort() if transiting
-    faceEvents.fire 'abort', arguments
+    facadeEventEmitter.fire 'abort', arguments
     return
   face.setRequestHeader = (header, value) ->
     request.headers[header] = value
