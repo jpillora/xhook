@@ -61,20 +61,11 @@ convertHeaders = (h, dest = {}) ->
 
 xhook.headers = convertHeaders
 
-#patch XMLHTTP
-patchClass = (name) ->
-  Class = window[name]
-  return unless Class
-  window[name] = (arg) ->
-    return if typeof arg is "string" and not /\.XMLHTTP/.test(arg)
-    createXHRFacade new Class(arg)
-  return
+#patch XHR
+XMLHttpRequest = window.XMLHttpRequest
+window.XMLHttpRequest = ->
 
-patchClass "ActiveXObject"
-patchClass "XMLHttpRequest"
-
-#make patched version
-createXHRFacade = (xhr) ->
+  xhr = new XMLHttpRequest
 
   if pluginEvents.listeners(BEFORE).length is 0 and
      pluginEvents.listeners(AFTER).length is 0

@@ -19,7 +19,7 @@ With XHook, you could easily implement functionality to:
 
 * Cache requests in memory, localStorage, etc.
 * Insert authentication headers
-  * S3 Request Signing
+  * S3 Request Signing, see [S3 Hook](https://github.com/jpillora/s3hook)
 * Simulate responses
   * For testing purposes, just add your test hooks and your code can remain the same
 * Sending Error statistics to Google Analytics
@@ -36,6 +36,9 @@ With XHook, you could easily implement functionality to:
 ## Future Features
 
 * Backwards compatible user controlled progress (download/upload) events
+* Add BrowserSwarm or TestlingCI automated cross-browser tests
+ 
+  *Tip: See [CONTRIBUTING.md](CONTRIBUTING.md) for steps on how to contribute* :wink:
 
 ## Example
 
@@ -57,18 +60,16 @@ Tested in IE8+, Chrome, Firefox, Safari
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
  -->
 
-## Live Demos
-
-See the above example and more here:
+## Demos
 
 ### *http://jpillora.com/xhook*
 
 ## Download
 
-* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 7.8KB
-* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.3KB (0.8KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 8.8KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.6KB (0.9KB Gzip)
 
-  *Note: It's **important** to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
+  *Note: It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 
@@ -109,7 +110,7 @@ If our `handler` is asynchronous, just include the `callback` argument.
 <img src="https://docs.google.com/drawings/d/1PTxHDqdW9iNqagDwtaO0ggXZkJp7ILiRDVWAMHInFGQ/pub?w=498&amp;h=235">
 
 *The dark red `before` hook is returning a `response` object, which will trigger the `after`
-hooks, then trigger the appropriate events, so it **appears** as if `response` came from 
+hooks, then trigger the appropriate events, so it* **appears** *as if `response` came from 
 the server.*
 
 ### Reference
@@ -123,6 +124,10 @@ https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest` and `ActiveXObject`, so you may use any library
 conjunction with XHook, just make sure to load XHook **first**. 
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md) for instructions on how to build and run XHook locally.
 
 ### Old Version
 
