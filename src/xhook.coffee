@@ -91,16 +91,16 @@ createXHRFacade = (xhr) ->
   #==========================
   # Private API
   readyHead = ->
-    face.status = response.status
-    face.statusText = response.statusText
+    facade.status = response.status
+    facade.statusText = response.statusText
     response.headers or= {}
     return
 
   readyBody = ->
-    face.responseType = response.type or ''
-    face.response = response.data or null
-    face.responseText = response.text or response.data or ''
-    face.responseXML = response.xml or null
+    facade.responseType = response.type or ''
+    facade.response = response.data or null
+    facade.responseText = response.text or response.data or ''
+    facade.responseXML = response.xml or null
     return
 
   copyHead = ->
@@ -123,7 +123,7 @@ createXHRFacade = (xhr) ->
     #fire off events after hooks have run
     checkReadyState = ->
       while n > currentState and currentState < 4
-        face[READY_STATE] = ++currentState
+        facade[READY_STATE] = ++currentState
         if currentState is 2
           readyHead()
         if currentState is 4
@@ -132,7 +132,8 @@ createXHRFacade = (xhr) ->
         # the event object
         facadeEventEmitter.fire "readystatechange", makeFakeEvent("readystatechange")
         if currentState is 4
-          faceEvents.fire "load", makeFakeEvent("load")
+          facadeEventEmitter.fire "load", makeFakeEvent("load")
+          facadeEventEmitter.fire "loadend"
       return
 
 
@@ -165,13 +166,13 @@ createXHRFacade = (xhr) ->
   checkEvent = (e) ->
     clone = {}
     for key, val of e
-      clone[key] = if val is xhr then face else val
+      clone[key] = if val is xhr then facade else val
     clone
 
   extractProps = ->
     for key in ['timeout']
       request[key] = xhr[key] if xhr[key] and request[key] is `undefined`
-    for key, fn of face
+    for key, fn of facade
       if typeof fn is 'function' and /^on(\w+)/.test key
         facadeEventEmitter.on RegExp.$1, fn
     return
@@ -212,16 +213,16 @@ createXHRFacade = (xhr) ->
 
   #==========================
   # Facade XHR
-  face =
+  facade =
     withCredentials: false # initialise 'withCredentials' on object so jQuery thinks we have CORS
     response: null
     status: 0
 
-  face.addEventListener = (event, fn) -> facadeEventEmitter.on event, fn
-  face.removeEventListener = facadeEventEmitter.off
-  face.dispatchEvent = ->
+  facade.addEventListener = (event, fn) -> facadeEventEmitter.on event, fn
+  facade.removeEventListener = facadeEventEmitter.off
+  facade.dispatchEvent = ->
 
-  face.open = (method, url, async) ->
+  facade.open = (method, url, async) ->
     #TODO - user/password args
     request.method = method
     request.url = url
@@ -229,7 +230,7 @@ createXHRFacade = (xhr) ->
     setReadyState 1
     return
 
-  face.send = (body) ->
+  facade.send = (body) ->
     request.body = body
     send = ->
       #prepare response
@@ -269,23 +270,23 @@ createXHRFacade = (xhr) ->
     process()
     return
 
-  face.abort = ->
+  facade.abort = ->
     xhr.abort() if transiting
     facadeEventEmitter.fire 'abort', arguments
     return
-  face.setRequestHeader = (header, value) ->
+  facade.setRequestHeader = (header, value) ->
     request.headers[header] = value
     return
-  face.getResponseHeader = (header) ->
+  facade.getResponseHeader = (header) ->
     response.headers[header]
-  face.getAllResponseHeaders = ->
+  facade.getAllResponseHeaders = ->
     convertHeaders response.headers
   #TODO
-  # face.overrideMimeType = ->
+  # facade.overrideMimeType = ->
   #TODO
-  face.upload = EventEmitter()
+  facade.upload = EventEmitter()
 
-  return face
+  return facade
 #publicise
 window.xhook = xhook
 
