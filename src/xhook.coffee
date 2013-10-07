@@ -124,7 +124,7 @@ window.XMLHttpRequest = ->
         facadeEventEmitter.fire "readystatechange", makeFakeEvent("readystatechange")
         if currentState is 4
           facadeEventEmitter.fire "load", makeFakeEvent("load")
-          facadeEventEmitter.fire "loadend"
+          facadeEventEmitter.fire "loadend", makeFakeEvent("loadend")
       return
 
 
