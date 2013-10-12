@@ -15,16 +15,14 @@ EventEmitter = (ctx) ->
   events = {}
   listeners = (event) ->
     events[event] or []
-  addEvent = (event, callback, i) ->
-    events[event] = listeners event
-    return if events[event].indexOf(callback) >= 0
-    i = if i is `undefined` then events[event].length else i
-    events[event].splice i, 0, callback
-    return
   emitter =
     listeners: (event) -> Array::slice.call listeners event
     on: (event, callback, i) ->
-      addEvent(event, callback, i)
+      events[event] = listeners event
+      return if events[event].indexOf(callback) >= 0
+      i = if i is `undefined` then events[event].length else i
+      events[event].splice i, 0, callback
+      return
     off: (event, callback) ->
       i = listeners(event).indexOf callback
       return if i is -1
@@ -34,9 +32,6 @@ EventEmitter = (ctx) ->
       for listener in listeners event
         listener.apply ctx, args
       return
-    addEventListener: (event, callback) ->
-      # some implementations use addEventListener instead of on/off
-      addEvent(event, callback)
   return emitter
 
 #use event emitter to store hooks
@@ -280,7 +275,7 @@ window.XMLHttpRequest = ->
   #TODO
   # facade.overrideMimeType = ->
   #TODO
-  facade.upload = EventEmitter()
+  # facade.upload = null
 
   return facade
 #publicise

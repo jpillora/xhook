@@ -8,13 +8,6 @@ v1.0
   <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
 </a>
 
-
-**Attention: XHook has been rewritten to simplify the API**
-
-<!--
-[![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
--->
-
 With XHook, you could easily implement functionality to:
 
 * Cache requests in memory, localStorage, etc.
