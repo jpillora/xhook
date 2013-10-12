@@ -24,22 +24,25 @@ INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentati
 });
 
 EventEmitter = function(ctx) {
-  var emitter, events, listeners;
+  var addEvent, emitter, events, listeners;
   events = {};
   listeners = function(event) {
     return events[event] || [];
+  };
+  addEvent = function(event, callback, i) {
+    events[event] = listeners(event);
+    if (events[event].indexOf(callback) >= 0) {
+      return;
+    }
+    i = i === undefined ? events[event].length : i;
+    events[event].splice(i, 0, callback);
   };
   emitter = {
     listeners: function(event) {
       return Array.prototype.slice.call(listeners(event));
     },
     on: function(event, callback, i) {
-      events[event] = listeners(event);
-      if (events[event].indexOf(callback) >= 0) {
-        return;
-      }
-      i = i === undefined ? events[event].length : i;
-      events[event].splice(i, 0, callback);
+      return addEvent(event, callback, i);
     },
     off: function(event, callback) {
       var i;
@@ -57,6 +60,9 @@ EventEmitter = function(ctx) {
         listener = _ref[_i];
         listener.apply(ctx, args);
       }
+    },
+    addEventListener: function(event, callback) {
+      return addEvent(event, callback);
     }
   };
   return emitter;
