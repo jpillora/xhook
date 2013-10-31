@@ -1,5 +1,5 @@
 {
-  "name": "xhook-tests-name-change",
+  "name": "xhook-tests",
   "version": "0.2.0",
   "devDependencies": {
     "mocha": "~1.7.4"
