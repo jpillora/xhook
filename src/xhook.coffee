@@ -152,7 +152,10 @@ window.XMLHttpRequest = ->
       msieEventObject.type = type
       msieEventObject
     else
-      new Event(type)
+      # on some platforms like android 4.1.2 and safari on windows, it appears
+      # that new Event is not allowed
+      try new Event(type)
+      catch e then {type: type}
 
   checkEvent = (e) ->
     clone = {}
