@@ -198,7 +198,13 @@ window.XMLHttpRequest = function() {
       msieEventObject.type = type;
       return msieEventObject;
     } else {
-      return new Event(type);
+      try {
+        return new Event(type);
+      } catch (_error) {
+        return {
+          type: type
+        };
+      }
     }
   };
   checkEvent = function(e) {

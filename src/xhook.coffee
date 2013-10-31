@@ -155,7 +155,7 @@ window.XMLHttpRequest = ->
       # on some platforms like android 4.1.2 and safari on windows, it appears
       # that new Event is not allowed
       try new Event(type)
-      catch e then {type: type}
+      catch then {type}
 
   checkEvent = (e) ->
     clone = {}
