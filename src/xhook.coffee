@@ -118,6 +118,7 @@ window.XMLHttpRequest = ->
         if currentState is 2
           readyHead()
         if currentState is 4
+          readyHead()
           readyBody()
         # make fake events here for libraries that actually check the type on
         # the event object
