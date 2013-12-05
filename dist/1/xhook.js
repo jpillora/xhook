@@ -1,7 +1,6 @@
-// XHook - v1.0.7 - https://github.com/jpillora/xhook
+// XHook - v1.1.0 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2013
-(function(window,document,undefined) {
-var AFTER, BEFORE, EventEmitter, INVALID_PARAMS_ERROR, READY_STATE, XMLHttpRequest, convertHeaders, pluginEvents, xhook, _base,
+(function(window,undefined) {var AFTER, BEFORE, EventEmitter, INVALID_PARAMS_ERROR, READY_STATE, XMLHttpRequest, convertHeaders, pluginEvents, xhook, _base,
   __slice = [].slice;
 
 BEFORE = 'before';
@@ -334,4 +333,4 @@ window.XMLHttpRequest = function() {
 };
 
 window.xhook = xhook;
-}(window,document));
+}(this));

@@ -4,35 +4,36 @@ AFTER = 'after'
 READY_STATE = 'readyState'
 INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation."
 
-#add coffeescripts indexOf method to Array
+#if required, add coffeescripts indexOf method to Array
 Array::indexOf or= (item) ->
   for x, i in this
     return i if x is item
   return -1
 
 #tiny event emitter
-EventEmitter = (ctx) ->
+EventEmitter = () ->
+  #private
   events = {}
   listeners = (event) ->
     events[event] or []
-  emitter =
-    listeners: (event) -> Array::slice.call listeners event
-    on: (event, callback, i) ->
-      events[event] = listeners event
-      return if events[event].indexOf(callback) >= 0
-      i = if i is `undefined` then events[event].length else i
-      events[event].splice i, 0, callback
-      return
-    off: (event, callback) ->
-      i = listeners(event).indexOf callback
-      return if i is -1
-      listeners(event).splice i, 1
-      return
-    fire: (event, args...) ->
-      for listener in listeners event
-        listener.apply ctx, args
-      return
-  return emitter
+  #public
+  listeners: (event) ->
+    Array::slice.call listeners event
+  on: (event, callback, i) ->
+    events[event] = listeners event
+    return if events[event].indexOf(callback) >= 0
+    i = if i is `undefined` then events[event].length else i
+    events[event].splice i, 0, callback
+    return
+  off: (event, callback) ->
+    i = listeners(event).indexOf callback
+    return if i is -1
+    listeners(event).splice i, 1
+    return
+  fire: (event, args...) ->
+    for listener in listeners event
+      listener.apply undefined, args
+    return
 
 #use event emitter to store hooks
 pluginEvents = EventEmitter()
@@ -45,7 +46,7 @@ xhook[AFTER] = (handler, i) ->
 
 #helper
 convertHeaders = (h, dest = {}) ->
-  switch  typeof h
+  switch typeof h
     when "object"
       headers = []
       for k,v of h
@@ -170,6 +171,7 @@ window.XMLHttpRequest = ->
     for key, fn of facade
       if typeof fn is 'function' and /^on(\w+)/.test key
         facadeEventEmitter.on RegExp.$1, fn
+        delete facade[key]
     return
 
   #==========================
