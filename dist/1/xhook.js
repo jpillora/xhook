@@ -1,6 +1,6 @@
 // XHook - v1.1.0 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2013
-(function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, INVALID_PARAMS_ERROR, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, xhook, _base,
+(function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, xhook, _base,
   __slice = [].slice;
 
 document = window.document;
@@ -10,8 +10,6 @@ BEFORE = 'before';
 AFTER = 'after';
 
 READY_STATE = 'readyState';
-
-INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation.";
 
 ON = 'addEventListener';
 
@@ -23,7 +21,7 @@ XMLHTTP = 'XMLHttpRequest';
 
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
 
-COMMON_EVENTS = ['progress', 'abort', 'error'];
+COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
 (_base = Array.prototype).indexOf || (_base.indexOf = function(item) {
   var i, x, _i, _len;
@@ -86,10 +84,16 @@ EventEmitter = function(internal) {
 xhook = EventEmitter(true);
 
 xhook[BEFORE] = function(handler, i) {
+  if (handler.length < 1 || handler.length > 2) {
+    throw "!";
+  }
   return xhook[ON](BEFORE, handler, i);
 };
 
 xhook[AFTER] = function(handler, i) {
+  if (handler.length < 2 || handler.length > 3) {
+    throw "!";
+  }
   return xhook[ON](AFTER, handler, i);
 };
 
@@ -170,6 +174,9 @@ window[XMLHTTP] = function() {
     checkReadyState = function() {
       while (n > currentState && currentState < 4) {
         facade[READY_STATE] = ++currentState;
+        if (currentState === 1) {
+          facade[FIRE]("loadstart", makeFakeEvent("loadstart"));
+        }
         if (currentState === 2) {
           writeHead();
         }
@@ -200,8 +207,6 @@ window[XMLHTTP] = function() {
         return process();
       } else if (hook.length === 3) {
         return hook(request, response, process);
-      } else {
-        throw INVALID_PARAMS_ERROR;
       }
     };
     process();
@@ -309,8 +314,6 @@ window[XMLHTTP] = function() {
         return done(hook(request));
       } else if (hook.length === 2) {
         return hook(request, done);
-      } else {
-        throw INVALID_PARAMS_ERROR;
       }
     };
     process();

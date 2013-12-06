@@ -3,14 +3,13 @@ document = window.document
 BEFORE = 'before'
 AFTER = 'after'
 READY_STATE = 'readyState'
-INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation."
 ON = 'addEventListener'
 OFF = 'removeEventListener'
 FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
 
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
-COMMON_EVENTS = ['progress', 'abort', 'error']
+COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
 #if required, add coffeescripts indexOf method to Array
 Array::indexOf or= (item) ->
@@ -58,8 +57,12 @@ EventEmitter = (internal) ->
 #use event emitter to store hooks
 xhook = EventEmitter(true)
 xhook[BEFORE] = (handler, i) ->
+  if handler.length < 1 or handler.length > 2
+    throw "!"
   xhook[ON] BEFORE, handler, i
 xhook[AFTER] = (handler, i) ->
+  if handler.length < 2 or handler.length > 3
+    throw "!"
   xhook[ON] AFTER, handler, i
 
 #helper
@@ -129,6 +132,9 @@ window[XMLHTTP] = ->
     checkReadyState = ->
       while n > currentState and currentState < 4
         facade[READY_STATE] = ++currentState
+
+        if currentState is 1
+          facade[FIRE] "loadstart", makeFakeEvent("loadstart")
         if currentState is 2
           writeHead()
         if currentState is 4
@@ -158,8 +164,6 @@ window[XMLHTTP] = ->
         process()
       else if hook.length is 3
         hook request, response, process
-      else
-        throw INVALID_PARAMS_ERROR
     process()
     return
 
@@ -266,8 +270,6 @@ window[XMLHTTP] = ->
       else if hook.length is 2
         #async handlers must use an async xhr
         hook request, done
-      else
-        throw INVALID_PARAMS_ERROR
     #kick off
     process()
     return

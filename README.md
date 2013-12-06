@@ -1,6 +1,6 @@
 # XHook
 
-v1.0
+v1.1
 
 > ### Easily intercept and modify XHR request and response
 
@@ -59,10 +59,10 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 ## Download
 
-* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 8.8KB
-* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 3.6KB (0.9KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 9KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 4KB (1KB Gzip)
 
-  *Note: It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
+  :warn: *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 
@@ -109,6 +109,10 @@ the server.*
 ### Reference
 
 https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+
+http://www.w3.org/TR/XMLHttpRequest/
+
+http://www.w3.org/TR/XMLHttpRequest2/
 
 ### Issues
 
