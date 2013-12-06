@@ -1,0 +1,46 @@
+
+<h5>upload progress events</h5>
+<pre id="events"></pre>
+
+<script src="../dist/1/xhook.js"></script>
+<script type="text/javascript">
+
+//hook
+// xhook.before(function(request) {
+//   console.log('hook!', request.url);
+// });
+
+function append(str) {
+  document.getElementById('events').innerHTML += str + "\n";
+}
+
+var xhr = new XMLHttpRequest();
+
+xhr.onreadystatechange = function(e) {
+  append('readyState '+ xhr.readyState);
+}
+
+xhr.upload.onloadstart = function(e) {
+  append('upload started');
+}
+
+xhr.upload.onprogress = function(e) {
+  append(Math.round((e.loaded/e.total)*100));
+}
+
+xhr.upload.onload = function(e) {
+  append('upload complete');
+}
+
+xhr.open('POST', 'http://placekitten.com/2000/2000?r='+Math.random());
+
+var data = [];
+var i = 5e4;
+while(i--) data.push(i);
+data = data.join('-');
+
+append('sending #'+data.length+' chars');
+
+xhr.send(data);
+
+</script>

@@ -1,6 +1,6 @@
 // XHook - v1.1.0 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2013
-(function(window,undefined) {var AFTER, BEFORE, EventEmitter, FIRE, INVALID_PARAMS_ERROR, OFF, ON, READY_STATE, XMLHTTP, convertHeaders, document, xhook, _base,
+(function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, INVALID_PARAMS_ERROR, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, xhook, _base,
   __slice = [].slice;
 
 document = window.document;
@@ -20,6 +20,10 @@ OFF = 'removeEventListener';
 FIRE = 'dispatchEvent';
 
 XMLHTTP = 'XMLHttpRequest';
+
+UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
+
+COMMON_EVENTS = ['progress', 'abort', 'error'];
 
 (_base = Array.prototype).indexOf || (_base.indexOf = function(item) {
   var i, x, _i, _len;
@@ -56,12 +60,15 @@ EventEmitter = function(internal) {
     listeners(event).splice(i, 1);
   };
   emitter[FIRE] = function() {
-    var args, event, i, listener, _i, _len, _ref;
+    var args, event, i, legacylistener, listener, _i, _len, _ref;
     event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    legacylistener = emitter["on" + event];
+    if (legacylistener) {
+      legacylistener.apply(void 0, args);
+    }
     _ref = listeners(event);
     for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
       listener = _ref[i];
-      console.log('FIRE', i, event);
       listener.apply(void 0, args);
     }
   };
@@ -118,7 +125,7 @@ xhook.headers = convertHeaders;
 xhook[XMLHTTP] = window[XMLHTTP];
 
 window[XMLHTTP] = function() {
-  var checkEvent, currentState, extractProps, extractedProps, facade, makeFakeEvent, readBody, readHead, request, response, setReadyState, transiting, writeBody, writeHead, xhr;
+  var currentState, facade, makeFakeEvent, proxy, readBody, readHead, request, response, setReadyState, transiting, writeBody, writeHead, xhr;
   xhr = new xhook[XMLHTTP]();
   transiting = false;
   request = EventEmitter(true);
@@ -160,11 +167,9 @@ window[XMLHTTP] = function() {
   currentState = 0;
   setReadyState = function(n) {
     var checkReadyState, hooks, process;
-    extractProps();
     checkReadyState = function() {
       while (n > currentState && currentState < 4) {
         facade[READY_STATE] = ++currentState;
-        console.log('READY STATE', facade[READY_STATE]);
         if (currentState === 2) {
           writeHead();
         }
@@ -217,62 +222,58 @@ window[XMLHTTP] = function() {
       }
     }
   };
-  checkEvent = function(e) {
-    var clone, key, val;
-    clone = {};
-    for (key in e) {
-      val = e[key];
-      clone[key] = val === xhr ? facade : val;
+  proxy = function(events, from, to) {
+    var event, p, _i, _len, _results;
+    p = function(event) {
+      return function(e) {
+        var clone, key, val;
+        clone = {};
+        for (key in e) {
+          val = e[key];
+          clone[key] = val === from ? to : val;
+        }
+        clone;
+        return to[FIRE](event, clone);
+      };
+    };
+    _results = [];
+    for (_i = 0, _len = events.length; _i < _len; _i++) {
+      event = events[_i];
+      _results.push(from["on" + event] = p(event));
     }
-    return clone;
-  };
-  extractedProps = {};
-  extractProps = function() {
-    var event, fn, key, _i, _len, _ref;
-    console.log('extract props...');
-    _ref = ['timeout'];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      key = _ref[_i];
-      if (xhr[key] && request[key] === undefined) {
-        request[key] = xhr[key];
-      }
-    }
-    for (key in facade) {
-      fn = facade[key];
-      if (!extractedProps[key] && typeof fn === 'function' && /^on(\w+)/.test(key)) {
-        event = RegExp.$1;
-        console.log('LISTEN FOR EVENT', event);
-        facade[ON](event, fn);
-        extractedProps[key] = 1;
-      }
-    }
+    return _results;
   };
   xhr.onreadystatechange = function(event) {
     try {
       if (xhr[READY_STATE] === 2) {
         readHead();
-        setReadyState(2);
       }
     } catch (_error) {}
     if (xhr[READY_STATE] === 4) {
       transiting = false;
       readHead();
       readBody();
-      setReadyState(4);
     }
+    setReadyState(xhr[READY_STATE]);
   };
   facade = EventEmitter();
+  proxy(COMMON_EVENTS, xhr, facade);
+  request.fire = facade[FIRE];
   facade.withCredentials = false;
   facade.response = null;
   facade.status = 0;
-  facade.open = function(method, url, async) {
+  facade.open = function(method, url, async, user, pass) {
     request.method = method;
     request.url = url;
+    if (async === false) {
+      throw "sync xhr not supported by XHook";
+    }
+    request.user = user;
+    request.pass = pass;
     setReadyState(1);
   };
   facade.send = function(body) {
     var hooks, process, send;
-    extractProps();
     request.body = body;
     send = function() {
       var header, value, _ref;
@@ -280,10 +281,8 @@ window[XMLHTTP] = function() {
         headers: {}
       };
       transiting = true;
-      xhr.open(request.method, request.url);
-      if (request.timeout) {
-        xhr.timeout = request.timeout;
-      }
+      xhr.open(request.method, request.url, true, request.user, request.pass);
+      xhr.timeout = request.timeout || facade.timeout;
       _ref = request.headers;
       for (header in _ref) {
         value = _ref[header];
@@ -335,6 +334,10 @@ window[XMLHTTP] = function() {
     facade.overrideMimeType = function() {
       return xhr.overrideMimeType.apply(xhr, arguments);
     };
+  }
+  if (xhr.upload) {
+    facade.upload = EventEmitter();
+    proxy(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload);
   }
   return facade;
 };

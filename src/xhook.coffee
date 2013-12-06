@@ -9,6 +9,9 @@ OFF = 'removeEventListener'
 FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
 
+UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
+COMMON_EVENTS = ['progress', 'abort', 'error']
+
 #if required, add coffeescripts indexOf method to Array
 Array::indexOf or= (item) ->
   for x, i in this
@@ -35,8 +38,10 @@ EventEmitter = (internal) ->
     listeners(event).splice i, 1
     return
   emitter[FIRE] = (event, args...) ->
+    legacylistener = emitter["on#{event}"]
+    if legacylistener
+      legacylistener.apply undefined, args
     for listener, i in listeners event
-      console.log 'FIRE', i, event
       listener.apply undefined, args
     return
 
@@ -119,14 +124,11 @@ window[XMLHTTP] = ->
 
   currentState = 0
   setReadyState = (n) ->
-    #pull in properties
-    extractProps()
 
     #ensure ready state 0 through 4 is handled
     checkReadyState = ->
       while n > currentState and currentState < 4
         facade[READY_STATE] = ++currentState
-        console.log 'READY STATE', facade[READY_STATE]
         if currentState is 2
           writeHead()
         if currentState is 4
@@ -172,24 +174,17 @@ window[XMLHTTP] = ->
       try new Event(type)
       catch then {type}
 
-  checkEvent = (e) ->
-    clone = {}
-    for key, val of e
-      clone[key] = if val is xhr then facade else val
-    clone
-
-  extractedProps = {}
-  extractProps = ->
-    console.log 'extract props...'
-    for key in ['timeout']
-      request[key] = xhr[key] if xhr[key] and request[key] is `undefined`
-    for key, fn of facade
-      if not extractedProps[key] and typeof fn is 'function' and /^on(\w+)/.test key
-        event = RegExp.$1
-        console.log 'LISTEN FOR EVENT', event
-        facade[ON] event, fn
-        extractedProps[key] = 1
-    return
+  #proxy events that are not specifically fired by XHook
+  proxy = (events, from, to) ->
+    p = (event) -> (e) ->
+      clone = {}
+      for key, val of e
+        clone[key] = if val is from then to else val
+      clone
+      to[FIRE] event, clone
+    #dont proxy manual events
+    for event in events
+      from["on#{event}"] = p(event)
 
   #==========================
   # Event Handlers
@@ -197,63 +192,54 @@ window[XMLHTTP] = ->
   #react to *real* xhr ready state changes
   xhr.onreadystatechange = (event) ->
 
-    # simulate transit progress events?
-    # TODO
-    # if xhr[READY_STATE] is 1
-
     #pull status and headers
     try
       if xhr[READY_STATE] is 2
         readHead()
-        setReadyState 2
-
-    # simulate data progress events?
-    # TODO
-    # if xhr[READY_STATE] is 3
-
     #pull response data
     if xhr[READY_STATE] is 4
       transiting = false
       readHead()
       readBody()
-      setReadyState 4
 
+    setReadyState xhr[READY_STATE]
     return
-
-  # #the rest of the events
-  # for event in ['abort','progress']
-  #   console.log "listen on#{event}"
-  #   xhr["on#{event}"] = (obj) ->
-  #     console.log event, obj
-  #     facade[FIRE] event, checkEvent obj
 
   #==========================
   # Facade XHR
   facade = EventEmitter()
+
+  #proxy common events from xhr to facade
+  proxy COMMON_EVENTS, xhr, facade 
+
+  request.fire = facade[FIRE]
+
   facade.withCredentials = false # initialise 'withCredentials' on object so jQuery thinks we have CORS
   facade.response = null
   facade.status = 0
 
-  facade.open = (method, url, async) ->
+  facade.open = (method, url, async, user, pass) ->
     #TODO - user/password args
     request.method = method
     request.url = url
-    
+    # async not allowed
+    if async is false
+      throw "sync xhr not supported by XHook"
+    request.user = user
+    request.pass = pass
     setReadyState 1
     return
 
   facade.send = (body) ->
-    #extract properties
-    extractProps()
 
     request.body = body
     send = ->
       #prepare response
       response = { headers: {} }
       transiting = true
-      # xhr.onprogress = (e) -> console.log('progress', e); return
-      xhr.open request.method, request.url
-      xhr.timeout = request.timeout if request.timeout
+      
+      xhr.open request.method, request.url, true, request.user, request.pass
+      xhr.timeout = request.timeout or facade.timeout
       for header, value of request.headers
         xhr.setRequestHeader header, value
       xhr.send request.body
@@ -298,12 +284,15 @@ window[XMLHTTP] = ->
   facade.getAllResponseHeaders = ->
     convertHeaders response.headers
 
+  #proxy call only when supported
   if xhr.overrideMimeType
     facade.overrideMimeType = ->
       xhr.overrideMimeType.apply xhr, arguments
 
-  #TODO
-  # facade.upload = null
+  #create emitter only when supported
+  if xhr.upload
+    facade.upload = EventEmitter()
+    proxy COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
 
   return facade
 
