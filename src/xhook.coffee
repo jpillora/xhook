@@ -1,8 +1,13 @@
 #for compression
+document = window.document
 BEFORE = 'before'
 AFTER = 'after'
 READY_STATE = 'readyState'
 INVALID_PARAMS_ERROR = "Invalid number or parameters. Please see API documentation."
+ON = 'addEventListener'
+OFF = 'removeEventListener'
+FIRE = 'dispatchEvent'
+XMLHTTP = 'XMLHttpRequest'
 
 #if required, add coffeescripts indexOf method to Array
 Array::indexOf or= (item) ->
@@ -11,38 +16,46 @@ Array::indexOf or= (item) ->
   return -1
 
 #tiny event emitter
-EventEmitter = () ->
+EventEmitter = (internal) ->
   #private
   events = {}
   listeners = (event) ->
     events[event] or []
   #public
-  listeners: (event) ->
-    Array::slice.call listeners event
-  on: (event, callback, i) ->
+  emitter = {}
+  emitter[ON] = (event, callback, i) ->
     events[event] = listeners event
     return if events[event].indexOf(callback) >= 0
-    i = if i is `undefined` then events[event].length else i
+    i = if i is undefined then events[event].length else i
     events[event].splice i, 0, callback
     return
-  off: (event, callback) ->
+  emitter[OFF] = (event, callback) ->
     i = listeners(event).indexOf callback
     return if i is -1
     listeners(event).splice i, 1
     return
-  fire: (event, args...) ->
-    for listener in listeners event
+  emitter[FIRE] = (event, args...) ->
+    for listener, i in listeners event
+      console.log 'FIRE', i, event
       listener.apply undefined, args
     return
 
+  #add listeners method and extra aliases
+  if internal
+    emitter.listeners = (event) ->
+      Array::slice.call listeners event
+    emitter.on = emitter[ON]
+    emitter.off = emitter[OFF]
+    emitter.fire = emitter[FIRE]
+
+  emitter
+
 #use event emitter to store hooks
-pluginEvents = EventEmitter()
-#main method
-xhook = {}
+xhook = EventEmitter(true)
 xhook[BEFORE] = (handler, i) ->
-  pluginEvents.on BEFORE, handler, i
+  xhook[ON] BEFORE, handler, i
 xhook[AFTER] = (handler, i) ->
-  pluginEvents.on AFTER, handler, i
+  xhook[ON] AFTER, handler, i
 
 #helper
 convertHeaders = (h, dest = {}) ->
@@ -63,46 +76,42 @@ convertHeaders = (h, dest = {}) ->
 xhook.headers = convertHeaders
 
 #patch XHR
-XMLHttpRequest = window.XMLHttpRequest
-window.XMLHttpRequest = ->
 
-  xhr = new XMLHttpRequest
+xhook[XMLHTTP] = window[XMLHTTP]
+window[XMLHTTP] = ->
 
-  if pluginEvents.listeners(BEFORE).length is 0 and
-     pluginEvents.listeners(AFTER).length is 0
-    return xhr
+  xhr = new xhook[XMLHTTP]()
 
   #==========================
   # Extra state
   transiting = false
-  request =
-    headers: {}
+  request = EventEmitter(true)
+  request.headers = {}
   response = null
-  facadeEventEmitter = EventEmitter()
 
   #==========================
   # Private API
-  readyHead = ->
+  writeHead = ->
     facade.status = response.status
     facade.statusText = response.statusText
     response.headers or= {}
     return
 
-  readyBody = ->
+  writeBody = ->
     facade.responseType = response.type or ''
     facade.response = response.data or null
     facade.responseText = response.text or response.data or ''
     facade.responseXML = response.xml or null
     return
 
-  copyHead = ->
+  readHead = ->
     response.status = xhr.status
     response.statusText = xhr.statusText
     for key, val of convertHeaders xhr.getAllResponseHeaders()
       unless response.headers[key]
         response.headers[key] = val
 
-  copyBody = ->
+  readBody = ->
     response.type = xhr.responseType
     response.text = xhr.responseText
     response.data = xhr.response or response.text
@@ -112,28 +121,32 @@ window.XMLHttpRequest = ->
   setReadyState = (n) ->
     #pull in properties
     extractProps()
-    #fire off events after hooks have run
+
+    #ensure ready state 0 through 4 is handled
     checkReadyState = ->
       while n > currentState and currentState < 4
         facade[READY_STATE] = ++currentState
+        console.log 'READY STATE', facade[READY_STATE]
         if currentState is 2
-          readyHead()
+          writeHead()
         if currentState is 4
-          readyHead()
-          readyBody()
+          writeHead()
+          writeBody()
         # make fake events here for libraries that actually check the type on
         # the event object
-        facadeEventEmitter.fire "readystatechange", makeFakeEvent("readystatechange")
+        facade[FIRE] "readystatechange", makeFakeEvent("readystatechange")
         if currentState is 4
-          facadeEventEmitter.fire "load", makeFakeEvent("load")
-          facadeEventEmitter.fire "loadend", makeFakeEvent("loadend")
+          facade[FIRE] "load", makeFakeEvent("load")
+          facade[FIRE] "loadend", makeFakeEvent("loadend")
       return
 
-
+    #only check while not COMPLETE
     if n < 4
-      return checkReadyState()
+      checkReadyState()
+      return
 
-    hooks = pluginEvents.listeners AFTER
+    #on COMPLETE, run all 'after' hooks
+    hooks = xhook.listeners AFTER
     process = ->
       unless hooks.length
         return checkReadyState()
@@ -149,8 +162,8 @@ window.XMLHttpRequest = ->
     return
 
   makeFakeEvent = (type) ->
-    if window.document.createEventObject?
-      msieEventObject = window.document.createEventObject()
+    if document.createEventObject?
+      msieEventObject = document.createEventObject()
       msieEventObject.type = type
       msieEventObject
     else
@@ -165,13 +178,17 @@ window.XMLHttpRequest = ->
       clone[key] = if val is xhr then facade else val
     clone
 
+  extractedProps = {}
   extractProps = ->
+    console.log 'extract props...'
     for key in ['timeout']
       request[key] = xhr[key] if xhr[key] and request[key] is `undefined`
     for key, fn of facade
-      if typeof fn is 'function' and /^on(\w+)/.test key
-        facadeEventEmitter.on RegExp.$1, fn
-        delete facade[key]
+      if not extractedProps[key] and typeof fn is 'function' and /^on(\w+)/.test key
+        event = RegExp.$1
+        console.log 'LISTEN FOR EVENT', event
+        facade[ON] event, fn
+        extractedProps[key] = 1
     return
 
   #==========================
@@ -187,7 +204,7 @@ window.XMLHttpRequest = ->
     #pull status and headers
     try
       if xhr[READY_STATE] is 2
-        copyHead()
+        readHead()
         setReadyState 2
 
     # simulate data progress events?
@@ -197,63 +214,65 @@ window.XMLHttpRequest = ->
     #pull response data
     if xhr[READY_STATE] is 4
       transiting = false
-      copyHead()
-      copyBody()
+      readHead()
+      readBody()
       setReadyState 4
 
     return
 
-  #the rest of the events
-  for event in ['abort','progress']
-    xhr["on#{event}"] = (obj) ->
-      facadeEventEmitter.fire event, checkEvent obj
+  # #the rest of the events
+  # for event in ['abort','progress']
+  #   console.log "listen on#{event}"
+  #   xhr["on#{event}"] = (obj) ->
+  #     console.log event, obj
+  #     facade[FIRE] event, checkEvent obj
 
   #==========================
   # Facade XHR
-  facade =
-    withCredentials: false # initialise 'withCredentials' on object so jQuery thinks we have CORS
-    response: null
-    status: 0
-
-  facade.addEventListener = (event, fn) -> facadeEventEmitter.on event, fn
-  facade.removeEventListener = facadeEventEmitter.off
-  facade.dispatchEvent = ->
+  facade = EventEmitter()
+  facade.withCredentials = false # initialise 'withCredentials' on object so jQuery thinks we have CORS
+  facade.response = null
+  facade.status = 0
 
   facade.open = (method, url, async) ->
     #TODO - user/password args
     request.method = method
     request.url = url
-    request.async = async
+    
     setReadyState 1
     return
 
   facade.send = (body) ->
+    #extract properties
+    extractProps()
+
     request.body = body
     send = ->
       #prepare response
       response = { headers: {} }
       transiting = true
-      xhr.open request.method, request.url, request.async
+      # xhr.onprogress = (e) -> console.log('progress', e); return
+      xhr.open request.method, request.url
       xhr.timeout = request.timeout if request.timeout
       for header, value of request.headers
         xhr.setRequestHeader header, value
       xhr.send request.body
       return
 
-    hooks = pluginEvents.listeners BEFORE
+    hooks = xhook.listeners BEFORE
     #process 1 hook
     process = ->
       unless hooks.length
         return send()
       done = (resp) ->
-        #dont send - dummy response
+        #break chain - provide dummy response
         if typeof resp is 'object' and typeof resp.status is 'number'
           response = resp
           setReadyState 4
           return
         #continue processing until no hooks left
-        else
-          process()
+        process()
+        return
       hook = hooks.shift()
       #async or sync?
       if hook.length is 1
@@ -269,7 +288,7 @@ window.XMLHttpRequest = ->
 
   facade.abort = ->
     xhr.abort() if transiting
-    facadeEventEmitter.fire 'abort', arguments
+    facade[FIRE] 'abort', arguments
     return
   facade.setRequestHeader = (header, value) ->
     request.headers[header] = value
@@ -278,12 +297,17 @@ window.XMLHttpRequest = ->
     response.headers[header]
   facade.getAllResponseHeaders = ->
     convertHeaders response.headers
-  #TODO
-  # facade.overrideMimeType = ->
+
+  if xhr.overrideMimeType
+    facade.overrideMimeType = ->
+      xhr.overrideMimeType.apply xhr, arguments
+
   #TODO
   # facade.upload = null
 
   return facade
+
 #publicise
+#TODO - UMD
 window.xhook = xhook
 
