@@ -1,7 +1,6 @@
 // XHook - v1.1.0 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2013
-(function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, xhook, _base,
-  __slice = [].slice;
+(function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, fakeEvent, mergeObjects, proxyEvents, xhook, _base;
 
 document = window.document;
 
@@ -34,6 +33,51 @@ COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
   return -1;
 });
 
+mergeObjects = function(src, dst) {
+  var k, v;
+  for (k in src) {
+    v = src[k];
+    dst[k] = v;
+  }
+};
+
+proxyEvents = function(events, from, to) {
+  var event, p, _i, _len;
+  p = function(event) {
+    return function(e) {
+      var clone, key, val;
+      clone = {};
+      for (key in e) {
+        val = e[key];
+        clone[key] = val === from ? to : val;
+      }
+      clone;
+      return to[FIRE](event, clone);
+    };
+  };
+  for (_i = 0, _len = events.length; _i < _len; _i++) {
+    event = events[_i];
+    from["on" + event] = p(event);
+  }
+};
+
+fakeEvent = function(type) {
+  var msieEventObject;
+  if (document.createEventObject != null) {
+    msieEventObject = document.createEventObject();
+    msieEventObject.type = type;
+    return msieEventObject;
+  } else {
+    try {
+      return new Event(type);
+    } catch (_error) {
+      return {
+        type: type
+      };
+    }
+  }
+};
+
 EventEmitter = function(internal) {
   var emitter, events, listeners;
   events = {};
@@ -57,17 +101,18 @@ EventEmitter = function(internal) {
     }
     listeners(event).splice(i, 1);
   };
-  emitter[FIRE] = function() {
-    var args, event, i, legacylistener, listener, _i, _len, _ref;
-    event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  emitter[FIRE] = function(event, obj) {
+    var e, i, legacylistener, listener, _i, _len, _ref;
+    e = fakeEvent(event);
+    mergeObjects(obj, e);
     legacylistener = emitter["on" + event];
     if (legacylistener) {
-      legacylistener.apply(void 0, args);
+      legacylistener(e);
     }
     _ref = listeners(event);
     for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
       listener = _ref[i];
-      listener.apply(void 0, args);
+      listener(e);
     }
   };
   if (internal) {
@@ -129,16 +174,16 @@ xhook.headers = convertHeaders;
 xhook[XMLHTTP] = window[XMLHTTP];
 
 window[XMLHTTP] = function() {
-  var currentState, facade, makeFakeEvent, proxy, readBody, readHead, request, response, setReadyState, transiting, writeBody, writeHead, xhr;
+  var calls, currentState, facade, fn, k, readBody, readHead, request, response, setReadyState, transiting, wrapCall, writeBody, writeHead, xhr;
   xhr = new xhook[XMLHTTP]();
   transiting = false;
   request = EventEmitter(true);
   request.headers = {};
-  response = null;
+  response = {};
+  response.headers = {};
   writeHead = function() {
     facade.status = response.status;
     facade.statusText = response.statusText;
-    response.headers || (response.headers = {});
   };
   writeBody = function() {
     facade.responseType = response.type || '';
@@ -147,26 +192,22 @@ window[XMLHTTP] = function() {
     facade.responseXML = response.xml || null;
   };
   readHead = function() {
-    var key, val, _ref, _results;
+    var key, val, _ref;
     response.status = xhr.status;
     response.statusText = xhr.statusText;
     _ref = convertHeaders(xhr.getAllResponseHeaders());
-    _results = [];
     for (key in _ref) {
       val = _ref[key];
       if (!response.headers[key]) {
-        _results.push(response.headers[key] = val);
-      } else {
-        _results.push(void 0);
+        response.headers[key] = val;
       }
     }
-    return _results;
   };
   readBody = function() {
     response.type = xhr.responseType;
     response.text = xhr.responseText;
     response.data = xhr.response || response.text;
-    return response.xml = xhr.responseXML;
+    response.xml = xhr.responseXML;
   };
   currentState = 0;
   setReadyState = function(n) {
@@ -175,7 +216,7 @@ window[XMLHTTP] = function() {
       while (n > currentState && currentState < 4) {
         facade[READY_STATE] = ++currentState;
         if (currentState === 1) {
-          facade[FIRE]("loadstart", makeFakeEvent("loadstart"));
+          facade[FIRE]("loadstart", fakeEvent("loadstart"));
         }
         if (currentState === 2) {
           writeHead();
@@ -184,10 +225,10 @@ window[XMLHTTP] = function() {
           writeHead();
           writeBody();
         }
-        facade[FIRE]("readystatechange", makeFakeEvent("readystatechange"));
+        facade[FIRE]("readystatechange", fakeEvent("readystatechange"));
         if (currentState === 4) {
-          facade[FIRE]("load", makeFakeEvent("load"));
-          facade[FIRE]("loadend", makeFakeEvent("loadend"));
+          facade[FIRE]("load", fakeEvent("load"));
+          facade[FIRE]("loadend", fakeEvent("loadend"));
         }
       }
     };
@@ -211,43 +252,6 @@ window[XMLHTTP] = function() {
     };
     process();
   };
-  makeFakeEvent = function(type) {
-    var msieEventObject;
-    if (document.createEventObject != null) {
-      msieEventObject = document.createEventObject();
-      msieEventObject.type = type;
-      return msieEventObject;
-    } else {
-      try {
-        return new Event(type);
-      } catch (_error) {
-        return {
-          type: type
-        };
-      }
-    }
-  };
-  proxy = function(events, from, to) {
-    var event, p, _i, _len, _results;
-    p = function(event) {
-      return function(e) {
-        var clone, key, val;
-        clone = {};
-        for (key in e) {
-          val = e[key];
-          clone[key] = val === from ? to : val;
-        }
-        clone;
-        return to[FIRE](event, clone);
-      };
-    };
-    _results = [];
-    for (_i = 0, _len = events.length; _i < _len; _i++) {
-      event = events[_i];
-      _results.push(from["on" + event] = p(event));
-    }
-    return _results;
-  };
   xhr.onreadystatechange = function(event) {
     try {
       if (xhr[READY_STATE] === 2) {
@@ -262,8 +266,16 @@ window[XMLHTTP] = function() {
     setReadyState(xhr[READY_STATE]);
   };
   facade = EventEmitter();
-  proxy(COMMON_EVENTS, xhr, facade);
-  request.fire = facade[FIRE];
+  facade[ON]('progress', function() {
+    return setReadyState(3);
+  });
+  proxyEvents(COMMON_EVENTS, xhr, facade);
+  request.on = function(event, fn) {
+    facade[ON](event, fn);
+  };
+  request.fire = function(event, obj) {
+    facade[FIRE](event, obj);
+  };
   facade.withCredentials = false;
   facade.response = null;
   facade.status = 0;
@@ -282,9 +294,6 @@ window[XMLHTTP] = function() {
     request.body = body;
     send = function() {
       var header, value, _ref;
-      response = {
-        headers: {}
-      };
       transiting = true;
       xhr.open(request.method, request.url, true, request.user, request.pass);
       xhr.timeout = request.timeout || facade.timeout;
@@ -302,12 +311,20 @@ window[XMLHTTP] = function() {
         return send();
       }
       done = function(resp) {
-        if (typeof resp === 'object' && typeof resp.status === 'number') {
-          response = resp;
+        if (typeof resp === 'object' && (typeof resp.status === 'number' || typeof response.status === 'number')) {
+          mergeObjects(resp, response);
           setReadyState(4);
           return;
         }
         process();
+      };
+      done.head = function(resp) {
+        mergeObjects(resp, response);
+        return setReadyState(2);
+      };
+      done.text = function(text) {
+        response.text = text;
+        return setReadyState(3);
       };
       hook = hooks.shift();
       if (hook.length === 1) {
@@ -339,8 +356,21 @@ window[XMLHTTP] = function() {
     };
   }
   if (xhr.upload) {
-    facade.upload = EventEmitter();
-    proxy(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload);
+    facade.upload = request.upload = EventEmitter();
+    proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload);
+  }
+  calls = request.calls = EventEmitter(true);
+  wrapCall = function(name, fn) {
+    return function() {
+      calls.fire(name, arguments);
+      return fn.apply(void 0, arguments);
+    };
+  };
+  for (k in facade) {
+    fn = facade[k];
+    if (typeof fn === 'function') {
+      facade[k] = wrapCall(k, fn);
+    }
   }
   return facade;
 };

@@ -1,0 +1,44 @@
+
+<h5>download progress events</h5>
+<pre id="events"></pre>
+
+<script src="../dist/1/xhook.js"></script>
+<script type="text/javascript">
+
+//simulate progress events
+xhook.before(function(request, callback) {
+
+  var loaded = 0;
+  request.fire('progress', { loaded: loaded, total: 100 });
+
+  function tick() {
+    loaded += Math.round(8+Math.random()*8);
+    loaded = Math.min(loaded, 100);
+    request.fire('progress', { loaded: loaded, total: 100 });
+    if(loaded < 100)
+      setTimeout(tick, 100);
+    else
+      callback({ status: 200, text: 'done' });
+  }
+  tick();
+});
+
+function append(str) {
+  document.getElementById('events').innerHTML += str + "\n";
+}
+
+var xhr = new XMLHttpRequest();
+
+xhr.onreadystatechange = function(e) {
+  append('readyState '+ xhr.readyState);
+}
+
+xhr.onprogress = function(e) {
+  append(Math.round((e.loaded/e.total)*100));
+}
+
+//will not 
+xhr.open('GET', 'example1.txt');
+
+xhr.send();
+</script>

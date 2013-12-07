@@ -2,7 +2,7 @@
 
 v1.1
 
-> ### Easily intercept and modify XHR request and response
+#### Easily intercept and modify XHR request and response
 
 <a href="https://twitter.com/intent/tweet?hashtags=xhook%2Cjavascript%2Cxhr&original_referer=http%3A%2F%2Fgithub.com%2F&text=XHook%3A+Easily+intercept+and+modify+XHR+request+and+response&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fjpillora%2Fxhook" target="_blank">
   <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
@@ -14,7 +14,7 @@ With XHook, you could easily implement functionality to:
 * Insert authentication headers
   * S3 Request Signing, see [S3 Hook](https://github.com/jpillora/s3hook)
 * Simulate responses
-  * For testing purposes, just add your test hooks and your code can remain the same
+  * For testing purposes, create transparent fake backends
 * Sending Error statistics to Google Analytics
 * Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
@@ -62,7 +62,7 @@ Tested in IE8+, Chrome, Firefox, Safari
 * Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 9KB
 * Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 4KB (1KB Gzip)
 
-  :warn: *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
+  :warning: *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 

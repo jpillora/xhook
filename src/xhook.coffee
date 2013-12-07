@@ -17,6 +17,36 @@ Array::indexOf or= (item) ->
     return i if x is item
   return -1
 
+mergeObjects = (src, dst) ->
+  for k,v of src
+    dst[k] = v
+  return
+
+#proxy events that are not specifically fired by XHook
+proxyEvents = (events, from, to) ->
+  p = (event) -> (e) ->
+    clone = {}
+    for key, val of e
+      clone[key] = if val is from then to else val
+    clone
+    to[FIRE] event, clone
+  #dont proxy manual events
+  for event in events
+    from["on#{event}"] = p(event)
+  return
+
+#create fake event
+fakeEvent = (type) ->
+  if document.createEventObject?
+    msieEventObject = document.createEventObject()
+    msieEventObject.type = type
+    msieEventObject
+  else
+    # on some platforms like android 4.1.2 and safari on windows, it appears
+    # that new Event is not allowed
+    try new Event(type)
+    catch then {type}
+
 #tiny event emitter
 EventEmitter = (internal) ->
   #private
@@ -36,12 +66,15 @@ EventEmitter = (internal) ->
     return if i is -1
     listeners(event).splice i, 1
     return
-  emitter[FIRE] = (event, args...) ->
+  emitter[FIRE] = (event, obj) ->
+
+    e = fakeEvent event
+    mergeObjects obj, e
     legacylistener = emitter["on#{event}"]
     if legacylistener
-      legacylistener.apply undefined, args
+      legacylistener e
     for listener, i in listeners event
-      listener.apply undefined, args
+      listener e
     return
 
   #add listeners method and extra aliases
@@ -95,14 +128,14 @@ window[XMLHTTP] = ->
   transiting = false
   request = EventEmitter(true)
   request.headers = {}
-  response = null
+  response = {}
+  response.headers = {}
 
   #==========================
   # Private API
   writeHead = ->
     facade.status = response.status
     facade.statusText = response.statusText
-    response.headers or= {}
     return
 
   writeBody = ->
@@ -118,12 +151,14 @@ window[XMLHTTP] = ->
     for key, val of convertHeaders xhr.getAllResponseHeaders()
       unless response.headers[key]
         response.headers[key] = val
+    return
 
   readBody = ->
     response.type = xhr.responseType
     response.text = xhr.responseText
     response.data = xhr.response or response.text
     response.xml = xhr.responseXML
+    return
 
   currentState = 0
   setReadyState = (n) ->
@@ -134,7 +169,7 @@ window[XMLHTTP] = ->
         facade[READY_STATE] = ++currentState
 
         if currentState is 1
-          facade[FIRE] "loadstart", makeFakeEvent("loadstart")
+          facade[FIRE] "loadstart", fakeEvent("loadstart")
         if currentState is 2
           writeHead()
         if currentState is 4
@@ -142,10 +177,10 @@ window[XMLHTTP] = ->
           writeBody()
         # make fake events here for libraries that actually check the type on
         # the event object
-        facade[FIRE] "readystatechange", makeFakeEvent("readystatechange")
+        facade[FIRE] "readystatechange", fakeEvent("readystatechange")
         if currentState is 4
-          facade[FIRE] "load", makeFakeEvent("load")
-          facade[FIRE] "loadend", makeFakeEvent("loadend")
+          facade[FIRE] "load", fakeEvent("load")
+          facade[FIRE] "loadend", fakeEvent("loadend")
       return
 
     #only check while not COMPLETE
@@ -167,35 +202,11 @@ window[XMLHTTP] = ->
     process()
     return
 
-  makeFakeEvent = (type) ->
-    if document.createEventObject?
-      msieEventObject = document.createEventObject()
-      msieEventObject.type = type
-      msieEventObject
-    else
-      # on some platforms like android 4.1.2 and safari on windows, it appears
-      # that new Event is not allowed
-      try new Event(type)
-      catch then {type}
-
-  #proxy events that are not specifically fired by XHook
-  proxy = (events, from, to) ->
-    p = (event) -> (e) ->
-      clone = {}
-      for key, val of e
-        clone[key] = if val is from then to else val
-      clone
-      to[FIRE] event, clone
-    #dont proxy manual events
-    for event in events
-      from["on#{event}"] = p(event)
-
   #==========================
   # Event Handlers
 
   #react to *real* xhr ready state changes
   xhr.onreadystatechange = (event) ->
-
     #pull status and headers
     try
       if xhr[READY_STATE] is 2
@@ -213,17 +224,24 @@ window[XMLHTTP] = ->
   # Facade XHR
   facade = EventEmitter()
 
+  # progress means we're current downloading...
+  facade[ON] 'progress', -> setReadyState 3
+
   #proxy common events from xhr to facade
-  proxy COMMON_EVENTS, xhr, facade 
+  proxyEvents COMMON_EVENTS, xhr, facade 
 
-  request.fire = facade[FIRE]
-
+  #create reference to facades eventemitter on request
+  request.on = (event, fn) ->
+    facade[ON] event, fn
+    return
+  request.fire = (event, obj) ->
+    facade[FIRE] event, obj
+    return
   facade.withCredentials = false # initialise 'withCredentials' on object so jQuery thinks we have CORS
   facade.response = null
   facade.status = 0
 
   facade.open = (method, url, async, user, pass) ->
-    #TODO - user/password args
     request.method = method
     request.url = url
     # async not allowed
@@ -231,6 +249,7 @@ window[XMLHTTP] = ->
       throw "sync xhr not supported by XHook"
     request.user = user
     request.pass = pass
+    # openned facade xhr (not real xhr)
     setReadyState 1
     return
 
@@ -239,7 +258,6 @@ window[XMLHTTP] = ->
     request.body = body
     send = ->
       #prepare response
-      response = { headers: {} }
       transiting = true
       
       xhr.open request.method, request.url, true, request.user, request.pass
@@ -250,19 +268,31 @@ window[XMLHTTP] = ->
       return
 
     hooks = xhook.listeners BEFORE
-    #process 1 hook
+    #process hooks sequentially
     process = ->
       unless hooks.length
         return send()
+      #go to next hook OR optionally provide response
       done = (resp) ->
         #break chain - provide dummy response
-        if typeof resp is 'object' and typeof resp.status is 'number'
-          response = resp
+        if typeof resp is 'object' and
+           (typeof resp.status is 'number' or
+            typeof response.status is 'number')
+          mergeObjects resp, response
           setReadyState 4
           return
         #continue processing until no hooks left
         process()
         return
+      #specifically provide headers
+      done.head = (resp) ->
+        mergeObjects resp, response
+        setReadyState 2
+      #specifically provide partial text (responseText)
+      done.text = (text) ->
+        response.text = text
+        setReadyState 3
+
       hook = hooks.shift()
       #async or sync?
       if hook.length is 1
@@ -293,8 +323,19 @@ window[XMLHTTP] = ->
 
   #create emitter only when supported
   if xhr.upload
-    facade.upload = EventEmitter()
-    proxy COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
+    facade.upload = request.upload = EventEmitter()
+    proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
+
+  #create method call watcher
+  calls = request.calls = EventEmitter(true)
+  wrapCall = (name, fn) -> ->
+    calls.fire name, arguments
+    fn.apply undefined, arguments
+
+  #wrap all facade methods
+  for k, fn of facade
+    if typeof fn is 'function'
+      facade[k] = wrapCall k, fn
 
   return facade
 
