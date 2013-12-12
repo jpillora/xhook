@@ -90,7 +90,7 @@ EventEmitter = function(internal) {
     if (events[event].indexOf(callback) >= 0) {
       return;
     }
-    i = i === void 0 ? events[event].length : i;
+    i = i === undefined ? events[event].length : i;
     events[event].splice(i, 0, callback);
   };
   emitter[OFF] = function(event, callback) {
@@ -181,16 +181,6 @@ window[XMLHTTP] = function() {
   request.headers = {};
   response = {};
   response.headers = {};
-  writeHead = function() {
-    facade.status = response.status;
-    facade.statusText = response.statusText;
-  };
-  writeBody = function() {
-    facade.responseType = response.type || '';
-    facade.response = response.data || null;
-    facade.responseText = response.text || response.data || '';
-    facade.responseXML = response.xml || null;
-  };
   readHead = function() {
     var key, val, _ref;
     response.status = xhr.status;
@@ -205,9 +195,21 @@ window[XMLHTTP] = function() {
   };
   readBody = function() {
     response.type = xhr.responseType;
-    response.text = xhr.responseText;
+    if (!response.type || response.type === 'document') {
+      response.text = xhr.responseText;
+      response.xml = xhr.responseXML;
+    }
     response.data = xhr.response || response.text;
-    response.xml = xhr.responseXML;
+  };
+  writeHead = function() {
+    facade.status = response.status;
+    facade.statusText = response.statusText;
+  };
+  writeBody = function() {
+    facade.responseType = response.type || '';
+    facade.response = response.data || null;
+    facade.responseText = response.text || '';
+    facade.responseXML = response.xml || null;
   };
   currentState = 0;
   setReadyState = function(n) {
@@ -293,13 +295,17 @@ window[XMLHTTP] = function() {
     var hooks, process, send;
     request.body = body;
     send = function() {
-      var header, value, _ref;
+      var header, k, value, _i, _len, _ref, _ref1;
       transiting = true;
       xhr.open(request.method, request.url, true, request.user, request.pass);
-      xhr.timeout = request.timeout || facade.timeout;
-      _ref = request.headers;
-      for (header in _ref) {
-        value = _ref[header];
+      _ref = ['responseType', 'timeout'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        k = _ref[_i];
+        xhr[k] = request[k] || facade[k];
+      }
+      _ref1 = request.headers;
+      for (header in _ref1) {
+        value = _ref1[header];
         xhr.setRequestHeader(header, value);
       }
       xhr.send(request.body);
@@ -363,7 +369,7 @@ window[XMLHTTP] = function() {
   wrapCall = function(name, fn) {
     return function() {
       calls.fire(name, arguments);
-      return fn.apply(void 0, arguments);
+      return fn.apply(undefined, arguments);
     };
   };
   for (k in facade) {
@@ -375,5 +381,5 @@ window[XMLHTTP] = function() {
   return facade;
 };
 
-window.xhook = xhook;
+(this.define || Object)((this.exports || this).xhook = xhook);
 }(this));

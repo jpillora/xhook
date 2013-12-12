@@ -25,10 +25,10 @@ With XHook, you could easily implement functionality to:
 * Intercept and modify XHR **request** and **response**
 * Simulate **responses** transparently
 * Backwards compatible `addEventListener` `removeEventListener`
+* Backwards compatible user controlled progress (download/upload) events
 
 ## Future Features
 
-* Backwards compatible user controlled progress (download/upload) events
 * Add BrowserSwarm or TestlingCI automated cross-browser tests
  
   *Tip: See [CONTRIBUTING.md](CONTRIBUTING.md) for steps on how to contribute* :wink:

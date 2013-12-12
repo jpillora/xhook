@@ -58,7 +58,7 @@ EventEmitter = (internal) ->
   emitter[ON] = (event, callback, i) ->
     events[event] = listeners event
     return if events[event].indexOf(callback) >= 0
-    i = if i is undefined then events[event].length else i
+    i = if i is `undefined` then events[event].length else i
     events[event].splice i, 0, callback
     return
   emitter[OFF] = (event, callback) ->
@@ -133,18 +133,8 @@ window[XMLHTTP] = ->
 
   #==========================
   # Private API
-  writeHead = ->
-    facade.status = response.status
-    facade.statusText = response.statusText
-    return
 
-  writeBody = ->
-    facade.responseType = response.type or ''
-    facade.response = response.data or null
-    facade.responseText = response.text or response.data or ''
-    facade.responseXML = response.xml or null
-    return
-
+  #read results from real xhr into response
   readHead = ->
     response.status = xhr.status
     response.statusText = xhr.statusText
@@ -155,11 +145,26 @@ window[XMLHTTP] = ->
 
   readBody = ->
     response.type = xhr.responseType
-    response.text = xhr.responseText
+    if not response.type or response.type is 'document'
+      response.text = xhr.responseText
+      response.xml = xhr.responseXML
     response.data = xhr.response or response.text
-    response.xml = xhr.responseXML
     return
 
+  #write response into facade xhr
+  writeHead = ->
+    facade.status = response.status
+    facade.statusText = response.statusText
+    return
+
+  writeBody = ->
+    facade.responseType = response.type or ''
+    facade.response = response.data or null
+    facade.responseText = response.text or ''
+    facade.responseXML = response.xml or null
+    return
+
+  #control facade ready state
   currentState = 0
   setReadyState = (n) ->
 
@@ -205,7 +210,7 @@ window[XMLHTTP] = ->
   #==========================
   # Event Handlers
 
-  #react to *real* xhr ready state changes
+  #handle real ready state
   xhr.onreadystatechange = (event) ->
     #pull status and headers
     try
@@ -261,7 +266,11 @@ window[XMLHTTP] = ->
       transiting = true
       
       xhr.open request.method, request.url, true, request.user, request.pass
-      xhr.timeout = request.timeout or facade.timeout
+      
+      #extract props
+      for k in ['responseType', 'timeout']
+        xhr[k] = request[k] or facade[k]
+
       for header, value of request.headers
         xhr.setRequestHeader header, value
       xhr.send request.body
@@ -330,7 +339,7 @@ window[XMLHTTP] = ->
   calls = request.calls = EventEmitter(true)
   wrapCall = (name, fn) -> ->
     calls.fire name, arguments
-    fn.apply undefined, arguments
+    fn.apply `undefined`, arguments
 
   #wrap all facade methods
   for k, fn of facade
@@ -339,7 +348,6 @@ window[XMLHTTP] = ->
 
   return facade
 
-#publicise
-#TODO - UMD
-window.xhook = xhook
+#publicise (mini-umd)
+(@define or Object) (@exports or @).xhook = xhook
 
