@@ -89,7 +89,7 @@ window.XMLHttpRequest = ->
 
   readyBody = ->
     facade.responseType = response.type or ''
-    facade.response = response.data or null
+    facade.response = response.data or or response.text or null
     facade.responseText = response.text or response.data or ''
     facade.responseXML = response.xml or null
     return
