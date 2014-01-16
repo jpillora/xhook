@@ -1,4 +1,4 @@
-
+<!DOCTYPE HTML>
 <h5>upload progress events</h5>
 <pre id="events"></pre>
 
@@ -6,12 +6,12 @@
 <script type="text/javascript">
 
 //hook
-// xhook.before(function(request) {
-//   console.log('hook!', request.url);
-// });
+xhook.before(function(request) {
+  append('hooked xhr though left untouched!');
+});
 
 function append(str) {
-  document.getElementById('events').innerHTML += str + "\n";
+  document.getElementById('events').innerHTML += str + "<br>";
 }
 
 var xhr = new XMLHttpRequest();
@@ -32,7 +32,7 @@ xhr.upload.onload = function(e) {
   append('upload complete');
 }
 
-xhr.open('POST', 'http://placekitten.com/2000/2000?r='+Math.random());
+xhr.open('POST', 'missing-endpoint?r='+Math.random());
 
 var data = [];
 var i = 5e4;

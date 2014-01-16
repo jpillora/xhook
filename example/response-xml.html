@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<h5>xml-example</h5>
+<pre id="log"></pre>
+
+<script src="../dist/1/xhook.js"></script>
+
+<script type="text/javascript">
+//hook and modify 'responseText' of 'example2.txt'
+xhook.after(function(request, response) {
+  response.xml.getElementById("bk106").childNodes[3].textContent = "Harry Potter";
+});
+
+//vanilla calls
+var xhr1 = new XMLHttpRequest();
+xhr1.open('GET', 'example.xml');
+xhr1.onreadystatechange = function(e) {
+  if(xhr1.readyState !== 4) return;
+  var books = xhr1.responseXML.childNodes[0].childNodes;
+  for(var i = 0; i < books.length; i++) {
+    var details = books[i].childNodes;
+    for(var j = 0; j < details.length; j++) {
+      var detail = details[j];
+      if(detail.nodeName === "title")
+        log.innerHTML += books[i].id + ": " +detail.textContent + "<br>"
+    }
+  }
+}
+xhr1.send();
+
+</script>

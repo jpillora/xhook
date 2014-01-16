@@ -19,7 +19,7 @@ Array::indexOf or= (item) ->
 
 mergeObjects = (src, dst) ->
   for k,v of src
-    dst[k] = v
+    try dst[k] = v
   return
 
 #proxy events that are not specifically fired by XHook
@@ -67,7 +67,6 @@ EventEmitter = (internal) ->
     listeners(event).splice i, 1
     return
   emitter[FIRE] = (event, obj) ->
-
     e = fakeEvent event
     mergeObjects obj, e
     legacylistener = emitter["on#{event}"]
@@ -159,7 +158,7 @@ window[XMLHTTP] = ->
 
   writeBody = ->
     facade.responseType = response.type or ''
-    facade.response = response.data or null
+    facade.response = response.data or response.text or null
     facade.responseText = response.text or ''
     facade.responseXML = response.xml or null
     return
@@ -330,21 +329,21 @@ window[XMLHTTP] = ->
     facade.overrideMimeType = ->
       xhr.overrideMimeType.apply xhr, arguments
 
-  #create emitter only when supported
+  #create emitter (can be used to polyfill)
+  facade.upload = request.upload = EventEmitter()
   if xhr.upload
-    facade.upload = request.upload = EventEmitter()
     proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
 
-  #create method call watcher
-  calls = request.calls = EventEmitter(true)
-  wrapCall = (name, fn) -> ->
-    calls.fire name, arguments
-    fn.apply `undefined`, arguments
-
-  #wrap all facade methods
-  for k, fn of facade
-    if typeof fn is 'function'
-      facade[k] = wrapCall k, fn
+  # TODO this may not be necessary...
+  # #create method call watcher
+  # calls = request.calls = EventEmitter(true)
+  # wrapCall = (name, fn) -> ->
+  #   calls.fire name, arguments
+  #   fn.apply `undefined`, arguments
+  # #wrap all facade methods
+  # for k, fn of facade
+  #   if typeof fn is 'function'
+  #     facade[k] = wrapCall k, fn
 
   return facade
 

@@ -1,4 +1,4 @@
-
+<!DOCTYPE HTML>
 <h5>download progress events</h5>
 <pre id="events"></pre>
 
@@ -9,6 +9,7 @@
 xhook.before(function(request, callback) {
 
   var loaded = 0;
+  //manually firing progress will advance the ready state to 3
   request.fire('progress', { loaded: loaded, total: 100 });
 
   function tick() {
@@ -24,7 +25,7 @@ xhook.before(function(request, callback) {
 });
 
 function append(str) {
-  document.getElementById('events').innerHTML += str + "\n";
+  document.getElementById('events').innerHTML += str + "<br>";
 }
 
 var xhr = new XMLHttpRequest();

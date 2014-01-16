@@ -1,4 +1,4 @@
-
+<!DOCTYPE HTML>
 <h5>example1.txt</h5>
 <pre id="one"></pre>
 
@@ -6,7 +6,7 @@
 <pre id="two"></pre>
 
 <script src="../dist/1/xhook.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.js"></script>
 
 <div ng-app="app"></div>
 
@@ -14,7 +14,7 @@
 //hook and modify 'responseText' of 'example2.txt'
 xhook.after(function(request, response) {
   if(request.url.match(/example2\.txt$/))
-    response.text = response.text.replace(/[aeiou]/g,'z');
+    response.data = response.data.replace(/[aeiou]/g,'z');
 });
 
 //setup angular

@@ -1,6 +1,7 @@
 // XHook - v1.1.0 - https://github.com/jpillora/xhook
-// Jaime Pillora <dev@jpillora.com> - MIT Copyright 2013
-(function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, fakeEvent, mergeObjects, proxyEvents, xhook, _base;
+// Jaime Pillora <dev@jpillora.com> - MIT Copyright 2014
+(function(window,document,undefined) {
+var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, fakeEvent, mergeObjects, proxyEvents, xhook, _base;
 
 document = window.document;
 
@@ -37,7 +38,9 @@ mergeObjects = function(src, dst) {
   var k, v;
   for (k in src) {
     v = src[k];
-    dst[k] = v;
+    try {
+      dst[k] = v;
+    } catch (_error) {}
   }
 };
 
@@ -174,7 +177,7 @@ xhook.headers = convertHeaders;
 xhook[XMLHTTP] = window[XMLHTTP];
 
 window[XMLHTTP] = function() {
-  var calls, currentState, facade, fn, k, readBody, readHead, request, response, setReadyState, transiting, wrapCall, writeBody, writeHead, xhr;
+  var currentState, facade, readBody, readHead, request, response, setReadyState, transiting, writeBody, writeHead, xhr;
   xhr = new xhook[XMLHTTP]();
   transiting = false;
   request = EventEmitter(true);
@@ -207,7 +210,7 @@ window[XMLHTTP] = function() {
   };
   writeBody = function() {
     facade.responseType = response.type || '';
-    facade.response = response.data || null;
+    facade.response = response.data || response.text || null;
     facade.responseText = response.text || '';
     facade.responseXML = response.xml || null;
   };
@@ -361,25 +364,12 @@ window[XMLHTTP] = function() {
       return xhr.overrideMimeType.apply(xhr, arguments);
     };
   }
+  facade.upload = request.upload = EventEmitter();
   if (xhr.upload) {
-    facade.upload = request.upload = EventEmitter();
     proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload);
-  }
-  calls = request.calls = EventEmitter(true);
-  wrapCall = function(name, fn) {
-    return function() {
-      calls.fire(name, arguments);
-      return fn.apply(undefined, arguments);
-    };
-  };
-  for (k in facade) {
-    fn = facade[k];
-    if (typeof fn === 'function') {
-      facade[k] = wrapCall(k, fn);
-    }
   }
   return facade;
 };
 
 (this.define || Object)((this.exports || this).xhook = xhook);
-}(this));
+}(window,document));

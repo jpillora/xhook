@@ -1,14 +1,17 @@
-
+<!DOCTYPE HTML>
 <h5>download progress events</h5>
 <pre id="events"></pre>
 
 <script src="../dist/1/xhook.js"></script>
 <script type="text/javascript">
 
-//no hooks, standard progress events
+//hook
+xhook.before(function(request) {
+  append('hooked xhr though left untouched!');
+});
 
 function append(str) {
-  document.getElementById('events').innerHTML += str + "\n";
+  document.getElementById('events').innerHTML += str + "<br>";
 }
 
 var xhr = new XMLHttpRequest();
@@ -21,7 +24,7 @@ xhr.onprogress = function(e) {
   append(Math.round((e.loaded/e.total)*100));
 }
 
-xhr.open('GET', 'http://placekitten.com/2000/2000?r='+Math.random());
+xhr.open('GET', 'example-large.txt?r='+Math.random());
 
 xhr.send();
 
