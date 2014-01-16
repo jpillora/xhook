@@ -21,7 +21,10 @@ xhr.onreadystatechange = function(e) {
 }
 
 xhr.onprogress = function(e) {
-  append(Math.round((e.loaded/e.total)*100));
+  if(e.total)
+    append(Math.round((e.loaded/e.total)*100));
+  else
+    append(e.loaded + " bytes loaded")
 }
 
 xhr.open('GET', 'example-large.txt?r='+Math.random());
