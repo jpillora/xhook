@@ -88,17 +88,18 @@ EventEmitter = (internal) ->
 
 #use event emitter to store hooks
 xhook = EventEmitter(true)
+xhook.EventEmitter = EventEmitter
 xhook[BEFORE] = (handler, i) ->
   if handler.length < 1 or handler.length > 2
-    throw "!"
+    throw "invalid hook"
   xhook[ON] BEFORE, handler, i
 xhook[AFTER] = (handler, i) ->
   if handler.length < 2 or handler.length > 3
-    throw "!"
+    throw "invalid hook"
   xhook[ON] AFTER, handler, i
 
 #helper
-convertHeaders = (h, dest = {}) ->
+convertHeaders = xhook.headers = (h, dest = {}) ->
   switch typeof h
     when "object"
       headers = []
@@ -113,10 +114,7 @@ convertHeaders = (h, dest = {}) ->
       return dest
   return
 
-xhook.headers = convertHeaders
-
 #patch XHR
-
 xhook[XMLHTTP] = window[XMLHTTP]
 window[XMLHTTP] = ->
 
@@ -261,17 +259,17 @@ window[XMLHTTP] = ->
 
     request.body = body
     send = ->
-      #prepare response
+      #prepare request all at once
       transiting = true
-      
+      #perform open
       xhr.open request.method, request.url, true, request.user, request.pass
-      
       #extract props
       for k in ['responseType', 'timeout']
         xhr[k] = request[k] or facade[k]
-
+      #insert headers
       for header, value of request.headers
         xhr.setRequestHeader header, value
+      #real send!
       xhr.send request.body
       return
 
@@ -282,7 +280,7 @@ window[XMLHTTP] = ->
         return send()
       #go to next hook OR optionally provide response
       done = (resp) ->
-        #break chain - provide dummy response
+        #break chain - provide dummy response (readyState 4)
         if typeof resp is 'object' and
            (typeof resp.status is 'number' or
             typeof response.status is 'number')
@@ -292,11 +290,11 @@ window[XMLHTTP] = ->
         #continue processing until no hooks left
         process()
         return
-      #specifically provide headers
+      #specifically provide headers (readyState 2)
       done.head = (resp) ->
         mergeObjects resp, response
         setReadyState 2
-      #specifically provide partial text (responseText)
+      #specifically provide partial text (responseText  readyState 3)
       done.text = (text) ->
         response.text = text
         setReadyState 3
