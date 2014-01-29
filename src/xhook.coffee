@@ -141,10 +141,8 @@ window[XMLHTTP] = ->
     return
 
   readBody = ->
-    response.type = xhr.responseType
-    if not response.type or response.type is 'document'
-      response.text = xhr.responseText
-      response.xml = xhr.responseXML
+    try response.text = xhr.responseText
+    try response.xml = xhr.responseXML
     response.data = xhr.response or response.text
     return
 
@@ -155,7 +153,6 @@ window[XMLHTTP] = ->
     return
 
   writeBody = ->
-    facade.responseType = response.type or ''
     facade.response = response.data or response.text or null
     facade.responseText = response.text or ''
     facade.responseXML = response.xml or null
@@ -185,12 +182,12 @@ window[XMLHTTP] = ->
           facade[FIRE] "loadend", fakeEvent("loadend")
       return
 
-    #only check while not COMPLETE
+    #fire hooks once readyState reaches 4
     if n < 4
       checkReadyState()
       return
 
-    #on COMPLETE, run all 'after' hooks
+    #run all 'after' hooks in sequence
     hooks = xhook.listeners AFTER
     process = ->
       unless hooks.length
@@ -263,9 +260,10 @@ window[XMLHTTP] = ->
       transiting = true
       #perform open
       xhr.open request.method, request.url, true, request.user, request.pass
-      #extract props
-      for k in ['responseType', 'timeout']
-        xhr[k] = request[k] or facade[k]
+      #extract xhr settings
+      for k in ['type', 'timeout']
+        modk = if k is "type" then "responseType" else k
+        xhr[modk] = request[k] or facade[modk]
       #insert headers
       for header, value of request.headers
         xhr.setRequestHeader header, value

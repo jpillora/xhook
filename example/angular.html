@@ -11,7 +11,7 @@
 <div ng-app="app"></div>
 
 <script type="text/javascript">
-//hook and modify 'responseText' of 'example2.txt'
+//hook and modify 'response' (not 'responseText') of 'example2.txt'
 xhook.after(function(request, response) {
   if(request.url.match(/example2\.txt$/))
     response.data = response.data.replace(/[aeiou]/g,'z');

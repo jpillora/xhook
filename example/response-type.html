@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<h5>responseType example</h5>
+<pre>See modern browser console...</pre>
+
+<script src="../dist/1/xhook.js"></script>
+
+<script type="text/javascript">
+//silently provide a 'responseType' to the request
+xhook.before(function(request) {
+  if(/\.json$/.test(request.url))
+    request.type = "json";
+  else if(/\.html$/.test(request.url))
+    request.type = "document";
+});
+
+//vanilla calls
+var xhr1 = new XMLHttpRequest();
+xhr1.open('GET', 'example-data.json');
+xhr1.onreadystatechange = function(e) {
+  if(xhr1.readyState === 4)
+  console.log("OBJECT:", xhr1.response);
+}
+xhr1.send();
+
+var xhr2 = new XMLHttpRequest();
+xhr2.open('GET', 'response-type.html');
+xhr2.onreadystatechange = function(e) {
+  if(xhr2.readyState === 4)
+  console.log("DOM ELEMENT:", xhr2.response);
+}
+xhr2.send();
+</script>

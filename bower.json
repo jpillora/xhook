@@ -1,0 +1,11 @@
+{
+  "name": "jpillora/xhook",
+  "version": "1.1.2",
+  "main": "dist/1/xhook.js",
+  "license": "MIT",
+  "ignore": [
+    "./!(dist/1/xhook.js)"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,4 +1,4 @@
-// XHook - v1.1.0 - https://github.com/jpillora/xhook
+// XHook - v1.1.2 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2014
 (function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, OFF, ON, READY_STATE, UPLOAD_EVENTS, XMLHTTP, convertHeaders, document, fakeEvent, mergeObjects, proxyEvents, xhook, _base;
 
@@ -196,11 +196,12 @@ window[XMLHTTP] = function() {
     }
   };
   readBody = function() {
-    response.type = xhr.responseType;
-    if (!response.type || response.type === 'document') {
+    try {
       response.text = xhr.responseText;
+    } catch (_error) {}
+    try {
       response.xml = xhr.responseXML;
-    }
+    } catch (_error) {}
     response.data = xhr.response || response.text;
   };
   writeHead = function() {
@@ -208,7 +209,6 @@ window[XMLHTTP] = function() {
     facade.statusText = response.statusText;
   };
   writeBody = function() {
-    facade.responseType = response.type || '';
     facade.response = response.data || response.text || null;
     facade.responseText = response.text || '';
     facade.responseXML = response.xml || null;
@@ -297,13 +297,14 @@ window[XMLHTTP] = function() {
     var hooks, process, send;
     request.body = body;
     send = function() {
-      var header, k, value, _i, _len, _ref, _ref1;
+      var header, k, modk, value, _i, _len, _ref, _ref1;
       transiting = true;
       xhr.open(request.method, request.url, true, request.user, request.pass);
-      _ref = ['responseType', 'timeout'];
+      _ref = ['type', 'timeout'];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         k = _ref[_i];
-        xhr[k] = request[k] || facade[k];
+        modk = k === "type" ? "responseType" : k;
+        xhr[modk] = request[k] || facade[modk];
       }
       _ref1 = request.headers;
       for (header in _ref1) {

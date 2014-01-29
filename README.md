@@ -62,41 +62,41 @@ Tested in IE8+, Chrome, Firefox, Safari
 * Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 9KB
 * Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 4KB (1KB Gzip)
 
-  :warning: *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
+  :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 
-### `xhook`.`before`(`handler(request[, callback])`)
+### `xhook`.`before`(`handler(request[, callback])` `[, index]`)
 
-We can **modify** the `request` before the XHR is sent.
+Modifying **any** property of the `request` object will modify the underlying XHR before it is sent.
 
-If our `handler` is asynchronous, just include the `callback` argument, which accepts an optional `response` object.
+If our `handler` is asynchronous, just include the optional `callback` argument, which accepts an optional `response` object.
 
-To provide a **fake** response, simply `return` or `callback()` a `response` object.
+To provide a **fake** response, `return` **or** `callback()` a `response` object.
 
-### `xhook`.`after`(`handler(request, response[, callback])`)
+### `xhook`.`after`(`handler(request, response[, callback])` `[, index]`)
 
-We can **read** the `request` and **modify** the `response` before the XHR is recieved.
+Modifying **any** property of the `response` object will modify the underlying XHR before it is received.
 
-If our `handler` is asynchronous, just include the `callback` argument.
+If our `handler` is asynchronous, just include the optional `callback` argument.
 
 ### `request` Object
 
-* `method` (String)
-* `url` (String)
-* `body` (String) **May implement binary data in the future**
-* `headers` (Object)
-* `timeout` (Number)
+* `method` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`open(method,url)`</a>*)
+* `url` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`open(method,url)`</a>*)
+* `body` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`send(body)`</a>*)
+* `headers` (Object) (*All Name-Value pairs **set** with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#setRequestHeader()">`setRequestHeader(name,value)`</a>*)
+* `timeout` (Number) *([`timeout`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#timeout))*
+* `type` (String) *([`responseType`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseType))*
 
 ### `response` Object
 
-* `status` (Number) **Required when for fake `response`s**
-* `statusText` (String)
-* `text` (String) *(XMLHttpRequest `responseText`)*
-* `headers` (Object)
-* `type` (String) *(XMLHttpRequest `responseType`)*
-* `xml` (XML) *(XMLHttpRequest `responseXML`)*
-* `data` (Varies) *(XMLHttpRequest `response`)*
+* `status` (Number) **Required when for fake `response`s** *([`status`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#status))*
+* `statusText` (String) *([`statusText`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#statusText))*
+* `text` (String) *([`responseText`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseText))*
+* `headers` (Object) (*All Name-Value pairs **retrieved** with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#getAllResponseHeaders()">`getAllResponseHeaders()`</a>*)
+* `xml` (XML) *([`responseXML`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseXML))*
+* `data` (Varies) *([`response`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#response))*
 
 ### Overview
 
@@ -119,7 +119,7 @@ http://www.w3.org/TR/XMLHttpRequest2/
 * `xhr instanceof XMLHttpRequest` checks will return `false`
 
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
-and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest` and `ActiveXObject`, so you may use any library
+and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest`, so you may use any library
 conjunction with XHook, just make sure to load XHook **first**. 
 
 ## Contributing
