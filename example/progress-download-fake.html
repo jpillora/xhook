@@ -10,12 +10,12 @@ xhook.before(function(request, callback) {
 
   var loaded = 0;
   //manually firing progress will advance the ready state to 3
-  request.fire('progress', { loaded: loaded, total: 100 });
+  request.xhr.dispatchEvent('progress', { loaded: loaded, total: 100 });
 
   function tick() {
     loaded += Math.round(8+Math.random()*8);
     loaded = Math.min(loaded, 100);
-    request.fire('progress', { loaded: loaded, total: 100 });
+    request.xhr.dispatchEvent('progress', { loaded: loaded, total: 100 });
     if(loaded < 100)
       setTimeout(tick, 100);
     else

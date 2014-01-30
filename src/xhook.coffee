@@ -8,6 +8,7 @@ OFF = 'removeEventListener'
 FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
 
+#DOWNLOAD_EVENTS ARE SYNTHESISED
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
@@ -17,17 +18,22 @@ Array::indexOf or= (item) ->
     return i if x is item
   return -1
 
+slice = (o,n) -> Array::slice.call o,n
+
 mergeObjects = (src, dst) ->
   for k,v of src
-    try dst[k] = v
-  return
+    continue if k is "returnValue"
+    try dst[k] = src[k]
+  return dst
 
-#proxy events that are not specifically fired by XHook
+#proxy events from one emitter to another
 proxyEvents = (events, from, to) ->
   p = (event) -> (e) ->
     clone = {}
-    for key, val of e
-      clone[key] = if val is from then to else val
+    for k of e
+      continue if k is "returnValue"
+      val = e[k]
+      clone[k] = if val is from then to else val
     clone
     to[FIRE] event, clone
   #dont proxy manual events
@@ -48,7 +54,7 @@ fakeEvent = (type) ->
     catch then {type}
 
 #tiny event emitter
-EventEmitter = (internal) ->
+EventEmitter = (nodeStyle) ->
   #private
   events = {}
   listeners = (event) ->
@@ -66,23 +72,32 @@ EventEmitter = (internal) ->
     return if i is -1
     listeners(event).splice i, 1
     return
-  emitter[FIRE] = (event, obj) ->
-    e = fakeEvent event
-    mergeObjects obj, e
+  emitter[FIRE] = ->
+    args = slice arguments
+    event = args.shift()
+    unless nodeStyle
+      args[0] = mergeObjects args[0], fakeEvent event
     legacylistener = emitter["on#{event}"]
     if legacylistener
-      legacylistener e
-    for listener, i in listeners event
-      listener e
+      legacylistener.apply `undefined`, args
+    for listener, i in listeners(event).concat(listeners("*"))
+      listener.apply `undefined`, args
     return
 
   #add listeners method and extra aliases
-  if internal
+  if nodeStyle
     emitter.listeners = (event) ->
-      Array::slice.call listeners event
+      slice listeners event
     emitter.on = emitter[ON]
     emitter.off = emitter[OFF]
     emitter.fire = emitter[FIRE]
+    emitter.once = (e, fn) ->
+      fire = ->
+        emitter.off e, fire
+        fn.apply null, arguments
+      emitter.on e, fire
+    emitter.destroy = ->
+      events = {}
 
   emitter
 
@@ -123,7 +138,7 @@ window[XMLHTTP] = ->
   #==========================
   # Extra state
   transiting = false
-  request = EventEmitter(true)
+  request = {}
   request.headers = {}
   response = {}
   response.headers = {}
@@ -168,7 +183,7 @@ window[XMLHTTP] = ->
         facade[READY_STATE] = ++currentState
 
         if currentState is 1
-          facade[FIRE] "loadstart", fakeEvent("loadstart")
+          facade[FIRE] "loadstart", {}
         if currentState is 2
           writeHead()
         if currentState is 4
@@ -176,10 +191,10 @@ window[XMLHTTP] = ->
           writeBody()
         # make fake events here for libraries that actually check the type on
         # the event object
-        facade[FIRE] "readystatechange", fakeEvent("readystatechange")
+        facade[FIRE] "readystatechange", {}
         if currentState is 4
-          facade[FIRE] "load", fakeEvent("load")
-          facade[FIRE] "loadend", fakeEvent("loadend")
+          facade[FIRE] "load", {}
+          facade[FIRE] "loadend", {}
       return
 
     #fire hooks once readyState reaches 4
@@ -221,7 +236,7 @@ window[XMLHTTP] = ->
 
   #==========================
   # Facade XHR
-  facade = EventEmitter()
+  facade = request.xhr = EventEmitter()
 
   # progress means we're current downloading...
   facade[ON] 'progress', -> setReadyState 3
@@ -229,13 +244,6 @@ window[XMLHTTP] = ->
   #proxy common events from xhr to facade
   proxyEvents COMMON_EVENTS, xhr, facade 
 
-  #create reference to facades eventemitter on request
-  request.on = (event, fn) ->
-    facade[ON] event, fn
-    return
-  request.fire = (event, obj) ->
-    facade[FIRE] event, obj
-    return
   facade.withCredentials = false # initialise 'withCredentials' on object so jQuery thinks we have CORS
   facade.response = null
   facade.status = 0
@@ -254,16 +262,23 @@ window[XMLHTTP] = ->
 
   facade.send = (body) ->
 
+    #read xhr settings before hooking
+    for k in ['type', 'timeout']
+      modk = if k is "type" then "responseType" else k
+      request[k] = facade[modk]
+
     request.body = body
     send = ->
       #prepare request all at once
       transiting = true
       #perform open
       xhr.open request.method, request.url, true, request.user, request.pass
-      #extract xhr settings
+
+      #write xhr settings
       for k in ['type', 'timeout']
         modk = if k is "type" then "responseType" else k
-        xhr[modk] = request[k] or facade[modk]
+        xhr[modk] = request[k]
+
       #insert headers
       for header, value of request.headers
         xhr.setRequestHeader header, value
@@ -293,8 +308,8 @@ window[XMLHTTP] = ->
         mergeObjects resp, response
         setReadyState 2
       #specifically provide partial text (responseText  readyState 3)
-      done.text = (text) ->
-        response.text = text
+      done.progress = (resp) ->
+        mergeObjects resp, response
         setReadyState 3
 
       hook = hooks.shift()
@@ -310,7 +325,7 @@ window[XMLHTTP] = ->
 
   facade.abort = ->
     xhr.abort() if transiting
-    facade[FIRE] 'abort', arguments
+    facade[FIRE] 'abort', {}
     return
   facade.setRequestHeader = (header, value) ->
     request.headers[header] = value
@@ -325,9 +340,9 @@ window[XMLHTTP] = ->
     facade.overrideMimeType = ->
       xhr.overrideMimeType.apply xhr, arguments
 
-  #create emitter (can be used to polyfill)
-  facade.upload = request.upload = EventEmitter()
+  #create emitter when supported
   if xhr.upload
+    facade.upload = request.upload = EventEmitter()
     proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
 
   # TODO this may not be necessary...
