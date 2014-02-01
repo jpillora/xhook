@@ -7,6 +7,7 @@ ON = 'addEventListener'
 OFF = 'removeEventListener'
 FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
+FormData = 'FormData'
 
 #DOWNLOAD_EVENTS ARE SYNTHESISED
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
@@ -127,6 +128,17 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
         if /([^:]+):\s*(.+)/.test(header)
           dest[RegExp.$1] = RegExp.$2 if not dest[RegExp.$1]
       return dest
+  return
+
+#patch FormData
+
+xhook[FormData] = window[FormData]
+window[FormData] = ->
+  @fd = new xhook[FormData]
+  @entries = []
+  @append = (args...) =>
+    @entries.push args
+    @fd.append.apply @fd, args
   return
 
 #patch XHR
@@ -282,6 +294,9 @@ window[XMLHTTP] = ->
       #insert headers
       for header, value of request.headers
         xhr.setRequestHeader header, value
+      #extract formdata
+      if request.body instanceof window[FormData]
+        request.body = request.body.fd
       #real send!
       xhr.send request.body
       return
