@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+
+<p>
+Use <a href="https://github.com/jpillora/xdomain">XDomain</a> instead. However, if you MUST use CORS:
+</p>
+
+<h4>IE8/9 CORS Polyfill</h4>
+
+<h5>https://cors-test.appspot.com/test (cross domain)</h5>
+<pre id="one">loading...</pre>
+
+<h5>example1.txt (same domain)</h5>
+<pre id="two">loading...</pre>
+
+<hr>
+
+<h4>Warning:</h4>
+<p>1. all requests will MUST the protocol of the page</p>
+<p>2. only these 3 events work: 'progress','timeout','error'</p>
+<p>3. request headers do not work, and only the content-type response header works</p>
+
+<hr>
+
+<h4>Usage Guide</h4>
+
+<p>1. Include XHook</p>
+<p>2. Install this before-hook</p>
+<p>3. Make normal XMLHttpRequests, if user has crossdomain and IE8/9, they will be silently swapped out for XDR</p>
+
+<pre id="polyfill-code"></pre>
+
+<script src="../dist/1/xhook.js"></script>
+
+<script type="text/javascript" id="polyfill">
+xhook.before(function(request, callback) {
+  //skip browsers that dont use XDR
+  if(!window.XDomainRequest)
+    return callback();
+  //skip requests that aren't cross domain
+  var url = request.url;
+  var loc = window.location;
+  var hostname = loc.hostname + (loc.port ? ":"+loc.port : "");
+  if(!/https?:\/\/([^\?\/]+)/.test(url) || RegExp.$1 === hostname)
+    return callback();
+  //force same protocol
+  url = url.replace(/https?:/,loc.protocol);
+  //request!
+  var xdr = new window.XDomainRequest();
+  xdr.timeout = request.timeout;
+  //proxy events
+  var proxy = function(e) {
+    xdr['on'+e] = function() {
+      request.xhr.dispatchEvent(e);
+    };
+  };
+  var events = ['progress','timeout','error'];
+  for(var i = 0; i < events.length; ++i )
+    proxy(events[i]);
+  //custom onload
+  xdr.onload = function() {
+    callback({
+      status: 200,
+      statusText: "OK",
+      headers: {
+        'Content-Type': xdr.contentType
+      },
+      text: xdr.responseText
+    })
+  };
+  xdr.open(request.method, url);
+  xdr.send(request.body);
+  return
+});
+
+</script>
+
+<script type="text/javascript">
+
+var code = document.getElementById('polyfill').innerHTML;
+document.getElementById('polyfill-code').innerHTML = code.replace(/\n/g,"<br>")
+
+//vanilla calls
+var xhr1 = new XMLHttpRequest();
+xhr1.open('GET', 'https://cors-test.appspot.com/test');
+xhr1.onreadystatechange = function() {
+  document.getElementById('one').innerHTML = xhr1.responseText;
+}
+// xhr1.timeout = 2
+// xhr1.ontimeout = function() {
+//   document.getElementById('one').innerHTML = 'timeout';
+// }
+// xhr1.onerror = function() {
+//   document.getElementById('one').innerHTML = 'error';
+// }
+xhr1.send();
+
+var xhr2 = new XMLHttpRequest();
+xhr2.open('GET', 'example2.txt');
+xhr2.onreadystatechange = function(e) {
+  document.getElementById('two').innerHTML = xhr2.responseText;
+}
+xhr2.send();
+</script>
