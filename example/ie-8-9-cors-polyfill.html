@@ -42,14 +42,14 @@ xhook.before(function(request, callback) {
   var url = request.url;
   var loc = window.location;
   var hostname = loc.hostname + (loc.port ? ":"+loc.port : "");
-  if(!/https?:\/\/([^\?\/]+)/.test(url) || RegExp.$1 === hostname)
+  if(!/^https?:\/\/([^\?\/]+)/.test(url) || RegExp.$1 === hostname)
     return callback();
 
   //if not GET, force POST
   var method = request.method;
   if(method !== 'GET') method = 'POST';
   //force same protocol
-  url = url.replace(/https?:/,loc.protocol);
+  url = url.replace(/^https?:/,loc.protocol);
   //request!
   var xdr = new window.XDomainRequest();
   xdr.timeout = request.timeout;
