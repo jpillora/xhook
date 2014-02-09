@@ -14,16 +14,19 @@ Use <a href="https://github.com/jpillora/xdomain">XDomain</a> instead. However, 
 
 <hr>
 
-<h4>Warning:</h4>
-<p>1. all requests will MUST the protocol of the page</p>
+
+<h4>Warning: Due to limitations with IE's XDomainRequest:</h4>
+<p>1. requests will MUST the protocol of the page</p>
 <p>2. only these 3 events work: 'progress','timeout','error'</p>
 <p>3. request headers do not work, and only the content-type response header works</p>
+<p>4. only GET or POST may be used requests</p>
+<p>5. requests must be async</p>
 
 <hr>
 
 <h4>Usage Guide</h4>
 
-<p>1. Include XHook</p>
+<p>1. Include <a href="https://github.com/jpillora/xhook">XHook</a></p>
 <p>2. Install this before-hook</p>
 <p>3. Make normal XMLHttpRequests, if user has crossdomain and IE8/9, they will be silently swapped out for XDR</p>
 
@@ -42,6 +45,10 @@ xhook.before(function(request, callback) {
   var hostname = loc.hostname + (loc.port ? ":"+loc.port : "");
   if(!/https?:\/\/([^\?\/]+)/.test(url) || RegExp.$1 === hostname)
     return callback();
+
+  //if not GET, force POST
+  var method = request.method;
+  if(method !== 'GET') method = 'POST';
   //force same protocol
   url = url.replace(/https?:/,loc.protocol);
   //request!
@@ -67,7 +74,7 @@ xhook.before(function(request, callback) {
       text: xdr.responseText
     })
   };
-  xdr.open(request.method, url);
+  xdr.open(method, url);
   xdr.send(request.body);
   return
 });
