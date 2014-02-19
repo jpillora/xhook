@@ -113,6 +113,7 @@ xhook[AFTER] = (handler, i) ->
   if handler.length < 2 or handler.length > 3
     throw "invalid hook"
   xhook[ON] AFTER, handler, i
+xhook.addWithCredentials = true
 
 #helper
 convertHeaders = xhook.headers = (h, dest = {}) ->
@@ -256,7 +257,9 @@ window[XMLHTTP] = ->
   #proxy common events from xhr to facade
   proxyEvents COMMON_EVENTS, xhr, facade 
 
-  facade.withCredentials = false # initialise 'withCredentials' on object so jQuery thinks we have CORS
+  if xhook.addWithCredentials
+    # initialise 'withCredentials' on object so jQuery thinks we have CORS
+    facade.withCredentials = false
   facade.response = null
   facade.status = 0
 
@@ -288,8 +291,9 @@ window[XMLHTTP] = ->
 
       #write xhr settings
       for k in ['type', 'timeout']
-        modk = if k is "type" then "responseType" else k
-        xhr[modk] = request[k]
+        if k of request
+          modk = if k is "type" then "responseType" else k
+          xhr[modk] = request[k]
 
       #insert headers
       for header, value of request.headers
