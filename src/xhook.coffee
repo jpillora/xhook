@@ -280,7 +280,7 @@ window[XMLHTTP] = ->
     #read xhr settings before hooking
     for k in ['type', 'timeout']
       modk = if k is "type" then "responseType" else k
-      request[k] = facade[modk]
+      request[k] = facade[modk] if modk of facade
 
     request.body = body
     send = ->
@@ -291,9 +291,8 @@ window[XMLHTTP] = ->
 
       #write xhr settings
       for k in ['type', 'timeout']
-        if k of request
-          modk = if k is "type" then "responseType" else k
-          xhr[modk] = request[k]
+        modk = if k is "type" then "responseType" else k
+        xhr[modk] = request[k] if k of request
 
       #insert headers
       for header, value of request.headers
