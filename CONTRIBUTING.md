@@ -8,7 +8,7 @@
 
 * Install [`grunt-source`](https://github.com/jpillora/grunt-source) with `npm install -g grunt-source` (Grunt Source allows the use of external Grunt environments)
 
-* Watch *src* for changes and will then compile and minify into *dist* with `grunt-source`
+* Watch *src* for changes and will then compile and minify into *dist* with `grunt-source --server=3000`
 
 * Open Chrome `open http://localhost:3000/`
 

@@ -82,12 +82,13 @@ If our `handler` is asynchronous, just include the optional `callback` argument.
 
 ### `request` Object
 
-* `method` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`open(method,url)`</a>*)
-* `url` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`open(method,url)`</a>*)
+* `method` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#open()">`open(method,url)`</a>*)
+* `url` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#open()">`open(method,url)`</a>*)
 * `body` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`send(body)`</a>*)
 * `headers` (Object) (*All Name-Value pairs **set** with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#setRequestHeader()">`setRequestHeader(name,value)`</a>*)
 * `timeout` (Number) *([`timeout`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#timeout))*
 * `type` (String) *([`responseType`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseType))*
+* `withCredentials` (String) *([`withCredentials`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#withCredentials))*
 
 ### `response` Object
 
