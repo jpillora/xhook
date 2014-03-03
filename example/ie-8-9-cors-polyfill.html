@@ -6,7 +6,7 @@ Use <a href="https://github.com/jpillora/xdomain">XDomain</a> instead. However, 
 
 <h4>IE8/9 CORS Polyfill</h4>
 
-<h5>https://cors-test.appspot.com/test (cross domain)</h5>
+<h5>http://echo.jpillora.com/cors-test (cross domain)</h5>
 <pre id="one">loading...</pre>
 
 <h5>example2.txt (same domain)</h5>
@@ -87,7 +87,7 @@ document.getElementById('polyfill-code').innerHTML = code.replace(/\n/g,"<br>")
 
 //vanilla calls
 var xhr1 = new XMLHttpRequest();
-xhr1.open('GET', 'https://cors-test.appspot.com/test');
+xhr1.open('GET', 'http://echo.jpillora.com/cors-test');
 xhr1.onreadystatechange = function() {
   document.getElementById('one').innerHTML = xhr1.responseText;
 }

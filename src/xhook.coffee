@@ -278,7 +278,7 @@ window[XMLHTTP] = ->
   facade.send = (body) ->
 
     #read xhr settings before hooking
-    for k in ['type', 'timeout']
+    for k in ['type', 'timeout', 'withCredentials']
       modk = if k is "type" then "responseType" else k
       request[k] = facade[modk] if modk of facade
 
@@ -290,7 +290,7 @@ window[XMLHTTP] = ->
       xhr.open request.method, request.url, true, request.user, request.pass
 
       #write xhr settings
-      for k in ['type', 'timeout']
+      for k in ['type', 'timeout', 'withCredentials']
         modk = if k is "type" then "responseType" else k
         xhr[modk] = request[k] if k of request
 

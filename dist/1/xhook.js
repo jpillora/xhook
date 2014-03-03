@@ -335,7 +335,7 @@ window[XMLHTTP] = function() {
   };
   facade.send = function(body) {
     var hooks, k, modk, process, send, _i, _len, _ref;
-    _ref = ['type', 'timeout'];
+    _ref = ['type', 'timeout', 'withCredentials'];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       k = _ref[_i];
       modk = k === "type" ? "responseType" : k;
@@ -348,7 +348,7 @@ window[XMLHTTP] = function() {
       var header, value, _j, _len1, _ref1, _ref2;
       transiting = true;
       xhr.open(request.method, request.url, true, request.user, request.pass);
-      _ref1 = ['type', 'timeout'];
+      _ref1 = ['type', 'timeout', 'withCredentials'];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         k = _ref1[_j];
         modk = k === "type" ? "responseType" : k;
