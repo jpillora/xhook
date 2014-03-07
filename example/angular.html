@@ -6,15 +6,15 @@
 <pre id="two"></pre>
 
 <script src="../dist/1/xhook.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.js"></script>
 
 <div ng-app="app"></div>
 
 <script type="text/javascript">
-//hook and modify 'response' (not 'responseText') of 'example2.txt'
+//hook and modify 'responseText' of 'example2.txt'
 xhook.after(function(request, response) {
   if(request.url.match(/example2\.txt$/))
-    response.data = response.data.replace(/[aeiou]/g,'z');
+    response.text = response.text.replace(/[aeiou]/g,'z');
 });
 
 //setup angular

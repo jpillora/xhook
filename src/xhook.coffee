@@ -114,6 +114,8 @@ xhook[AFTER] = (handler, i) ->
     throw "invalid hook"
   xhook[ON] AFTER, handler, i
 xhook.addWithCredentials = true
+xhook.enable = -> window[XMLHTTP] = XHookHttpRequest; return
+xhook.disable = -> window[XMLHTTP] = xhook[XMLHTTP]; return
 
 #helper
 convertHeaders = xhook.headers = (h, dest = {}) ->
@@ -144,7 +146,7 @@ window[FormData] = ->
 
 #patch XHR
 xhook[XMLHTTP] = window[XMLHTTP]
-window[XMLHTTP] = ->
+XHookHttpRequest = window[XMLHTTP] = ->
 
   xhr = new xhook[XMLHTTP]()
 
@@ -181,9 +183,12 @@ window[XMLHTTP] = ->
     return
 
   writeBody = ->
-    facade.response = response.data or response.text or null
-    facade.responseText = response.text or ''
-    facade.responseXML = response.xml or null
+    if response.hasOwnProperty 'text'
+      facade.responseText = response.text
+    else if response.hasOwnProperty 'xml'
+      facade.responseXML = response.xml
+    else
+      facade.response = response.data or null
     return
 
   #control facade ready state
@@ -260,7 +265,6 @@ window[XMLHTTP] = ->
   if xhook.addWithCredentials
     # initialise 'withCredentials' on object so jQuery thinks we have CORS
     facade.withCredentials = false
-  facade.response = null
   facade.status = 0
 
   facade.open = (method, url, async, user, pass) ->

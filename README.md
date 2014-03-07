@@ -59,8 +59,8 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 ## Download
 
-* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 9KB
-* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 4KB (1KB Gzip)
+* Development [xhook.js](http://jpillora.com/xhook/dist/1/xhook.js) 11KB
+* Production [xhook.min.js](http://jpillora.com/xhook/dist/1/xhook.min.js) 5KB (1.2KB Gzip)
 
   :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
