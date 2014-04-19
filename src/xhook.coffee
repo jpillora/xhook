@@ -316,7 +316,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
       for header, value of request.headers
         xhr.setRequestHeader header, value
       #extract formdata
-      if request.body instanceof window[FormData]
+      if window[FormData] and request.body instanceof window[FormData]
         request.body = request.body.fd
       #real send!
       xhr.send request.body

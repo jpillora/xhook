@@ -385,7 +385,7 @@ XHookHttpRequest = window[XMLHTTP] = function() {
         value = _ref2[header];
         xhr.setRequestHeader(header, value);
       }
-      if (request.body instanceof window[FormData]) {
+      if (window[FormData] && request.body instanceof window[FormData]) {
         request.body = request.body.fd;
       }
       xhr.send(request.body);
