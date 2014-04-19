@@ -134,15 +134,29 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
   return
 
 #patch FormData
-
-xhook[FormData] = window[FormData]
-window[FormData] = ->
-  @fd = new xhook[FormData]
-  @entries = []
-  @append = (args...) =>
-    @entries.push args
-    @fd.append.apply @fd, args
-  return
+# we can do this safely because all XHR
+# is hooked, so we can ensure the real FormData
+# object is used on send
+if xhook[FormData] = window[FormData]
+  window[FormData] = (form) ->
+    @fd = new xhook[FormData](form)
+    @form = form
+    entries = []
+    Object.defineProperty @, 'entries', get: ->
+      #extract form entries
+      fentries = unless form then [] else
+        slice(form.querySelectorAll("input,select")).filter((e) ->
+          return e.type not in ['checkbox','radio'] or e.checked
+        ).map((e) ->
+          [e.name, if e.type is "file" then e.files else e.value]
+        )
+      #combine with js entries
+      return fentries.concat entries
+    @append = =>
+      args = slice arguments
+      entries.push args
+      @fd.append.apply @fd, args
+    return
 
 #patch XHR
 xhook[XMLHTTP] = window[XMLHTTP]
