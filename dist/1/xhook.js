@@ -402,6 +402,7 @@
         done = function(resp) {
           if (typeof resp === 'object' && (typeof resp.status === 'number' || typeof response.status === 'number')) {
             mergeObjects(resp, response);
+            response.data = resp.response || resp.text;
             setReadyState(4);
             return;
           }
@@ -856,6 +857,7 @@ XHookHttpRequest = window[XMLHTTP] = function() {
       done = function(resp) {
         if (typeof resp === 'object' && (typeof resp.status === 'number' || typeof response.status === 'number')) {
           mergeObjects(resp, response);
+          response.data = resp.response || resp.text;
           setReadyState(4);
           return;
         }
