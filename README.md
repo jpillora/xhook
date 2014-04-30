@@ -133,7 +133,7 @@ Version 0.x docs and downloads can be found [here](https://github.com/jpillora/x
 
 #### MIT License
 
-Copyright © 2013 Jaime Pillora &lt;dev@jpillora.com&gt;
+Copyright © 2013–2014 Jaime Pillora <dev@jpillora.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
