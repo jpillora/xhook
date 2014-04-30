@@ -1,0 +1,51 @@
+<h5>Unmodified headers</h5>
+<pre id="result-1"></pre>
+
+<h5>Modified headers</h5>
+<pre id="result-2"></pre>
+
+<script src="../dist/1/xhook.js"></script>
+<script type="text/javascript">
+
+//hook and modify 'responseText' of 'example2.txt'
+xhook.after(function(request, response) {
+  if (request.url.match(/example2\.txt$/)) {
+    // Alwayse insert headers using their lowercase name, i.e. `foo`, not `Foo`
+    response.headers['foo'] = 'Bar';
+  }
+});
+
+//vanilla calls
+var xhr1 = new XMLHttpRequest();
+xhr1.open('GET', 'example1.txt');
+xhr1.onreadystatechange = function (event) {
+  document.getElementById('result-1').innerHTML = xhr1.getAllResponseHeaders();
+}
+xhr1.send();
+
+var xhr2 = new XMLHttpRequest();
+xhr2.open('GET', 'example2.txt');
+xhr2.onreadystatechange = function (event) {
+
+  // Test accessing headers case insensitive
+  var NAME_1 = 'foo';
+  var NAME_2 = 'fOo';
+  var NAME_3 = 'FOO';
+  var value1 = xhr2.getResponseHeader(NAME_1);
+  var value2 = xhr2.getResponseHeader(NAME_2);
+  var value3 = xhr2.getResponseHeader(NAME_3);
+
+  var supportsCaseInsensitiveHeaders =
+    value1 != null && value2 != null && value3 != null &&
+    value1 === value2 && value2 === value3;
+
+  var result =
+    NAME_1 + ': ' + value1 + '\n' +
+    NAME_2 + ': ' + value2 + '\n' +
+    NAME_3 + ': ' + value3 + '\n\n' +
+    'Supports case insensitive headers: ' + supportsCaseInsensitiveHeaders;
+
+  document.getElementById('result-2').innerHTML = result;
+}
+xhr2.send();
+</script>
