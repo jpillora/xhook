@@ -132,7 +132,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
         if /([^:]+):\s*(.+)/.test(header)
           name = RegExp.$1?.toLowerCase()
           value = RegExp.$2
-          dest[name] = value if not dest[name]
+          dest[name] ?= value
       return dest
   return
 

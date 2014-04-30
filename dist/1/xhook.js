@@ -204,7 +204,7 @@ convertHeaders = xhook.headers = function(h, dest) {
         if (/([^:]+):\s*(.+)/.test(header)) {
           name = (_ref = RegExp.$1) != null ? _ref.toLowerCase() : void 0;
           value = RegExp.$2;
-          if (!dest[name]) {
+          if (dest[name] == null) {
             dest[name] = value;
           }
         }
