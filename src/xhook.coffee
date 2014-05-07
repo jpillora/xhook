@@ -228,8 +228,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
         # the event object
         facade[FIRE] "readystatechange", {}
         if currentState is 4
-          facade[FIRE] "load", {}
-          facade[FIRE]("loadend", {}) if "#{facade.status}".charAt(0) is "2"
+          facade[FIRE] "load", {} if "#{facade.status}".charAt(0) is "2"
+          facade[FIRE] "loadend", {}
       return
 
     #fire hooks once readyState reaches 4

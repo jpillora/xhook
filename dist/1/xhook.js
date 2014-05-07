@@ -304,10 +304,10 @@ XHookHttpRequest = window[XMLHTTP] = function() {
         }
         facade[FIRE]("readystatechange", {});
         if (currentState === 4) {
-          facade[FIRE]("load", {});
           if (("" + facade.status).charAt(0) === "2") {
-            facade[FIRE]("loadend", {});
+            facade[FIRE]("load", {});
           }
+          facade[FIRE]("loadend", {});
         }
       }
     };
