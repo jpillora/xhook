@@ -123,13 +123,16 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
     when "object"
       headers = []
       for k,v of h
-        headers.push "#{k}:\t#{v}"
+        name = k.toLowerCase()
+        headers.push "#{name}:\t#{v}"
       return headers.join '\n'
     when "string"
       headers = h.split '\n'
       for header in headers
         if /([^:]+):\s*(.+)/.test(header)
-          dest[RegExp.$1] = RegExp.$2 if not dest[RegExp.$1]
+          name = RegExp.$1?.toLowerCase()
+          value = RegExp.$2
+          dest[name] ?= value
       return dest
   return
 
@@ -181,7 +184,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
     response.statusText = xhr.statusText
     for key, val of convertHeaders xhr.getAllResponseHeaders()
       unless response.headers[key]
-        response.headers[key] = val
+        name = key.toLowerCase()
+        response.headers[name] = val
     return
 
   readBody = ->
@@ -364,10 +368,12 @@ XHookHttpRequest = window[XMLHTTP] = ->
     facade[FIRE] 'abort', {}
     return
   facade.setRequestHeader = (header, value) ->
-    request.headers[header] = value
+    name = header?.toLowerCase()
+    request.headers[name] = value
     return
   facade.getResponseHeader = (header) ->
-    response.headers[header]
+    name = header?.toLowerCase()
+    response.headers[name]
   facade.getAllResponseHeaders = ->
     convertHeaders response.headers
 
