@@ -203,10 +203,9 @@ XHookHttpRequest = window[XMLHTTP] = ->
   writeBody = ->
     if response.hasOwnProperty 'text'
       facade.responseText = response.text
-    else if response.hasOwnProperty 'xml'
+    if response.hasOwnProperty 'xml'
       facade.responseXML = response.xml
-    else
-      facade.response = response.data or null
+    facade.response = response.data or null
     return
 
   #control facade ready state
@@ -338,6 +337,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
            (typeof resp.status is 'number' or
             typeof response.status is 'number')
           mergeObjects resp, response
+          response.data = resp.response or resp.text
           setReadyState 4
           return
         #continue processing until no hooks left

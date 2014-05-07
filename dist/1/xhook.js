@@ -280,11 +280,11 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   writeBody = function() {
     if (response.hasOwnProperty('text')) {
       facade.responseText = response.text;
-    } else if (response.hasOwnProperty('xml')) {
-      facade.responseXML = response.xml;
-    } else {
-      facade.response = response.data || null;
     }
+    if (response.hasOwnProperty('xml')) {
+      facade.responseXML = response.xml;
+    }
+    facade.response = response.data || null;
   };
   currentState = 0;
   setReadyState = function(n) {
@@ -403,6 +403,7 @@ XHookHttpRequest = window[XMLHTTP] = function() {
       done = function(resp) {
         if (typeof resp === 'object' && (typeof resp.status === 'number' || typeof response.status === 'number')) {
           mergeObjects(resp, response);
+          response.data = resp.response || resp.text;
           setReadyState(4);
           return;
         }
