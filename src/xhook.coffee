@@ -229,7 +229,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
         facade[FIRE] "readystatechange", {}
         if currentState is 4
           facade[FIRE] "load", {}
-          facade[FIRE] "loadend", {}
+          facade[FIRE]("loadend", {}) if "#{facade.status}".charAt(0) is "2"
       return
 
     #fire hooks once readyState reaches 4
@@ -401,5 +401,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   return facade
 
 #publicise (mini-umd)
-(@define or Object) (@exports or @).xhook = xhook
-
+if typeof @define is "function" and @define.amd
+  define "xhook", [], -> xhook
+else
+  (@exports or @).xhook = xhook

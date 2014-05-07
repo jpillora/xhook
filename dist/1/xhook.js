@@ -305,7 +305,9 @@ XHookHttpRequest = window[XMLHTTP] = function() {
         facade[FIRE]("readystatechange", {});
         if (currentState === 4) {
           facade[FIRE]("load", {});
-          facade[FIRE]("loadend", {});
+          if (("" + facade.status).charAt(0) === "2") {
+            facade[FIRE]("loadend", {});
+          }
         }
       }
     };
@@ -457,5 +459,11 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   return facade;
 };
 
-(this.define || Object)((this.exports || this).xhook = xhook);
+if (typeof this.define === "function" && this.define.amd) {
+  define("xhook", [], function() {
+    return xhook;
+  });
+} else {
+  (this.exports || this).xhook = xhook;
+}
 }.call(this,window));
