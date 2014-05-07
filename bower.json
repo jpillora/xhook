@@ -6,7 +6,8 @@
   "ignore": [
     "*",
     "!bower.json",
-    "!dist/1/xhook.js"
+    "!dist/1/xhook.js",
+    "!dist/1/xhook.min.js"
   ],
   "dependencies": {},
   "devDependencies": {}
