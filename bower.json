@@ -1,6 +1,6 @@
 {
   "name": "jpillora/xhook",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "main": "dist/1/xhook.js",
   "license": "MIT",
   "ignore": [

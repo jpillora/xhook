@@ -113,7 +113,6 @@ xhook[AFTER] = (handler, i) ->
   if handler.length < 2 or handler.length > 3
     throw "invalid hook"
   xhook[ON] AFTER, handler, i
-xhook.addWithCredentials = true
 xhook.enable = -> window[XMLHTTP] = XHookHttpRequest; return
 xhook.disable = -> window[XMLHTTP] = xhook[XMLHTTP]; return
 
@@ -279,8 +278,9 @@ XHookHttpRequest = window[XMLHTTP] = ->
   #proxy common events from xhr to facade
   proxyEvents COMMON_EVENTS, xhr, facade 
 
-  if xhook.addWithCredentials
-    # initialise 'withCredentials' on object so jQuery thinks we have CORS
+  # initialise 'withCredentials' on facade xhr in browsers with it
+  # or if explicitly told to do so
+  if 'withCredentials' of xhr or xhook.addWithCredentials
     facade.withCredentials = false
   facade.status = 0
 
