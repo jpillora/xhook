@@ -28,18 +28,19 @@ mergeObjects = (src, dst) ->
   return dst
 
 #proxy events from one emitter to another
-proxyEvents = (events, from, to) ->
+proxyEvents = (events, src, dst) ->
   p = (event) -> (e) ->
     clone = {}
     for k of e
       continue if k is "returnValue"
       val = e[k]
-      clone[k] = if val is from then to else val
+      #replace instances of source emitter with dest emitter
+      clone[k] = if val is src then dst else val
     clone
-    to[FIRE] event, clone
+    dst[FIRE] event, clone
   #dont proxy manual events
   for event in events
-    from["on#{event}"] = p(event)
+    src["on#{event}"] = p(event)
   return
 
 #create fake event
@@ -168,6 +169,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
 
   #==========================
   # Extra state
+  hasError = false
   transiting = false
   request = {}
   request.headers = {}
@@ -207,40 +209,45 @@ XHookHttpRequest = window[XMLHTTP] = ->
     facade.response = response.data or null
     return
 
+  #ensure ready state 0 through 4 is handled
+  emitReadyState = (n) ->
+    while n > currentState and currentState < 4
+      facade[READY_STATE] = ++currentState
+      # make fake events for libraries that actually check the type on
+      # the event object
+      if currentState is 1
+        facade[FIRE] "loadstart", {}
+      if currentState is 2
+        writeHead()
+      if currentState is 4
+        writeHead()
+        writeBody()
+      facade[FIRE] "readystatechange", {}
+      #delay final events incase of error
+      if currentState is 4
+        setTimeout emitFinal, 0
+    return
+
+  emitFinal = ->
+    unless hasError
+      facade[FIRE] "load", {}
+    facade[FIRE] "loadend", {}
+    if hasError
+      facade[READY_STATE] = 0
+    return
+
   #control facade ready state
   currentState = 0
   setReadyState = (n) ->
-
-    #ensure ready state 0 through 4 is handled
-    checkReadyState = ->
-      while n > currentState and currentState < 4
-        facade[READY_STATE] = ++currentState
-
-        if currentState is 1
-          facade[FIRE] "loadstart", {}
-        if currentState is 2
-          writeHead()
-        if currentState is 4
-          writeHead()
-          writeBody()
-        # make fake events here for libraries that actually check the type on
-        # the event object
-        facade[FIRE] "readystatechange", {}
-        if currentState is 4
-          facade[FIRE] "load", {} if "#{facade.status}".charAt(0) is "2"
-          facade[FIRE] "loadend", {}
+    #emit events until readyState reaches 4
+    if n isnt 4
+      emitReadyState(n)
       return
-
-    #fire hooks once readyState reaches 4
-    if n < 4
-      checkReadyState()
-      return
-
-    #run all 'after' hooks in sequence
+    #before emitting 4, run all 'after' hooks in sequence
     hooks = xhook.listeners AFTER
     process = ->
       unless hooks.length
-        return checkReadyState()
+        return emitReadyState(4)
       hook = hooks.shift()
       if hook.length is 2
         hook request, response
@@ -251,9 +258,11 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   #==========================
-  # Event Handlers
+  # Facade XHR
+  facade = request.xhr = EventEmitter()
 
-  #handle real ready state
+  #==========================
+  # Handle the underlying ready state
   xhr.onreadystatechange = (event) ->
     #pull status and headers
     try
@@ -268,12 +277,21 @@ XHookHttpRequest = window[XMLHTTP] = ->
     setReadyState xhr[READY_STATE]
     return
 
-  #==========================
-  # Facade XHR
-  facade = request.xhr = EventEmitter()
-
+  #mark this xhr as errored
+  hasErrorHandler = ->
+    hasError = true
+    return
+  facade[ON] 'error', hasErrorHandler
+  facade[ON] 'timeout', hasErrorHandler
+  facade[ON] 'abort', hasErrorHandler
   # progress means we're current downloading...
-  facade[ON] 'progress', -> setReadyState 3
+  facade[ON] 'progress', ->
+    #progress events are followed by readystatechange for some reason...
+    if currentState < 3
+      setReadyState 3
+    else
+      facade[FIRE] "readystatechange", {}
+    return
 
   #proxy common events from xhr to facade
   proxyEvents COMMON_EVENTS, xhr, facade 
@@ -297,7 +315,6 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   facade.send = (body) ->
-
     #read xhr settings before hooking
     for k in ['type', 'timeout', 'withCredentials']
       modk = if k is "type" then "responseType" else k
@@ -364,8 +381,10 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   facade.abort = ->
-    xhr.abort() if transiting
-    facade[FIRE] 'abort', {}
+    if transiting
+      xhr.abort() #this will emit an 'abort' for us
+    else
+      facade[FIRE] 'abort', {}
     return
   facade.setRequestHeader = (header, value) ->
     name = header?.toLowerCase()
@@ -387,20 +406,9 @@ XHookHttpRequest = window[XMLHTTP] = ->
     facade.upload = request.upload = EventEmitter()
     proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
 
-  # TODO this may not be necessary...
-  # #create method call watcher
-  # calls = request.calls = EventEmitter(true)
-  # wrapCall = (name, fn) -> ->
-  #   calls.fire name, arguments
-  #   fn.apply `undefined`, arguments
-  # #wrap all facade methods
-  # for k, fn of facade
-  #   if typeof fn is 'function'
-  #     facade[k] = wrapCall k, fn
-
   return facade
 
-#publicise (mini-umd)
+#publicise
 if typeof @define is "function" and @define.amd
   define "xhook", [], -> xhook
 else
