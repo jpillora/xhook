@@ -18,6 +18,7 @@ With XHook, you could easily implement functionality to:
 * Sending Error statistics to Google Analytics
 * Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
+* Supports RequiresJS and Browserify
 * Preflight GZip compression, see [XZip](http://github.com/jpillora/xzip) (In progress)
 
 ## Features
