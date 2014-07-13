@@ -348,25 +348,26 @@ XHookHttpRequest = window[XMLHTTP] = ->
       unless hooks.length
         return send()
       #go to next hook OR optionally provide response
-      done = (resp) ->
+      done = (userResponse) ->
         #break chain - provide dummy response (readyState 4)
-        if typeof resp is 'object' and
-           (typeof resp.status is 'number' or
+        if typeof userResponse is 'object' and
+           (typeof userResponse.status is 'number' or
             typeof response.status is 'number')
-          mergeObjects resp, response
-          response.data = resp.response or resp.text
+          mergeObjects userResponse, response
+          unless 'data' in userResponse
+            userResponse.data = userResponse.response or userResponse.text
           setReadyState 4
           return
         #continue processing until no hooks left
         process()
         return
       #specifically provide headers (readyState 2)
-      done.head = (resp) ->
-        mergeObjects resp, response
+      done.head = (userResponse) ->
+        mergeObjects userResponse, response
         setReadyState 2
       #specifically provide partial text (responseText  readyState 3)
-      done.progress = (resp) ->
-        mergeObjects resp, response
+      done.progress = (userResponse) ->
+        mergeObjects userResponse, response
         setReadyState 3
 
       hook = hooks.shift()
