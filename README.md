@@ -19,7 +19,7 @@ With XHook, you could easily implement functionality to:
 * Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
 * Supports RequiresJS and Browserify
-* Preflight GZip compression, see [XZip](http://github.com/jpillora/xzip) (In progress)
+* Preflight GZip compression, see [XZip](http://github.com/jpillora/xzip) (Incomplete)
 
 ## Features
 
@@ -62,30 +62,35 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 * Development [xhook.js](https://rawgit.com/jpillora/xhook/gh-pages/dist/1/xhook.js) 11KB
 * Production [xhook.min.js](https://rawgit.com/jpillora/xhook/gh-pages/dist/1/xhook.min.js) 5KB (1.2KB Gzip)
+* Gitraw CDN 
+
+``` html
+<script src="//cdn.rawgit.com/jpillora/xdomain/gh-pages/dist/0.6/xdomain.min.js" slave="http://xyz.example.com/proxy.html"></script>
+```
 
   :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
 ## API
 
-### `xhook`.`before`(`handler(request[, callback])` `[, index]`)
+### `xhook.before(handler(request[, callback])[, index])`
 
 Modifying **any** property of the `request` object will modify the underlying XHR before it is sent.
 
-If our `handler` is asynchronous, just include the optional `callback` argument, which accepts an optional `response` object.
+To make the `handler` is asynchronous, just include the optional `callback` function, which accepts an optional `response` object.
 
 To provide a **fake** response, `return` **or** `callback()` a `response` object.
 
-### `xhook`.`after`(`handler(request, response[, callback])` `[, index]`)
+### `xhook.after(handler(request, response[, callback]) [, index])`
 
 Modifying **any** property of the `response` object will modify the underlying XHR before it is received.
 
-If our `handler` is asynchronous, just include the optional `callback` argument.
+To make the `handler` is asynchronous, just include the optional `callback` function.
 
-### `xhook`.`enable`()
+### `xhook.enable()`
 
 Enables XHook (swaps out the native `XMLHttpRequest` class). XHook is enabled be default.
 
-### `xhook`.`disable`()
+### `xhook.disable()`
 
 Disables XHook (swaps the native `XMLHttpRequest` class back in)
 
@@ -96,7 +101,7 @@ Disables XHook (swaps the native `XMLHttpRequest` class back in)
 * `method` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#open()">`open(method,url)`</a>*)
 * `url` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#open()">`open(method,url)`</a>*)
 * `body` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#send()">`send(body)`</a>*)
-* `headers` (Object) (*All Name-Value pairs **set** with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#setRequestHeader()">`setRequestHeader(name,value)`</a>*)
+* `headers` (Object) (*Contains Name-Value pairs set with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#setRequestHeader()">`setRequestHeader(name,value)`</a>*)
 * `timeout` (Number) *([`timeout`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#timeout))*
 * `type` (String) *([`responseType`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseType))*
 * `withCredentials` (String) *([`withCredentials`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#withCredentials))*
@@ -106,7 +111,7 @@ Disables XHook (swaps the native `XMLHttpRequest` class back in)
 * `status` (Number) **Required when for fake `response`s** *([`status`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#status))*
 * `statusText` (String) *([`statusText`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#statusText))*
 * `text` (String) *([`responseText`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseText))*
-* `headers` (Object) (*All Name-Value pairs **retrieved** with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#getAllResponseHeaders()">`getAllResponseHeaders()`</a>*)
+* `headers` (Object) (*Contains Name-Value pairs retrieved with <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#getAllResponseHeaders()">`getAllResponseHeaders()`</a>*)
 * `xml` (XML) *([`responseXML`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseXML))*
 * `data` (Varies) *([`response`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#response))*
 
