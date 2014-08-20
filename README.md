@@ -81,6 +81,16 @@ Modifying **any** property of the `response` object will modify the underlying X
 
 If our `handler` is asynchronous, just include the optional `callback` argument.
 
+### `xhook`.`enable`()
+
+Enables XHook (swaps out the native `XMLHttpRequest` class). XHook is enabled be default.
+
+### `xhook`.`disable`()
+
+Disables XHook (swaps the native `XMLHttpRequest` class back in)
+
+---
+
 ### `request` Object
 
 * `method` (String) (*<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#open()">`open(method,url)`</a>*)
@@ -118,24 +128,24 @@ http://www.w3.org/TR/XMLHttpRequest2/
 
 ### Issues
 
-* `xhr instanceof XMLHttpRequest` checks will return `false`
-
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest`, so you may use any library
-conjunction with XHook, just make sure to load XHook **first**. 
+conjunction with XHook, just make sure to load XHook **first**.
+
+* Synchronous XHR is **not** supported. This is due to the introduction of asynchronous hooks. A sync XHR combined with an async hook will result in unexpected results so this is not allowed. XHook will throw an error if `async=false` is attempted. This causes a bug when attempting to add script tags **with jQuery**, see https://github.com/jpillora/xhook/issues/22 for more information and workaround.
 
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for instructions on how to build and run XHook locally.
 
-### Old Version
+Contributors:
 
-Version 0.x docs and downloads can be found [here](https://github.com/jpillora/xhook/tree/a42c8814bd052f03cfb3a1d7848a37df5a5d0563) 
+* Jaime Pillora <dev@jpillora.com>
+* Daniel Gasienica <daniel@gasienica.ch>
 
 #### MIT License
 
-Copyright © 2013–2014 Jaime Pillora <dev@jpillora.com><br>
-Copyright © 2014 Daniel Gasienica <daniel@gasienica.ch>
+Copyright © 2014 Jaime Pillora <dev@jpillora.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
