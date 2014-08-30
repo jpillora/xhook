@@ -1,7 +1,5 @@
 # XHook
 
-v1.1
-
 #### Easily intercept and modify XHR request and response
 
 <a href="https://twitter.com/intent/tweet?hashtags=xhook%2Cjavascript%2Cxhr&original_referer=http%3A%2F%2Fgithub.com%2F&text=XHook%3A+Easily+intercept+and+modify+XHR+request+and+response&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fjpillora%2Fxhook" target="_blank">
@@ -136,8 +134,6 @@ http://www.w3.org/TR/XMLHttpRequest2/
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest`, so you may use any library
 conjunction with XHook, just make sure to load XHook **first**.
-
-* Synchronous XHR is **not** supported. This is due to the introduction of asynchronous hooks. A sync XHR combined with an async hook will result in unexpected results so this is not allowed. XHook will throw an error if `async=false` is attempted. This causes a bug when attempting to add script tags **with jQuery**, see https://github.com/jpillora/xhook/issues/22 for more information and workaround.
 
 ## Contributing
 

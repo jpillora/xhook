@@ -252,8 +252,10 @@ XHookHttpRequest = window[XMLHTTP] = ->
       if hook.length is 2
         hook request, response
         process()
-      else if hook.length is 3
+      else if hook.length is 3 and request.async
         hook request, response, process
+      else
+        process()
     process()
     return
 
@@ -305,9 +307,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   facade.open = (method, url, async, user, pass) ->
     request.method = method
     request.url = url
-    # async not allowed
-    if async is false
-      throw "sync xhr not supported by XHook"
+    request.async = async isnt false
     request.user = user
     request.pass = pass
     # openned facade xhr (not real xhr)
@@ -325,7 +325,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
       #prepare request all at once
       transiting = true
       #perform open
-      xhr.open request.method, request.url, true, request.user, request.pass
+      xhr.open request.method, request.url, request.async, request.user, request.pass
 
       #write xhr settings
       for k in ['type', 'timeout', 'withCredentials']
@@ -374,9 +374,12 @@ XHookHttpRequest = window[XMLHTTP] = ->
       #async or sync?
       if hook.length is 1
         done hook request
-      else if hook.length is 2
+      else if hook.length is 2 and request.async
         #async handlers must use an async xhr
         hook request, done
+      else
+        #skip async hook on sync requests
+        done()
     #kick off
     process()
     return

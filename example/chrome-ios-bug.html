@@ -1,0 +1,41 @@
+<html>
+<body>
+<h1>Chrome iOS Bug</h1>
+
+<script type="text/javascript" src="../dist/1/xhook.js"></script>
+<script type="text/javascript">
+
+    //cant see console.logs on the iphone
+    function print(str) {
+        var e = document.createElement("h3")
+        e.innerHTML = str
+        document.body.appendChild(e)
+    }
+
+	print("begin")
+
+	xhook.before(function(req) {
+		print('before ' + req.method + ' ' + req.url);
+	});
+
+	xhook.after(function(req, res, callback) {
+		//this hook wont get called for sync xhr
+		print('simulate delay... ' + req.method + ' ' + req.url);
+		setTimeout(callback, 1000);
+	});
+
+	xhook.after(function(req, res) {
+		print('after ' + req.method + ' ' + req.url);
+	});
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET","/")
+	xhr.send()
+	xhr.onload = function() {
+		print('page is '+ xhr.responseText.length + ' bytes');
+	};
+
+</script>
+</body>
+</html>
+
