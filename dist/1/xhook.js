@@ -249,6 +249,7 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   transiting = false;
   request = {};
   request.headers = {};
+  request.headerNames = {};
   response = {};
   response.headers = {};
   readHead = function() {
@@ -456,8 +457,12 @@ XHookHttpRequest = window[XMLHTTP] = function() {
     }
   };
   facade.setRequestHeader = function(header, value) {
-    var name;
-    name = header != null ? header.toLowerCase() : void 0;
+    var lName, name;
+    lName = header != null ? header.toLowerCase() : void 0;
+    name = request.headerNames[lName] = request.headerNames[lName] || header;
+    if (request.headers[name]) {
+      value = request.headers[name] + ', ' + value;
+    }
     request.headers[name] = value;
   };
   facade.getResponseHeader = function(header) {
