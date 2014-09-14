@@ -297,7 +297,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   #proxy common events from xhr to facade
-  proxyEvents COMMON_EVENTS, xhr, facade 
+  proxyEvents COMMON_EVENTS, xhr, facade
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
