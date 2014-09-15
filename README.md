@@ -63,7 +63,7 @@ Tested in IE8+, Chrome, Firefox, Safari
 * Gitraw CDN 
 
 ``` html
-<script src="//cdn.rawgit.com/jpillora/xdomain/gh-pages/dist/0.6/xdomain.min.js" slave="http://xyz.example.com/proxy.html"></script>
+<script src="//cdn.rawgit.com/jpillora/xhook/52f71cbea1c4576bcf582d2c011ffdf656d13e88/dist/1/xhook.js"></script>
 ```
 
   :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
