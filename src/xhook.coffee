@@ -140,9 +140,12 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
 # we can do this safely because all XHR
 # is hooked, so we can ensure the real FormData
 # object is used on send
-if xhook[FormData] = window[FormData]
+NativeFormData = window[FormData]
+if NativeFormData
+  #expose native formdata as xhook.FormData incase its needed
+  xhook[FormData] = NativeFormData
   window[FormData] = (form) ->
-    @fd = new xhook[FormData](form)
+    @fd = if form then new NativeFormData(form) else new NativeFormData()
     @form = form
     entries = []
     Object.defineProperty @, 'entries', get: ->
