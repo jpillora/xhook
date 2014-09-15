@@ -1,4 +1,4 @@
-// XHook - v1.2.2 - https://github.com/jpillora/xhook
+// XHook - v1.2.3 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2014
 (function(window,undefined) {var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, FormData, OFF, ON, READY_STATE, UPLOAD_EVENTS, XHookHttpRequest, XMLHTTP, convertHeaders, document, fakeEvent, mergeObjects, proxyEvents, slice, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -214,8 +214,7 @@ convertHeaders = xhook.headers = function(h, dest) {
 
 if (xhook[FormData] = window[FormData]) {
   window[FormData] = function(form) {
-    var entries,
-      _this = this;
+    var entries;
     this.fd = new xhook[FormData](form);
     this.form = form;
     entries = [];
@@ -231,12 +230,14 @@ if (xhook[FormData] = window[FormData]) {
         return fentries.concat(entries);
       }
     });
-    this.append = function() {
-      var args;
-      args = slice(arguments);
-      entries.push(args);
-      return _this.fd.append.apply(_this.fd, args);
-    };
+    this.append = (function(_this) {
+      return function() {
+        var args;
+        args = slice(arguments);
+        entries.push(args);
+        return _this.fd.append.apply(_this.fd, args);
+      };
+    })(this);
   };
 }
 

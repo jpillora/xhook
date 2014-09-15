@@ -14,7 +14,7 @@ With XHook, you could easily implement functionality to:
 * Simulate responses
   * Create fake transparent backends for testing purposes
 * Sending Error statistics to Google Analytics
-* Polyfil CORS, by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
+* Create a client-side alternative to CORS by offloading requests to an iframe then splicing the response back in, see [XDomain](http://jpillora.com/xdomain)
 * Devious practical jokes
 * Supports RequiresJS and Browserify
 * Preflight GZip compression, see [XZip](http://github.com/jpillora/xzip) (Incomplete)
@@ -134,6 +134,8 @@ http://www.w3.org/TR/XMLHttpRequest2/
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest`, so you may use any library
 conjunction with XHook, just make sure to load XHook **first**.
+
+* You may use synchronous XHR, though this will cause asynchronous hooks to be **skipped**.
 
 ## Contributing
 

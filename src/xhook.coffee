@@ -392,13 +392,12 @@ XHookHttpRequest = window[XMLHTTP] = ->
       facade[FIRE] 'abort', {}
     return
   facade.setRequestHeader = (header, value) ->
+    #the first header set is used for all future case-alternatives of 'name'
     lName = header?.toLowerCase()
     name = request.headerNames[lName] = request.headerNames[lName] || header
-
     #append header to any previous values
     if request.headers[name]
       value = request.headers[name] + ', ' + value
-
     request.headers[name] = value
     return
   facade.getResponseHeader = (header) ->
