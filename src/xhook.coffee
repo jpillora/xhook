@@ -173,6 +173,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   transiting = false
   request = {}
   request.headers = {}
+  request.headerNames = {}
   response = {}
   response.headers = {}
 
@@ -296,7 +297,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   #proxy common events from xhr to facade
-  proxyEvents COMMON_EVENTS, xhr, facade 
+  proxyEvents COMMON_EVENTS, xhr, facade
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
@@ -391,7 +392,13 @@ XHookHttpRequest = window[XMLHTTP] = ->
       facade[FIRE] 'abort', {}
     return
   facade.setRequestHeader = (header, value) ->
-    name = header?.toLowerCase()
+    lName = header?.toLowerCase()
+    name = request.headerNames[lName] = request.headerNames[lName] || header
+
+    #append header to any previous values
+    if request.headers[name]
+      value = request.headers[name] + ', ' + value
+
     request.headers[name] = value
     return
   facade.getResponseHeader = (header) ->
