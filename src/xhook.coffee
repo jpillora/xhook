@@ -172,13 +172,10 @@ XHookHttpRequest = window[XMLHTTP] = ->
 
   #==========================
   # Extra state
-  hasError = false
-  transiting = false
   request = {}
-  request.headers = {}
-  request.headerNames = {}
-  response = {}
-  response.headers = {}
+  hasError = undefined
+  transiting = undefined
+  response = undefined
 
   #==========================
   # Private API
@@ -309,6 +306,16 @@ XHookHttpRequest = window[XMLHTTP] = ->
   facade.status = 0
 
   facade.open = (method, url, async, user, pass) ->
+    # Initailize empty XHR facade
+    currentState = 0
+    hasError = false
+    transiting = false
+    request.headers = {}
+    request.headerNames = {}
+    request.status = 0
+    response = {}
+    response.headers = {}
+
     request.method = method
     request.url = url
     request.async = async isnt false
