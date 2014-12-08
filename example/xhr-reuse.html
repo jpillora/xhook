@@ -1,0 +1,23 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<h5>example2.txt</h5>
+<pre id="two"></pre>
+
+<script src="../dist/1/xhook.js"></script>
+<script type="text/javascript">
+
+//vanilla calls on the same XHR instance
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'example1.txt');
+xhr.onload = function(e) {
+  document.getElementById('one').innerHTML = xhr.responseText;
+  xhr.open('GET', 'example2.txt');
+  xhr.onload = function(e) {
+    document.getElementById('two').innerHTML = xhr.responseText;
+  }
+  xhr.send();
+}
+xhr.send();
+</script>
