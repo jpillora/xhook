@@ -10,5 +10,8 @@
     "!dist/1/xhook.min.js"
   ],
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "mocha": "~2.0.1",
+    "chai": "~1.10.0"
+  }
 }

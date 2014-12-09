@@ -1,11 +1,22 @@
-var assert = require('assert');
+var expect = chai.expect;
 
-require('../dist/1/xhook');
+describe('xhook', function() {
+  after(function() {
+    // Remove all handlers after each test.
+    xhook.removeEventListener('before');
+    xhook.removeEventListener('after');
+  });
 
-describe('integers', function () {
-  it('should square the numbers', function (done) {
-    assert.equal(2*2, 4);
-    assert.equal(typeof xhook, 'object');
-    done();
+  it('should support xhr reuse', function(done) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../example/example1.txt');
+    xhr.onload = function() {
+      xhr.open('GET', '../example/example2.txt');
+      xhr.onload = function() {
+        done();
+      }
+      xhr.send();
+    }
+    xhr.send();
   });
 });
