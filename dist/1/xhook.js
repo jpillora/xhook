@@ -217,7 +217,8 @@ NativeFormData = window[FormData];
 if (NativeFormData) {
   xhook[FormData] = NativeFormData;
   window[FormData] = function(form) {
-    var entries;
+    var entries,
+      _this = this;
     this.fd = form ? new NativeFormData(form) : new NativeFormData();
     this.form = form;
     entries = [];
@@ -233,14 +234,12 @@ if (NativeFormData) {
         return fentries.concat(entries);
       }
     });
-    this.append = (function(_this) {
-      return function() {
-        var args;
-        args = slice(arguments);
-        entries.push(args);
-        return _this.fd.append.apply(_this.fd, args);
-      };
-    })(this);
+    this.append = function() {
+      var args;
+      args = slice(arguments);
+      entries.push(args);
+      return _this.fd.append.apply(_this.fd, args);
+    };
   };
 }
 
@@ -249,13 +248,10 @@ xhook[XMLHTTP] = window[XMLHTTP];
 XHookHttpRequest = window[XMLHTTP] = function() {
   var currentState, emitFinal, emitReadyState, facade, hasError, hasErrorHandler, readBody, readHead, request, response, setReadyState, transiting, writeBody, writeHead, xhr;
   xhr = new xhook[XMLHTTP]();
-  hasError = false;
-  transiting = false;
   request = {};
-  request.headers = {};
-  request.headerNames = {};
-  response = {};
-  response.headers = {};
+  hasError = void 0;
+  transiting = void 0;
+  response = void 0;
   readHead = function() {
     var key, name, val, _ref;
     response.status = xhr.status;
@@ -377,6 +373,14 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   }
   facade.status = 0;
   facade.open = function(method, url, async, user, pass) {
+    currentState = 0;
+    hasError = false;
+    transiting = false;
+    request.headers = {};
+    request.headerNames = {};
+    request.status = 0;
+    response = {};
+    response.headers = {};
     request.method = method;
     request.url = url;
     request.async = async !== false;
