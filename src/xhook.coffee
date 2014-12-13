@@ -13,6 +13,9 @@ FormData = 'FormData'
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
+msie = parseInt((/msie (\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])
+msie = parseInt((/trident\/.*; rv:(\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])  if isNaN(msie)
+
 #if required, add coffeescripts indexOf method to Array
 Array::indexOf or= (item) ->
   for x, i in this
@@ -167,28 +170,32 @@ if NativeFormData
 #patch XHR
 xhook[XMLHTTP] = window[XMLHTTP]
 XHookHttpRequest = window[XMLHTTP] = ->
-
+  ABORTED = -1
   xhr = new xhook[XMLHTTP]()
 
   #==========================
   # Extra state
   request = {}
+  status = null
   hasError = undefined
   transiting = undefined
   response = undefined
-
+  
   #==========================
   # Private API
 
   #read results from real xhr into response
   readHead = ->
-    response.status = xhr.status
-    response.statusText = xhr.statusText
-    for key, val of convertHeaders xhr.getAllResponseHeaders()
-      unless response.headers[key]
-        name = key.toLowerCase()
-        response.headers[name] = val
-    return
+    # Accessing attributes on an aborted xhr object will
+    # throw an 'c00c023f error' in IE9 and lower, don't touch it.
+    response.status = status or xhr.status
+    response.statusText = xhr.statusText  unless status is ABORTED and msie < 10
+    if status isnt ABORTED
+        for key, val of convertHeaders xhr.getAllResponseHeaders()
+          unless response.headers[key]
+            name = key.toLowerCase()
+            response.headers[name] = val
+        return
 
   readBody = ->
     try response.text = xhr.responseText
@@ -396,6 +403,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   facade.abort = ->
+    status = ABORTED;
     if transiting
       xhr.abort() #this will emit an 'abort' for us
     else
