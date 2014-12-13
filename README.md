@@ -1,6 +1,6 @@
 # XHook
 
-#### Easily intercept and modify XHR request and response
+#### Easily intercept and modify XHR ("AJAX") request and response
 
 <a href="https://twitter.com/intent/tweet?hashtags=xhook%2Cjavascript%2Cxhr&original_referer=http%3A%2F%2Fgithub.com%2F&text=XHook%3A+Easily+intercept+and+modify+XHR+request+and+response&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fjpillora%2Fxhook" target="_blank">
   <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
@@ -21,7 +21,7 @@ With XHook, you could easily implement functionality to:
 
 ## Features
 
-* Intercept and modify XHR **request** and **response**
+* Intercept and modify XMLHttpRequest ("AJAX") **request** and **response**
 * Simulate **responses** transparently
 * Backwards compatible `addEventListener` `removeEventListener`
 * Backwards compatible user controlled progress (download/upload) events
@@ -48,7 +48,7 @@ xhook.after(function(request, response) {
 
 Tested in IE8+, Chrome, Firefox, Safari
 
-### *Run test suite here: http://jpillora.com/xhook/test*
+#### *Run test suite here: http://jpillora.com/xhook/test*
 
 <!-- 
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
@@ -66,13 +66,13 @@ Tested in IE8+, Chrome, Firefox, Safari
 * Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js) 6KB
 * CDN
 
-	* Latest version (via Cloudflare CDN in front of Github Pages)
+	* Latest version (Cloudflare CDN to "`master`" branch)
 
 	``` html
 	<script src="//jpillora.com/xhook/dist/xhook.min.js"></script>
 	```
 
-	* Lock particular version (via Rawgit CDN to particular git tag)
+	* Lock particular version (Rawgit CDN to any [release tag](https://github.com/jpillora/xhook/releases))
 
 	``` html
 	<script src="//cdn.rawgit.com/jpillora/xhook/1.3.0/dist/xhook.min.js"></script>

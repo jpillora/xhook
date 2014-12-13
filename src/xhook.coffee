@@ -13,10 +13,11 @@ FormData = 'FormData'
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
+#parse IE version
 msie = parseInt((/msie (\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])
 msie = parseInt((/trident\/.*; rv:(\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])  if isNaN(msie)
 
-#if required, add coffeescripts indexOf method to Array
+#if required, add 'indexOf' method to Array
 Array::indexOf or= (item) ->
   for x, i in this
     return i if x is item
