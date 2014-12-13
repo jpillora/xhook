@@ -24,9 +24,12 @@ Array::indexOf or= (item) ->
 
 slice = (o,n) -> Array::slice.call o,n
 
+depricatedProp = (p) ->
+  return p in ["returnValue","totalSize","position"]
+
 mergeObjects = (src, dst) ->
   for k,v of src
-    continue if k is "returnValue"
+    continue if depricatedProp k
     try dst[k] = src[k]
   return dst
 
@@ -35,7 +38,7 @@ proxyEvents = (events, src, dst) ->
   p = (event) -> (e) ->
     clone = {}
     for k of e
-      continue if k is "returnValue"
+      continue if depricatedProp k
       val = e[k]
       #replace instances of source emitter with dest emitter
       clone[k] = if val is src then dst else val
@@ -73,6 +76,14 @@ EventEmitter = (nodeStyle) ->
     events[event].splice i, 0, callback
     return
   emitter[OFF] = (event, callback) ->
+    #remove all
+    if event is `undefined`
+      events = {}
+      return
+    #remove all of type event
+    if callback is `undefined`
+      events[event] = []
+    #remove particular handler
     i = listeners(event).indexOf callback
     return if i is -1
     listeners(event).splice i, 1
@@ -198,9 +209,12 @@ XHookHttpRequest = window[XMLHTTP] = ->
         return
 
   readBody = ->
-    try response.text = xhr.responseText
-    try response.xml = xhr.responseXML
-    response.data = xhr.response or response.text
+    if 'responseText' of xhr
+      response.text = xhr.responseText
+    if 'responseXML' of xhr
+      response.xml = xhr.responseXML
+    if 'response' of xhr
+      response.data = xhr.response
     return
 
   #write response into facade xhr
@@ -210,11 +224,12 @@ XHookHttpRequest = window[XMLHTTP] = ->
     return
 
   writeBody = ->
-    if response.hasOwnProperty 'text'
+    if 'text' of response
       facade.responseText = response.text
-    if response.hasOwnProperty 'xml'
+    if 'xml' of response
       facade.responseXML = response.xml
-    facade.response = response.data or null
+    if 'data' of response
+      facade.response = response.data
     return
 
   #ensure ready state 0 through 4 is handled
@@ -436,7 +451,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
 
   return facade
 
-#publicise
+#publicise (amd+commonjs+window)
 if typeof @define is "function" and @define.amd
   define "xhook", [], -> xhook
 else

@@ -48,6 +48,8 @@ xhook.after(function(request, response) {
 
 Tested in IE8+, Chrome, Firefox, Safari
 
+### *Run test suite here: http://jpillora.com/xhook/test*
+
 <!-- 
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
  -->
@@ -58,15 +60,23 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 ## Download
 
-* Development [xhook.js](https://rawgit.com/jpillora/xhook/gh-pages/dist/1/xhook.js) 11KB
-* Production [xhook.min.js](https://rawgit.com/jpillora/xhook/gh-pages/dist/1/xhook.min.js) 5KB (1.2KB Gzip)
-* Gitraw CDN 
-
-``` html
-<script src="//cdn.rawgit.com/jpillora/xhook/52f71cbea1c4576bcf582d2c011ffdf656d13e88/dist/1/xhook.js"></script>
-```
-
   :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
+
+* Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js) 14KB
+* Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js) 6KB
+* CDN
+
+	* Latest version (via Cloudflare CDN in front of Github Pages)
+
+	``` html
+	<script src="//jpillora.com/xhook/dist/xhook.min.js"></script>
+	```
+
+	* Lock particular version (via Rawgit CDN to particular git tag)
+
+	``` html
+	<script src="//cdn.rawgit.com/jpillora/xhook/1.3.0/dist/xhook.min.js"></script>
+	```
 
 ## API
 

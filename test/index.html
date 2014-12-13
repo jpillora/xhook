@@ -2,19 +2,35 @@
 <html>
   <head>
     <title>xhook tests</title>
-    <link rel="stylesheet" href="../bower_components/mocha/mocha.css" />
+    <link rel="stylesheet" href="mocha.css" />
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-38709761-14', 'auto');
+      ga('send', 'pageview');
+    </script>
+
   </head>
 
   <body>
     <div id="mocha"></div>
-    <script src="../bower_components/mocha/mocha.js"></script>
-    <script src="../bower_components/chai/chai.js"></script>
+    <script src="mocha.js"></script>
+    <script src="expect.js"></script>
     <script>mocha.setup('bdd')</script>
-    <script src="../dist/1/xhook.js"></script>
-    <script src="basic-tests.js"></script>
+    <script src="../dist/xhook.js"></script>
+    <script src="tests.js"></script>
     <script>
+      mocha.setup({globals: ['gaplugins', 'gaGlobal']});//allow GA
       mocha.checkLeaks();
-      mocha.run();
+      //log test results to GA
+      mocha.run().on("pass", function(test) {
+        ga('send','event','pass', test.title);
+      }).on("fail", function(test, err) {
+        ga('send','event','fail', test.title, ""+err);
+      });
     </script>
   </body>
 </html>
