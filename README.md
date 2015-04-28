@@ -75,7 +75,7 @@ Tested in IE8+, Chrome, Firefox, Safari
 	* Lock particular version (Rawgit CDN to any [release tag](https://github.com/jpillora/xhook/releases))
 
 	``` html
-	<script src="//cdn.rawgit.com/jpillora/xhook/1.3.0/dist/xhook.min.js"></script>
+	<script src="//cdn.rawgit.com/jpillora/xhook/1.3.1/dist/xhook.min.js"></script>
 	```
 
 ## API
