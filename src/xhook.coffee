@@ -220,12 +220,18 @@ XHookHttpRequest = window[XMLHTTP] = ->
         return
 
   readBody = ->
-    if 'responseText' of xhr
+    #https://xhr.spec.whatwg.org/
+    if !xhr.responseType or xhr.responseType is "text"
       response.text = xhr.responseText
-    if 'responseXML' of xhr
+      response.data = xhr.responseText
+    else if xhr.responseType is "document"
       response.xml = xhr.responseXML
-    if 'response' of xhr
+      response.data = xhr.responseXML
+    else
       response.data = xhr.response
+    #new in some browsers
+    if "responseURL" of xhr
+      response.finalUrl = xhr.responseURL
     return
 
   #write response into facade xhr
@@ -241,6 +247,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
       facade.responseXML = response.xml
     if 'data' of response
       facade.response = response.data
+    if 'finalUrl' of response
+      facade.responseURL = response.finalUrl
     return
 
   #ensure ready state 0 through 4 is handled

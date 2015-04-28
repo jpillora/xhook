@@ -1,4 +1,4 @@
-// XHook - v1.3.1 - https://github.com/jpillora/xhook
+// XHook - v1.3.2 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2015
 (function(window,undefined) {
 var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, FormData, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, xhook, _base,
@@ -303,14 +303,17 @@ XHookHttpRequest = window[XMLHTTP] = function() {
     }
   };
   readBody = function() {
-    if ('responseText' in xhr) {
+    if (!xhr.responseType || xhr.responseType === "text") {
       response.text = xhr.responseText;
-    }
-    if ('responseXML' in xhr) {
+      response.data = xhr.responseText;
+    } else if (xhr.responseType === "document") {
       response.xml = xhr.responseXML;
-    }
-    if ('response' in xhr) {
+      response.data = xhr.responseXML;
+    } else {
       response.data = xhr.response;
+    }
+    if ("responseURL" in xhr) {
+      response.finalUrl = xhr.responseURL;
     }
   };
   writeHead = function() {
@@ -326,6 +329,9 @@ XHookHttpRequest = window[XMLHTTP] = function() {
     }
     if ('data' in response) {
       facade.response = response.data;
+    }
+    if ('finalUrl' in response) {
+      facade.responseURL = response.finalUrl;
     }
   };
   emitReadyState = function(n) {
