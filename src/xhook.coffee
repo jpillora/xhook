@@ -9,7 +9,6 @@ FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
 FormData = 'FormData'
 
-#DOWNLOAD_EVENTS ARE SYNTHESISED
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
@@ -38,16 +37,17 @@ mergeObjects = (src, dst) ->
 proxyEvents = (events, src, dst) ->
   p = (event) -> (e) ->
     clone = {}
+    #copies event, with dst emitter inplace of src
     for k of e
       continue if depricatedProp k
       val = e[k]
-      #replace instances of source emitter with dest emitter
       clone[k] = if val is src then dst else val
-    clone
+    #emits out the dst
     dst[FIRE] event, clone
   #dont proxy manual events
   for event in events
-    src["on#{event}"] = p(event)
+    if dst._has event
+      src["on#{event}"] = p(event)
   return
 
 #create fake event
@@ -100,8 +100,9 @@ EventEmitter = (nodeStyle) ->
     for listener, i in listeners(event).concat(listeners("*"))
       listener.apply `undefined`, args
     return
-
-  #add listeners method and extra aliases
+  emitter._has = (event) ->
+    return !!(events[event] or emitter["on#{event}"])
+  #add extra aliases
   if nodeStyle
     emitter.listeners = (event) ->
       slice listeners event
@@ -129,8 +130,14 @@ xhook[AFTER] = (handler, i) ->
   if handler.length < 2 or handler.length > 3
     throw "invalid hook"
   xhook[ON] AFTER, handler, i
-xhook.enable = -> window[XMLHTTP] = XHookHttpRequest; return
-xhook.disable = -> window[XMLHTTP] = xhook[XMLHTTP]; return
+xhook.enable = ->
+  window[XMLHTTP] = XHookHttpRequest
+  window[FormData] = XHookFormData if NativeFormData
+  return
+xhook.disable = ->
+  window[XMLHTTP] = xhook[XMLHTTP]
+  window[FormData] = NativeFormData
+  return
 
 #helper
 convertHeaders = xhook.headers = (h, dest = {}) ->
@@ -156,31 +163,34 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
 # is hooked, so we can ensure the real FormData
 # object is used on send
 NativeFormData = window[FormData]
+XHookFormData = (form) ->
+  @fd = if form then new NativeFormData(form) else new NativeFormData()
+  @form = form
+  entries = []
+  Object.defineProperty @, 'entries', get: ->
+    #extract form entries
+    fentries = unless form then [] else
+      slice(form.querySelectorAll("input,select")).filter((e) ->
+        return e.type not in ['checkbox','radio'] or e.checked
+      ).map((e) ->
+        [e.name, if e.type is "file" then e.files else e.value]
+      )
+    #combine with js entries
+    return fentries.concat entries
+  @append = =>
+    args = slice arguments
+    entries.push args
+    @fd.append.apply @fd, args
+  return
+
 if NativeFormData
   #expose native formdata as xhook.FormData incase its needed
   xhook[FormData] = NativeFormData
-  window[FormData] = (form) ->
-    @fd = if form then new NativeFormData(form) else new NativeFormData()
-    @form = form
-    entries = []
-    Object.defineProperty @, 'entries', get: ->
-      #extract form entries
-      fentries = unless form then [] else
-        slice(form.querySelectorAll("input,select")).filter((e) ->
-          return e.type not in ['checkbox','radio'] or e.checked
-        ).map((e) ->
-          [e.name, if e.type is "file" then e.files else e.value]
-        )
-      #combine with js entries
-      return fentries.concat entries
-    @append = =>
-      args = slice arguments
-      entries.push args
-      @fd.append.apply @fd, args
-    return
+  window[FormData] = XHookFormData
 
 #patch XHR
-xhook[XMLHTTP] = window[XMLHTTP]
+NativeXMLHttp = window[XMLHTTP]
+xhook[XMLHTTP] = NativeXMLHttp
 XHookHttpRequest = window[XMLHTTP] = ->
   ABORTED = -1
   xhr = new xhook[XMLHTTP]()
@@ -316,11 +326,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
     if currentState < 3
       setReadyState 3
     else
-      facade[FIRE] "readystatechange", {}
+      facade[FIRE] "readystatechange", {} #TODO fake an XHR event
     return
-
-  #proxy common events from xhr to facade
-  proxyEvents COMMON_EVENTS, xhr, facade
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
@@ -356,6 +363,10 @@ XHookHttpRequest = window[XMLHTTP] = ->
 
     request.body = body
     send = ->
+      #proxy all events from real xhr to facade
+      proxyEvents COMMON_EVENTS, xhr, facade
+      proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload if facade.upload
+
       #prepare request all at once
       transiting = true
       #perform open
@@ -370,7 +381,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
       for header, value of request.headers
         xhr.setRequestHeader header, value
       #extract formdata
-      if window[FormData] and request.body instanceof window[FormData]
+      if NativeFormData and request.body instanceof NativeFormData
         request.body = request.body.fd
       #real send!
       xhr.send request.body
@@ -448,7 +459,6 @@ XHookHttpRequest = window[XMLHTTP] = ->
   #create emitter when supported
   if xhr.upload
     facade.upload = request.upload = EventEmitter()
-    proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload
 
   return facade
 
