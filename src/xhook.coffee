@@ -388,8 +388,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
       #insert headers
       for header, value of request.headers
         xhr.setRequestHeader header, value
-      #extract formdata
-      if NativeFormData and request.body instanceof NativeFormData
+      #extract real formdata
+      if request.body instanceof XHookFormData
         request.body = request.body.fd
       #real send!
       xhr.send request.body
