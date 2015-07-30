@@ -471,7 +471,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   return facade
 
 #publicise (amd+commonjs+window)
-if typeof @define is "function" and @define.amd
+if typeof define is "function" and define.amd
   define "xhook", [], -> xhook
 else
   (@exports or @).xhook = xhook
