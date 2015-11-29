@@ -1,0 +1,22 @@
+{
+  "name": "xhook",
+  "version": "1.3.3",
+  "description": "Easily intercept and modify XHR request and response",
+  "browser": "dist/xhook.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpillora/xhook"
+  },
+   "keywords": [
+    "xhr",
+    "ajax",
+    "intercept",
+    "modify",
+    "hook"
+  ],
+  "author": {
+    "name": "Jaime Pillora",
+    "email": "dev@jpillora.com"
+  },
+  "license": "MIT"
+}
