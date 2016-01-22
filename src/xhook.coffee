@@ -202,7 +202,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   hasError = undefined
   transiting = undefined
   response = undefined
-  
+
   #==========================
   # Private API
 
