@@ -343,6 +343,10 @@ XHookHttpRequest = window[XMLHTTP] = ->
     facade.withCredentials = false
   facade.status = 0
 
+  # initialise all possible event handlers
+  for event in COMMON_EVENTS.concat(UPLOAD_EVENTS)
+    facade["on#{event}"] = null
+
   facade.open = (method, url, async, user, pass) ->
     # Initailize empty XHR facade
     currentState = 0
