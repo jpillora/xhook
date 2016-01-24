@@ -96,9 +96,9 @@ EventEmitter = (nodeStyle) ->
       args[0] = mergeObjects args[0], fakeEvent event
     legacylistener = emitter["on#{event}"]
     if legacylistener
-      legacylistener.apply `undefined`, args
+      legacylistener.apply emitter, args
     for listener, i in listeners(event).concat(listeners("*"))
-      listener.apply `undefined`, args
+      listener.apply emitter, args
     return
   emitter._has = (event) ->
     return !!(events[event] or emitter["on#{event}"])
@@ -136,7 +136,7 @@ xhook.enable = ->
   return
 xhook.disable = ->
   window[XMLHTTP] = xhook[XMLHTTP]
-  window[FormData] = NativeFormData
+  window[FormData] = NativeFormData if NativeFormData
   return
 
 #helper

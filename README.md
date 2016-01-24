@@ -29,7 +29,7 @@ With XHook, you could easily implement functionality to:
 ## Future Features
 
 * Add BrowserSwarm or TestlingCI automated cross-browser tests
- 
+
   *Tip: See [CONTRIBUTING.md](CONTRIBUTING.md) for steps on how to contribute* :wink:
 
 ## Example
@@ -39,7 +39,7 @@ Here, we're converting vowels to **z**'s in all requests to 'example.txt':
 ``` javascript
 //modify 'responseText' of 'example2.txt'
 xhook.after(function(request, response) {
-  if(request.url.match(/example\.txt$/)) 
+  if(request.url.match(/example\.txt$/))
     response.text = response.text.replace(/[aeiou]/g,'z');
 });
 ```
@@ -50,7 +50,7 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 #### *Run test suite here: http://jpillora.com/xhook/test*
 
-<!-- 
+<!--
 [![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
  -->
 
@@ -64,15 +64,7 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 * Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js) 14KB
 * Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js) 6KB
-* CDN
-
-	* Latest version (Cloudflare CDN to "`master`" branch)
-
-	``` html
-	<script src="//jpillora.com/xhook/dist/xhook.min.js"></script>
-	```
-
-	* Lock particular version (Rawgit CDN to any [release tag](https://github.com/jpillora/xhook/releases))
+* CDN (See available versions [here](https://github.com/jpillora/xhook/releases))
 
 	``` html
 	<script src="//cdn.rawgit.com/jpillora/xhook/1.3.1/dist/xhook.min.js"></script>
@@ -128,7 +120,7 @@ Disables XHook (swaps the native `XMLHttpRequest` class back in)
 <img src="https://docs.google.com/drawings/d/1PTxHDqdW9iNqagDwtaO0ggXZkJp7ILiRDVWAMHInFGQ/pub?w=498&amp;h=235">
 
 *The dark red `before` hook is returning a `response` object, which will trigger the `after`
-hooks, then trigger the appropriate events, so it* **appears** *as if `response` came from 
+hooks, then trigger the appropriate events, so it* **appears** *as if `response` came from
 the server.*
 
 ### Reference
@@ -141,7 +133,7 @@ http://www.w3.org/TR/XMLHttpRequest2/
 
 ### Issues
 
-* XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery 
+* XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest`, so you may use any library
 conjunction with XHook, just make sure to load XHook **first**.
 
@@ -178,4 +170,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
