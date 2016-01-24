@@ -202,7 +202,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   hasError = undefined
   transiting = undefined
   response = undefined
-  
+
   #==========================
   # Private API
 
@@ -342,6 +342,10 @@ XHookHttpRequest = window[XMLHTTP] = ->
   if 'withCredentials' of xhr or xhook.addWithCredentials
     facade.withCredentials = false
   facade.status = 0
+
+  # initialise all possible event handlers
+  for event in COMMON_EVENTS.concat(UPLOAD_EVENTS)
+    facade["on#{event}"] = null
 
   facade.open = (method, url, async, user, pass) ->
     # Initailize empty XHR facade
