@@ -391,7 +391,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
 
       #insert headers
       for header, value of request.headers
-        xhr.setRequestHeader header, value
+        if header
+          xhr.setRequestHeader header, value
       #extract real formdata
       if request.body instanceof XHookFormData
         request.body = request.body.fd
