@@ -59,4 +59,11 @@ describe('xhook', function() {
     };
     xhr.send();
   });
+
+  it('sync XHR should not fail', function(done) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../example/example1.txt', false);
+    xhr.send();
+    done();
+  });
 });
