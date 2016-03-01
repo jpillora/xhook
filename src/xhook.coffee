@@ -370,6 +370,7 @@ XHookHttpRequest = window[XMLHTTP] = ->
   facade.send = (body) ->
     #read xhr settings before hooking
     for k in ['type', 'timeout', 'withCredentials']
+      continue if (k is 'withCredentials' and not request.async)
       modk = if k is "type" then "responseType" else k
       request[k] = facade[modk] if modk of facade
 

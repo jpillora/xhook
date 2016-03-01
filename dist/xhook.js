@@ -446,6 +446,9 @@ XHookHttpRequest = window[XMLHTTP] = function() {
     _ref1 = ['type', 'timeout', 'withCredentials'];
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       k = _ref1[_j];
+      if (k === 'withCredentials' && !request.async) {
+        continue;
+      }
       modk = k === "type" ? "responseType" : k;
       if (modk in facade) {
         request[k] = facade[modk];
