@@ -59,4 +59,12 @@ describe('xhook', function() {
     };
     xhr.send();
   });
+
+  it('should not fail on aborted request in IE9', function(done) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../example/example1.txt');
+    xhr.send();
+    xhr.abort();
+    done();
+  });
 });
