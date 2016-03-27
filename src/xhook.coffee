@@ -220,6 +220,8 @@ XHookHttpRequest = window[XMLHTTP] = ->
         return
 
   readBody = ->
+    if status is ABORTED and msie < 10
+        return
     #https://xhr.spec.whatwg.org/
     if !xhr.responseType or xhr.responseType is "text"
       response.text = xhr.responseText

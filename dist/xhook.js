@@ -305,6 +305,9 @@ XHookHttpRequest = window[XMLHTTP] = function() {
     }
   };
   readBody = function() {
+    if (status === ABORTED && msie < 10) {
+      return;
+    }
     if (!xhr.responseType || xhr.responseType === "text") {
       response.text = xhr.responseText;
       response.data = xhr.responseText;
