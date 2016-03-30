@@ -1,7 +1,7 @@
 // XHook - v1.3.5 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2016
 (function(window,undefined) {
-var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, FormData, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, xhook, _base,
+var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 document = window.document;
@@ -19,6 +19,8 @@ OFF = 'removeEventListener';
 FIRE = 'dispatchEvent';
 
 XMLHTTP = 'XMLHttpRequest';
+
+FETCH = 'fetch';
 
 FormData = 'FormData';
 
@@ -198,6 +200,9 @@ xhook[AFTER] = function(handler, i) {
 
 xhook.enable = function() {
   window[XMLHTTP] = XHookHttpRequest;
+  if (typeof window[FETCH] !== "function") {
+    window[FETCH] = XHookFetchRequest;
+  }
   if (NativeFormData) {
     window[FormData] = XHookFormData;
   }
@@ -205,6 +210,7 @@ xhook.enable = function() {
 
 xhook.disable = function() {
   window[XMLHTTP] = xhook[XMLHTTP];
+  window[FETCH] = xhook[FETCH];
   if (NativeFormData) {
     window[FormData] = NativeFormData;
   }
@@ -551,6 +557,74 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   }
   return facade;
 };
+
+if (typeof window[FETCH] === "function") {
+  NativeFetch = window[FETCH];
+  xhook[FETCH] = NativeFetch;
+  XHookFetchRequest = window[FETCH] = function(url, options) {
+    var afterHooks, beforeHooks;
+    if (options == null) {
+      options = {
+        headers: {}
+      };
+    }
+    options.url = url;
+    beforeHooks = xhook.listeners(BEFORE);
+    afterHooks = xhook.listeners(AFTER);
+    return new Promise(function(resolve, reject) {
+      var done, getRequest, processAfter, processBefore, send;
+      getRequest = function() {
+        if (options.headers) {
+          options.headers = new Headers(options.headers);
+        }
+        return new Request(options.url, options);
+      };
+      processAfter = function(response) {
+        var hook;
+        if (!afterHooks.length) {
+          return resolve(response);
+        }
+        hook = afterHooks.shift();
+        if (hook.length === 2) {
+          hook(getRequest(), response);
+          return processAfter(response);
+        } else if (hook.length === 3) {
+          return hook(getRequest(), response, processAfter);
+        } else {
+          return processAfter(response);
+        }
+      };
+      done = function(userResponse) {
+        if (userResponse !== void 0) {
+          resolve(new Response(userResponse.body || userResponse.text, userResponse));
+          return;
+        }
+        processBefore();
+      };
+      processBefore = function() {
+        var hook;
+        if (!beforeHooks.length) {
+          send();
+          return;
+        }
+        hook = beforeHooks.shift();
+        if (hook.length === 1) {
+          return done(hook(options));
+        } else if (hook.length === 2) {
+          return hook(getRequest(), done);
+        }
+      };
+      send = function() {
+        return NativeFetch(getRequest()).then(function(response) {
+          return processAfter(response);
+        })["catch"](function(err) {
+          return reject(err);
+        });
+      };
+      processBefore();
+    });
+  };
+}
 
 if (typeof define === "function" && define.amd) {
   define("xhook", [], function() {

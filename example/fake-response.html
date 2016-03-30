@@ -2,6 +2,9 @@
 <h5>example3.txt (which does not actually exist - verify in devtools)</h5>
 <pre id="res"></pre>
 
+<h5>example3.txt (which does not actually exist - verify in devtools) - fetch</h5>
+<pre id="fetch_res"></pre>
+
 <script src="../dist/xhook.js"></script>
 <script type="text/javascript">
 
@@ -26,4 +29,11 @@ xhr.addEventListener('readystatechange', function(e) {
   document.getElementById('res').innerHTML = xhr.responseText;
 });
 xhr.send();
+
+fetch('example1.txt')
+  .then(function(response) {
+    return response.text();
+  }).then(function(text) {
+    document.getElementById('fetch_res').innerHTML = text;
+  });
 </script>
