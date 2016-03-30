@@ -562,13 +562,14 @@ if (typeof window[FETCH] === "function") {
   NativeFetch = window[FETCH];
   xhook[FETCH] = NativeFetch;
   XHookFetchRequest = window[FETCH] = function(url, options) {
-    var afterHooks, beforeHooks;
+    var afterHooks, beforeHooks, request;
     if (options == null) {
       options = {
         headers: {}
       };
     }
     options.url = url;
+    request = null;
     beforeHooks = xhook.listeners(BEFORE);
     afterHooks = xhook.listeners(AFTER);
     return new Promise(function(resolve, reject) {
@@ -577,7 +578,10 @@ if (typeof window[FETCH] === "function") {
         if (options.headers) {
           options.headers = new Headers(options.headers);
         }
-        return new Request(options.url, options);
+        if (!request) {
+          request = new Request(options.url, options);
+        }
+        return mergeObjects(options, request);
       };
       processAfter = function(response) {
         var hook;

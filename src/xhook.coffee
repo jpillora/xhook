@@ -494,6 +494,7 @@ if typeof window[FETCH] is "function"
   xhook[FETCH] = NativeFetch
   XHookFetchRequest = window[FETCH] = (url, options = { headers: {} }) ->
     options.url = url
+    request = null
 
     beforeHooks = xhook.listeners BEFORE
     afterHooks = xhook.listeners AFTER
@@ -504,7 +505,10 @@ if typeof window[FETCH] is "function"
         if options.headers
           options.headers = new Headers(options.headers)
 
-        return new Request options.url, options
+        if (!request)
+          request = new Request options.url, options
+
+        return mergeObjects(options, request)
 
       processAfter = (response) ->
         unless afterHooks.length
