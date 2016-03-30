@@ -7,6 +7,7 @@ ON = 'addEventListener'
 OFF = 'removeEventListener'
 FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
+FETCH = 'fetch'
 FormData = 'FormData'
 
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
@@ -132,10 +133,12 @@ xhook[AFTER] = (handler, i) ->
   xhook[ON] AFTER, handler, i
 xhook.enable = ->
   window[XMLHTTP] = XHookHttpRequest
+  window[FETCH] = XHookFetchRequest unless typeof window[FETCH] is "function"
   window[FormData] = XHookFormData if NativeFormData
   return
 xhook.disable = ->
   window[XMLHTTP] = xhook[XMLHTTP]
+  window[FETCH] = xhook[FETCH]
   window[FormData] = NativeFormData if NativeFormData
   return
 
@@ -474,6 +477,70 @@ XHookHttpRequest = window[XMLHTTP] = ->
     facade.upload = request.upload = EventEmitter()
 
   return facade
+
+#patch Fetch
+if typeof window[FETCH] is "function"
+  NativeFetch = window[FETCH]
+  xhook[FETCH] = NativeFetch
+  XHookFetchRequest = window[FETCH] = (url, options = { headers: {} }) ->
+    options.url = url
+
+    beforeHooks = xhook.listeners BEFORE
+    afterHooks = xhook.listeners AFTER
+
+    return new Promise((resolve, reject) ->
+
+      getRequest = ->
+        if options.headers
+          options.headers = new Headers(options.headers)
+
+        return new Request options.url, options
+
+      processAfter = (response) ->
+        unless afterHooks.length
+          return resolve(response)
+
+        hook = afterHooks.shift()
+
+        if hook.length is 2
+          hook getRequest(), response
+          processAfter(response)
+        else if hook.length is 3
+          hook getRequest(), response, processAfter
+        else
+          processAfter(response)
+
+      done = (userResponse) ->
+        if userResponse != undefined
+          resolve(new Response(userResponse.body or userResponse.text, userResponse))
+          return
+
+        #continue processing until no hooks left
+        processBefore()
+        return
+
+      processBefore = ->
+        unless beforeHooks.length
+          send()
+          return
+
+        hook = beforeHooks.shift()
+
+        if hook.length is 1
+          done hook(options)
+        else if hook.length is 2
+          hook getRequest(), done
+
+      send = ->
+        NativeFetch(getRequest())
+          .then((response) -> processAfter(response))
+          .catch((err) -> reject(err))
+
+
+      processBefore()
+      return
+    )
+
 
 #publicise (amd+commonjs+window)
 if typeof define is "function" and define.amd

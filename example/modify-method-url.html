@@ -1,6 +1,9 @@
 
 <h5>modified request</h5>
-<pre></pre>
+<pre id="one"></pre>
+
+<h5>modified request - fetch</h5>
+<pre id="fetch_one"></pre>
 
 <script src="../dist/xhook.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
@@ -14,6 +17,14 @@ xhook.before(function(request) {
 
 //jquery call
 $.post('example1.txt').done(function(str) {
-  $('pre').text(str);
+  $('#one').text(str);
 });
+
+fetch('example1.txt', { method: 'POST' })
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(str) {
+      $('#fetch_one').text(str);
+    });
 </script>
