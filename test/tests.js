@@ -109,6 +109,17 @@ describe('xhook', function() {
         });
     });
 
+    it('should call the afterHook when a request fails', function(done) {
+      xhook.before(function(response) {
+        expect(response.url).to.equal('http://127.0.0.1/api/example1.txt');
+        done();
+      });
+
+
+      fetch('http://127.0.0.1/api/example1.txt')
+        .then(function() {});
+    });
+
   });
 
 

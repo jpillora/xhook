@@ -622,6 +622,7 @@ if (typeof window[FETCH] === "function") {
         return NativeFetch(getRequest()).then(function(response) {
           return processAfter(response);
         })["catch"](function(err) {
+          processAfter(err);
           return reject(err);
         });
       };

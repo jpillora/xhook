@@ -538,8 +538,10 @@ if typeof window[FETCH] is "function"
       send = ->
         NativeFetch(getRequest())
           .then((response) -> processAfter(response))
-          .catch((err) -> reject(err))
-
+          .catch((err) ->
+            processAfter(err)
+            reject(err)
+        )
 
       processBefore()
       return
