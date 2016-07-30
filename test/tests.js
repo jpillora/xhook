@@ -120,6 +120,33 @@ describe('xhook', function() {
         .then(function() {});
     });
 
+    it('should call both before and after hooks', function(done) {
+      var before = false;
+      var after = false;
+
+      xhook.before(function(req, callback) {
+        before = true;
+        callback({
+          text: 'the third text file'
+        });
+      });
+
+      xhook.after(function(req, resp) {
+        after = true;
+      });
+
+      fetch('../example/example1.txt')
+        .then(function(response) {
+          return response.text()
+        })
+        .then(function(text) {
+          expect(text).to.contain('the third text file');
+          expect(before).to.equal(true);
+          expect(after).to.equal(true);
+          done();
+        });
+    });
+
   });
 
 
