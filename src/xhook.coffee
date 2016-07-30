@@ -516,7 +516,9 @@ if typeof window[FETCH] is "function"
 
       done = (userResponse) ->
         if userResponse != undefined
-          resolve(new Response(userResponse.body or userResponse.text, userResponse))
+          response = new Response(userResponse.body or userResponse.text, userResponse)
+          resolve(response)
+          processAfter(response)
           return
 
         #continue processing until no hooks left

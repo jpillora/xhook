@@ -599,8 +599,11 @@ if (typeof window[FETCH] === "function") {
         }
       };
       done = function(userResponse) {
+        var response;
         if (userResponse !== void 0) {
-          resolve(new Response(userResponse.body || userResponse.text, userResponse));
+          response = new Response(userResponse.body || userResponse.text, userResponse);
+          resolve(response);
+          processAfter(response);
           return;
         }
         processBefore();
