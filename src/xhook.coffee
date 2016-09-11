@@ -548,7 +548,7 @@ if typeof window[FETCH] is "function"
           hook getRequest(), done
 
       send = ->
-        NativeFetch(getRequest())
+        NativeFetch(getRequest().clone())
           .then((response) -> processAfter(response))
           .catch((err) ->
             processAfter(err)

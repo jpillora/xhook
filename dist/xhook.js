@@ -622,7 +622,7 @@ if (typeof window[FETCH] === "function") {
         }
       };
       send = function() {
-        return NativeFetch(getRequest()).then(function(response) {
+        return NativeFetch(getRequest().clone()).then(function(response) {
           return processAfter(response);
         })["catch"](function(err) {
           processAfter(err);
