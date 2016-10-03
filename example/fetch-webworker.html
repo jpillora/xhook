@@ -1,0 +1,15 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<h5>example2.txt</h5>
+<pre id="two"></pre>
+
+<script src="../dist/xhook.js"></script>
+<script type="text/javascript">
+var worker = new Worker('worker_fetch.js');
+
+worker.onmessage = function(message) {
+   document.getElementById(message.data.id).innerHTML = message.data.response;
+}
+</script>

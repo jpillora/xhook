@@ -1,10 +1,17 @@
 // XHook - v1.3.5 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2016
-(function(window,undefined) {
-var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, xhook, _base,
+var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-document = window.document;
+WINDOW = null;
+
+if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+  WINDOW = self;
+} else {
+  WINDOW = window;
+}
+
+document = WINDOW.document;
 
 BEFORE = 'before';
 
@@ -93,7 +100,7 @@ proxyEvents = function(events, src, dst) {
 
 fakeEvent = function(type) {
   var msieEventObject;
-  if (document.createEventObject != null) {
+  if (document && (document.createEventObject != null)) {
     msieEventObject = document.createEventObject();
     msieEventObject.type = type;
     return msieEventObject;
@@ -199,20 +206,20 @@ xhook[AFTER] = function(handler, i) {
 };
 
 xhook.enable = function() {
-  window[XMLHTTP] = XHookHttpRequest;
-  if (typeof window[FETCH] !== "function") {
-    window[FETCH] = XHookFetchRequest;
+  WINDOW[XMLHTTP] = XHookHttpRequest;
+  if (typeof WINDOW[FETCH] !== "function") {
+    WINDOW[FETCH] = XHookFetchRequest;
   }
   if (NativeFormData) {
-    window[FormData] = XHookFormData;
+    WINDOW[FormData] = XHookFormData;
   }
 };
 
 xhook.disable = function() {
-  window[XMLHTTP] = xhook[XMLHTTP];
-  window[FETCH] = xhook[FETCH];
+  WINDOW[XMLHTTP] = xhook[XMLHTTP];
+  WINDOW[FETCH] = xhook[FETCH];
   if (NativeFormData) {
-    window[FormData] = NativeFormData;
+    WINDOW[FormData] = NativeFormData;
   }
 };
 
@@ -246,7 +253,7 @@ convertHeaders = xhook.headers = function(h, dest) {
   }
 };
 
-NativeFormData = window[FormData];
+NativeFormData = WINDOW[FormData];
 
 XHookFormData = function(form) {
   var entries;
@@ -277,14 +284,14 @@ XHookFormData = function(form) {
 
 if (NativeFormData) {
   xhook[FormData] = NativeFormData;
-  window[FormData] = XHookFormData;
+  WINDOW[FormData] = XHookFormData;
 }
 
-NativeXMLHttp = window[XMLHTTP];
+NativeXMLHttp = WINDOW[XMLHTTP];
 
 xhook[XMLHTTP] = NativeXMLHttp;
 
-XHookHttpRequest = window[XMLHTTP] = function() {
+XHookHttpRequest = WINDOW[XMLHTTP] = function() {
   var ABORTED, currentState, emitFinal, emitReadyState, event, facade, hasError, hasErrorHandler, readBody, readHead, request, response, setReadyState, status, transiting, writeBody, writeHead, xhr, _i, _len, _ref;
   ABORTED = -1;
   xhr = new xhook[XMLHTTP]();
@@ -558,10 +565,10 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   return facade;
 };
 
-if (typeof window[FETCH] === "function") {
-  NativeFetch = window[FETCH];
+if (typeof WINDOW[FETCH] === "function") {
+  NativeFetch = WINDOW[FETCH];
   xhook[FETCH] = NativeFetch;
-  XHookFetchRequest = window[FETCH] = function(url, options) {
+  XHookFetchRequest = WINDOW[FETCH] = function(url, options) {
     var afterHooks, beforeHooks, request;
     if (options == null) {
       options = {
@@ -641,5 +648,3 @@ if (typeof define === "function" && define.amd) {
 } else {
   (this.exports || this).xhook = xhook;
 }
-
-}.call(this,window));
