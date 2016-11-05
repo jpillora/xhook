@@ -20,8 +20,9 @@ UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
 #parse IE version
-msie = parseInt((/msie (\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])
-msie = parseInt((/trident\/.*; rv:(\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])  if isNaN(msie)
+useragent = if navigator then navigator.userAgent else ''
+msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) or [])[1])
+msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) or [])[1])  if isNaN(msie)
 
 #if required, add 'indexOf' method to Array
 Array::indexOf or= (item) ->
