@@ -20,7 +20,7 @@ UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
 #parse IE version
-useragent = if navigator then navigator.userAgent else ''
+useragent = if typeof navigator == 'object' then navigator.userAgent else ''
 msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) or [])[1])
 msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) or [])[1])  if isNaN(msie)
 
