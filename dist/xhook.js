@@ -35,7 +35,7 @@ UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
 
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
-useragent = typeof navigator === 'object' ? navigator.userAgent : '';
+useragent = navigator['useragent'] ? navigator.userAgent : '';
 
 msie = parseInt((/msie (\d+)/.exec(useragent.toLowerCase()) || [])[1]);
 
