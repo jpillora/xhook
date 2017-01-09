@@ -494,6 +494,11 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   if xhr.upload
     facade.upload = request.upload = EventEmitter()
 
+  facade.UNSENT = 0
+  facade.OPENED = 1
+  facade.HEADERS_RECEIVED = 2
+  facade.LOADING = 3
+  facade.DONE = 4
   return facade
 
 #patch Fetch
