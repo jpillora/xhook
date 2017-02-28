@@ -141,7 +141,7 @@ xhook[AFTER] = (handler, i) ->
   xhook[ON] AFTER, handler, i
 xhook.enable = ->
   WINDOW[XMLHTTP] = XHookHttpRequest
-  WINDOW[FETCH] = XHookFetchRequest unless typeof WINDOW[FETCH] is "function"
+  WINDOW[FETCH] = XHookFetchRequest if typeof XHookFetchRequest is "function"
   WINDOW[FormData] = XHookFormData if NativeFormData
   return
 xhook.disable = ->
