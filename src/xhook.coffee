@@ -23,12 +23,15 @@ COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 #parse IE version
 useragent = if navigator['useragent'] then navigator.userAgent else ''
 msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1])
-msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) || [])[1])  if isNaN(msie)
+
+if (isNaN(msie))
+  msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) || [])[1])
 
 #if required, add 'indexOf' method to Array
 Array.prototype.indexOf = Array.prototype.indexOf || (item) ->
   for x, i in this
-    return i if x == item
+    if (x == item)
+      return i
   return -1
 
 slice = (o,n) -> Array.prototype.slice.call(o,n)
@@ -38,7 +41,8 @@ depricatedProp = (p) ->
 
 mergeObjects = (src, dst) ->
   for k,v of src
-    continue if depricatedProp(k)
+    if (depricatedProp(k))
+      continue
     try dst[k] = src[k]
   return dst
 
@@ -48,7 +52,8 @@ proxyEvents = (events, src, dst) ->
     clone = {}
     #copies event, with dst emitter inplace of src
     for k of e
-      continue if depricatedProp(k)
+      if (depricatedProp(k))
+        continue
       val = e[k]
       clone[k] = if val == src then dst else val
     #emits out the dst
@@ -81,7 +86,8 @@ EventEmitter = (nodeStyle) ->
   emitter = {}
   emitter[ON] = (event, callback, i) ->
     events[event] = listeners(event)
-    return if events[event].indexOf(callback) >= 0
+    if (events[event].indexOf(callback) >= 0)
+      return
     i = if i == `undefined` then events[event].length else i
     events[event].splice(i, 0, callback)
     return
@@ -95,7 +101,8 @@ EventEmitter = (nodeStyle) ->
       events[event] = []
     #remove particular handler
     i = listeners(event).indexOf(callback)
-    return if i == -1
+    if (i == -1)
+      return
     listeners(event).splice(i, 1)
     return
   emitter[FIRE] = ->
@@ -141,13 +148,16 @@ xhook[AFTER] = (handler, i) ->
   xhook[ON](AFTER, handler, i)
 xhook.enable = ->
   WINDOW[XMLHTTP] = XHookHttpRequest
-  WINDOW[FETCH] = XHookFetchRequest if typeof XHookFetchRequest == "function"
-  WINDOW[FormData] = XHookFormData if NativeFormData
+  if (typeof XHookFetchRequest == "function")
+    WINDOW[FETCH] = XHookFetchRequest
+  if (NativeFormData)
+    WINDOW[FormData] = XHookFormData
   return
 xhook.disable = ->
   WINDOW[XMLHTTP] = xhook[XMLHTTP]
   WINDOW[FETCH] = xhook[FETCH]
-  WINDOW[FormData] = NativeFormData if NativeFormData
+  if (NativeFormData)
+    WINDOW[FormData] = NativeFormData
   return
 
 #helper
@@ -222,10 +232,11 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     # Accessing attributes on an aborted xhr object will
     # throw an 'c00c023f error' in IE9 and lower, don't touch it.
     response.status = status || xhr.status
-    response.statusText = xhr.statusText  if !(status == ABORTED && msie < 10)
+    if (!(status == ABORTED && msie < 10))
+      response.statusText = xhr.statusText
     if (status != ABORTED)
         for key, val of convertHeaders(xhr.getAllResponseHeaders())
-          if !response.headers[key]
+          if (!response.headers[key])
             name = key.toLowerCase()
             response.headers[name] = val
         return
@@ -391,7 +402,8 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     #read xhr settings before hooking
     for k in ['type', 'timeout', 'withCredentials']
       modk = if k == "type" then "responseType" else k
-      request[k] = facade[modk] if modk of facade
+      if (modk of facade)
+        request[k] = facade[modk]
 
     request.body = body
     send = ->
@@ -407,7 +419,8 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       #write xhr settings
       for k in ['type', 'timeout', 'withCredentials']
         modk = if k == "type" then "responseType" else k
-        xhr[modk] = request[k] if k of request
+        if (k of request)
+          xhr[modk] = request[k]
 
       #insert headers
       for header, value of request.headers
