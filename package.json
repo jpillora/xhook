@@ -1,8 +1,9 @@
 {
   "name": "xhook",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": "Easily intercept and modify XHR request and response",
   "browser": "dist/xhook.js",
+  "main": "dist/xhook.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/jpillora/xhook"
