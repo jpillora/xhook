@@ -147,6 +147,7 @@ Contributors:
 
 * Jaime Pillora <dev@jpillora.com>
 * Daniel Gasienica <daniel@gasienica.ch>
+* Maayan Glikser <maayan@glikm.com>
 
 #### MIT License
 

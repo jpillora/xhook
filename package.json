@@ -18,5 +18,15 @@
     "name": "Jaime Pillora",
     "email": "dev@jpillora.com"
   },
+  "contributors": [
+    {
+      "name": "Maayan Glikser",
+      "email": "maayan@glikm.com"
+    },
+    {
+      "name": "Daniel Gasienica",
+      "email": "daniel@gasienica.ch"
+    }
+  ],
   "license": "MIT"
 }
