@@ -1,5 +1,5 @@
 WINDOW = null;
-if typeof WorkerGlobalScope != 'undefined' && self instanceof WorkerGlobalScope
+if (typeof WorkerGlobalScope != 'undefined' && self instanceof WorkerGlobalScope)
   WINDOW = self
 else
   WINDOW = window
@@ -61,7 +61,7 @@ proxyEvents = (events, src, dst) ->
 
 #create fake event
 fakeEvent = (type) ->
-  if document && document.createEventObject?
+  if (document && document.createEventObject?)
     msieEventObject = document.createEventObject()
     msieEventObject.type = type
     msieEventObject
@@ -87,11 +87,11 @@ EventEmitter = (nodeStyle) ->
     return
   emitter[OFF] = (event, callback) ->
     #remove all
-    if event == `undefined`
+    if (event == `undefined`)
       events = {}
       return
     #remove all of type event
-    if callback == `undefined`
+    if (callback == `undefined`)
       events[event] = []
     #remove particular handler
     i = listeners(event).indexOf(callback)
@@ -101,10 +101,10 @@ EventEmitter = (nodeStyle) ->
   emitter[FIRE] = ->
     args = slice(arguments)
     event = args.shift()
-    if !nodeStyle
+    if (!nodeStyle)
       args[0] = mergeObjects(args[0], fakeEvent(event))
     legacylistener = emitter["on#{event}"]
-    if legacylistener
+    if (legacylistener)
       legacylistener.apply(emitter, args)
     for listener, i in listeners(event).concat(listeners("*"))
       listener.apply(emitter, args)
@@ -112,7 +112,7 @@ EventEmitter = (nodeStyle) ->
   emitter._has = (event) ->
     return !!(events[event] || emitter["on#{event}"])
   #add extra aliases
-  if nodeStyle
+  if (nodeStyle)
     emitter.listeners = (event) ->
       slice(listeners(event))
     emitter.on = emitter[ON]
@@ -132,11 +132,11 @@ EventEmitter = (nodeStyle) ->
 xhook = EventEmitter(true)
 xhook.EventEmitter = EventEmitter
 xhook[BEFORE] = (handler, i) ->
-  if handler.length < 1 || handler.length > 2
+  if (handler.length < 1 || handler.length > 2)
     throw "invalid hook"
   xhook[ON](BEFORE, handler, i)
 xhook[AFTER] = (handler, i) ->
-  if handler.length < 2 || handler.length > 3
+  if (handler.length < 2 || handler.length > 3)
     throw "invalid hook"
   xhook[ON](AFTER, handler, i)
 xhook.enable = ->
@@ -152,7 +152,7 @@ xhook.disable = ->
 
 #helper
 convertHeaders = xhook.headers = (h, dest = {}) ->
-  switch typeof h
+  switch (typeof h)
     when "object"
       headers = []
       for k,v of h
@@ -162,7 +162,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
     when "string"
       headers = h.split('\n')
       for header in headers
-        if /([^:]+):\s*(.+)/.test(header)
+        if (/([^:]+):\s*(.+)/.test(header))
           name = RegExp.$1?.toLowerCase()
           value = RegExp.$2
           dest[name] ?= value
@@ -194,7 +194,7 @@ XHookFormData = (form) ->
     this.fd.append.apply(this.fd, args)
   return
 
-if NativeFormData
+if (NativeFormData)
   #expose native formdata as xhook.FormData incase its needed
   xhook[FormData] = NativeFormData
   WINDOW[FormData] = XHookFormData
@@ -223,7 +223,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     # throw an 'c00c023f error' in IE9 and lower, don't touch it.
     response.status = status || xhr.status
     response.statusText = xhr.statusText  if !(status == ABORTED && msie < 10)
-    if status != ABORTED
+    if (status != ABORTED)
         for key, val of convertHeaders(xhr.getAllResponseHeaders())
           if !response.headers[key]
             name = key.toLowerCase()
@@ -232,16 +232,16 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
   readBody = ->
     #https://xhr.spec.whatwg.org/
-    if !xhr.responseType || xhr.responseType == "text"
+    if (!xhr.responseType || xhr.responseType == "text")
       response.text = xhr.responseText
       response.data = xhr.responseText
-    else if xhr.responseType == "document"
+    else if (xhr.responseType == "document")
       response.xml = xhr.responseXML
       response.data = xhr.responseXML
     else
       response.data = xhr.response
     #new in some browsers
-    if "responseURL" of xhr
+    if ("responseURL" of xhr)
       response.finalUrl = xhr.responseURL
     return
 
@@ -252,40 +252,40 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     return
 
   writeBody = ->
-    if 'text' of response
+    if ('text' of response)
       facade.responseText = response.text
-    if 'xml' of response
+    if ('xml' of response)
       facade.responseXML = response.xml
-    if 'data' of response
+    if ('data' of response)
       facade.response = response.data
-    if 'finalUrl' of response
+    if ('finalUrl' of response)
       facade.responseURL = response.finalUrl
     return
 
   #ensure ready state 0 through 4 is handled
   emitReadyState = (n) ->
-    while n > currentState && currentState < 4
+    while (n > currentState && currentState < 4)
       facade[READY_STATE] = ++currentState
       # make fake events for libraries that actually check the type on
       # the event object
-      if currentState == 1
+      if (currentState == 1)
         facade[FIRE]("loadstart", {})
-      if currentState == 2
+      if (currentState == 2)
         writeHead()
-      if currentState == 4
+      if (currentState == 4)
         writeHead()
         writeBody()
       facade[FIRE]("readystatechange", {})
       #delay final events incase of error
-      if currentState == 4
+      if (currentState == 4)
         setTimeout(emitFinal, 0)
     return
 
   emitFinal = ->
-    if !hasError
+    if (!hasError)
       facade[FIRE]("load", {})
     facade[FIRE]("loadend", {})
-    if hasError
+    if (hasError)
       facade[READY_STATE] = 0
     return
 
@@ -293,19 +293,19 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   currentState = 0
   setReadyState = (n) ->
     #emit events until readyState reaches 4
-    if n != 4
+    if (n != 4)
       emitReadyState(n)
       return
     #before emitting 4, run all 'after' hooks in sequence
     hooks = xhook.listeners(AFTER)
     process = ->
-      if !hooks.length
+      if (!hooks.length)
         return emitReadyState(4)
       hook = hooks.shift()
-      if hook.length == 2
+      if (hook.length == 2)
         hook(request, response)
         process()
-      else if hook.length == 3 && request.async
+      else if (hook.length == 3 && request.async)
         hook(request, response, process)
       else
         process()
@@ -330,10 +330,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   xhr.onreadystatechange = (event) ->
     #pull status and headers
     try
-      if xhr[READY_STATE] == 2
+      if (xhr[READY_STATE] == 2)
         readHead()
     #pull response data
-    if xhr[READY_STATE] == 4
+    if (xhr[READY_STATE] == 4)
       transiting = false
       readHead()
       readBody()
@@ -351,7 +351,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   # progress means we're current downloading...
   facade[ON]('progress', ->
     #progress events are followed by readystatechange for some reason...
-    if currentState < 3
+    if (currentState < 3)
       setReadyState(3)
     else
       facade[FIRE]("readystatechange", {}) #TODO fake an XHR event
@@ -359,7 +359,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
-  if 'withCredentials' of xhr || xhook.addWithCredentials
+  if ('withCredentials' of xhr || xhook.addWithCredentials)
     facade.withCredentials = false
   facade.status = 0
 
@@ -411,10 +411,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
       #insert headers
       for header, value of request.headers
-        if header
+        if (header)
           xhr.setRequestHeader(header, value)
       #extract real formdata
-      if request.body instanceof XHookFormData
+      if (request.body instanceof XHookFormData)
         request.body = request.body.fd
       #real send!
       xhr.send(request.body)
@@ -423,16 +423,16 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     hooks = xhook.listeners(BEFORE)
     #process hooks sequentially
     process = ->
-      if !hooks.length
+      if (!hooks.length)
         return send()
       #go to next hook OR optionally provide response
       done = (userResponse) ->
         #break chain - provide dummy response (readyState 4)
-        if typeof userResponse == 'object' and
+        if (typeof userResponse == 'object' and
            (typeof userResponse.status == 'number' or
-            typeof response.status == 'number')
+            typeof response.status == 'number'))
           mergeObjects(userResponse, response)
-          if !('data' in userResponse)
+          if (!('data' in userResponse))
             userResponse.data = userResponse.response || userResponse.text
           setReadyState(4)
           return
@@ -450,9 +450,9 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
       hook = hooks.shift()
       #async or sync?
-      if hook.length == 1
+      if (hook.length == 1)
         done(hook(request))
-      else if hook.length == 2 && request.async
+      else if (hook.length == 2 && request.async)
         #async handlers must use an async xhr
         hook(request, done)
       else
@@ -464,7 +464,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
   facade.abort = ->
     status = ABORTED;
-    if transiting
+    if (transiting)
       xhr.abort() #this will emit an 'abort' for us
     else
       facade[FIRE]('abort', {})
@@ -474,7 +474,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     lName = header?.toLowerCase()
     name = request.headerNames[lName] = request.headerNames[lName] || header
     #append header to any previous values
-    if request.headers[name]
+    if (request.headers[name])
       value = request.headers[name] + ', ' + value
     request.headers[name] = value
     return
@@ -485,12 +485,12 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     convertHeaders(response.headers)
 
   #proxy call only when supported
-  if xhr.overrideMimeType
+  if (xhr.overrideMimeType)
     facade.overrideMimeType = ->
       xhr.overrideMimeType.apply(xhr, arguments)
 
   #create emitter when supported
-  if xhr.upload
+  if (xhr.upload)
     facade.upload = request.upload = EventEmitter()
 
   facade.UNSENT = 0
@@ -501,7 +501,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   return facade
 
 #patch Fetch
-if typeof WINDOW[FETCH] == "function"
+if (typeof WINDOW[FETCH] == "function")
   NativeFetch = WINDOW[FETCH]
   xhook[FETCH] = NativeFetch
   XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
@@ -514,7 +514,7 @@ if typeof WINDOW[FETCH] == "function"
     return new Promise((resolve, reject) ->
 
       getRequest = ->
-        if options.headers
+        if (options.headers)
           options.headers = new Headers(options.headers)
 
         if (!request)
@@ -523,21 +523,21 @@ if typeof WINDOW[FETCH] == "function"
         return mergeObjects(options, request)
 
       processAfter = (response) ->
-        if !afterHooks.length
+        if (!afterHooks.length)
           return resolve(response)
 
         hook = afterHooks.shift()
 
-        if hook.length == 2
+        if (hook.length == 2)
           hook(getRequest(), response)
           processAfter(response)
-        else if hook.length == 3
+        else if (hook.length == 3)
           hook(getRequest(), response, processAfter)
         else
           processAfter(response)
 
       done = (userResponse) ->
-        if userResponse != undefined
+        if (userResponse != undefined)
           response = new Response(userResponse.body || userResponse.text, userResponse)
           resolve(response)
           processAfter(response)
@@ -548,15 +548,15 @@ if typeof WINDOW[FETCH] == "function"
         return
 
       processBefore = ->
-        if !beforeHooks.length
+        if (!beforeHooks.length)
           send()
           return
 
         hook = beforeHooks.shift()
 
-        if hook.length == 1
+        if (hook.length == 1)
           done hook(options)
-        else if hook.length == 2
+        else if (hook.length == 2)
           hook(getRequest(), done)
 
       send = ->
@@ -579,7 +579,7 @@ XHookHttpRequest.LOADING = 3;
 XHookHttpRequest.DONE = 4;
 
 #publicise (amd+commonjs+window)
-if typeof define == "function" && define.amd
+if (typeof define == "function" && define.amd)
   define("xhook", [], -> xhook)
 else
   (this.exports || this).xhook = xhook
