@@ -67,7 +67,7 @@ Tested in IE8+, Chrome, Firefox, Safari
 * CDN (See available versions [here](https://github.com/jpillora/xhook/releases))
 
 	``` html
-	<script src="//cdn.rawgit.com/jpillora/xhook/1.3.1/dist/xhook.min.js"></script>
+	<script src="//https://unpkg.com/xhook@latest/dist/xhook.min.js"></script>
 	```
 
 ## API
