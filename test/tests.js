@@ -150,10 +150,10 @@ describe('xhook', function() {
     it ('should replace native fetch when enable is called', function(){
       xhook.disable();
       expect(typeof window.fetch).to.equal('function');
-      expect(window.fetch.toString()).to.equal('function fetch() { [native code] }');
+      expect((/\{\s*\[native code\]\s*\}/).test(window.fetch.toString())).to.equal(true);
       xhook.enable();
       expect(typeof window.fetch).to.equal('function');
-      expect(window.fetch.toString()).not.to.equal('function fetch() { [native code] }');
+      expect((/\{\s*\[native code\]\s*\}/).test(window.fetch.toString())).to.equal(false);
     });
 
   });
