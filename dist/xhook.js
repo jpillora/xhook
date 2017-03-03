@@ -510,7 +510,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
       done = function(userResponse) {
         if (typeof userResponse === 'object' && (typeof userResponse.status === 'number' || typeof response.status === 'number')) {
           mergeObjects(userResponse, response);
-          if (__indexOf.call(userResponse, 'data') < 0) {
+          if (!(__indexOf.call(userResponse, 'data') >= 0)) {
             userResponse.data = userResponse.response || userResponse.text;
           }
           setReadyState(4);

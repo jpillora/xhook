@@ -101,7 +101,7 @@ EventEmitter = (nodeStyle) ->
   emitter[FIRE] = ->
     args = slice(arguments)
     event = args.shift()
-    unless nodeStyle
+    if !nodeStyle
       args[0] = mergeObjects(args[0], fakeEvent(event))
     legacylistener = emitter["on#{event}"]
     if legacylistener
@@ -180,7 +180,7 @@ XHookFormData = (form) ->
   entries = []
   Object.defineProperty(this, 'entries', get: ->
     #extract form entries
-    fentries = unless form then [] else
+    fentries = if !form then [] else
       slice(form.querySelectorAll("input,select")).filter((e) ->
         return e.type not in ['checkbox','radio'] || e.checked
       ).map((e) ->
@@ -222,10 +222,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     # Accessing attributes on an aborted xhr object will
     # throw an 'c00c023f error' in IE9 and lower, don't touch it.
     response.status = status || xhr.status
-    response.statusText = xhr.statusText  unless status == ABORTED && msie < 10
+    response.statusText = xhr.statusText  if !(status == ABORTED && msie < 10)
     if status != ABORTED
         for key, val of convertHeaders(xhr.getAllResponseHeaders())
-          unless response.headers[key]
+          if !response.headers[key]
             name = key.toLowerCase()
             response.headers[name] = val
         return
@@ -282,7 +282,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     return
 
   emitFinal = ->
-    unless hasError
+    if !hasError
       facade[FIRE]("load", {})
     facade[FIRE]("loadend", {})
     if hasError
@@ -299,7 +299,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     #before emitting 4, run all 'after' hooks in sequence
     hooks = xhook.listeners(AFTER)
     process = ->
-      unless hooks.length
+      if !hooks.length
         return emitReadyState(4)
       hook = hooks.shift()
       if hook.length == 2
@@ -423,7 +423,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     hooks = xhook.listeners(BEFORE)
     #process hooks sequentially
     process = ->
-      unless hooks.length
+      if !hooks.length
         return send()
       #go to next hook OR optionally provide response
       done = (userResponse) ->
@@ -432,7 +432,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
            (typeof userResponse.status == 'number' or
             typeof response.status == 'number')
           mergeObjects(userResponse, response)
-          unless 'data' in userResponse
+          if !('data' in userResponse)
             userResponse.data = userResponse.response || userResponse.text
           setReadyState(4)
           return
@@ -523,7 +523,7 @@ if typeof WINDOW[FETCH] == "function"
         return mergeObjects(options, request)
 
       processAfter = (response) ->
-        unless afterHooks.length
+        if !afterHooks.length
           return resolve(response)
 
         hook = afterHooks.shift()
@@ -548,7 +548,7 @@ if typeof WINDOW[FETCH] == "function"
         return
 
       processBefore = ->
-        unless beforeHooks.length
+        if !beforeHooks.length
           send()
           return
 
