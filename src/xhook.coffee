@@ -568,7 +568,7 @@ if (typeof WINDOW[FETCH] == "function")
         hook = beforeHooks.shift()
 
         if (hook.length == 1)
-          done hook(options)
+          done(hook(options))
         else if (hook.length == 2)
           hook(getRequest(), done)
 
