@@ -317,6 +317,15 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   facade = request.xhr = EventEmitter()
 
   #==========================
+
+  facade.response = xhr.response;
+  facade.responseText = xhr.responseText;
+  facade.responseXML = xhr.responseXML;
+  facade.responseURL = xhr.responseURL;
+  facade.readyState = xhr.readyState;
+  facade.status = xhr.status;
+  facade.statusText = xhr.statusText;
+
   # Handle the underlying ready state
   xhr.onreadystatechange = (event) ->
     #pull status and headers
@@ -562,6 +571,12 @@ if typeof WINDOW[FETCH] is "function"
       return
     )
 
+
+XHookHttpRequest.UNSENT = 0;
+XHookHttpRequest.OPENED = 1;
+XHookHttpRequest.HEADERS_RECEIVED = 2;
+XHookHttpRequest.LOADING = 3;
+XHookHttpRequest.DONE = 4;
 
 #publicise (amd+commonjs+window)
 if typeof define is "function" and define.amd

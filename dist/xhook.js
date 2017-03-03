@@ -405,6 +405,13 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
     process();
   };
   facade = request.xhr = EventEmitter();
+  facade.response = xhr.response;
+  facade.responseText = xhr.responseText;
+  facade.responseXML = xhr.responseXML;
+  facade.responseURL = xhr.responseURL;
+  facade.readyState = xhr.readyState;
+  facade.status = xhr.status;
+  facade.statusText = xhr.statusText;
   xhr.onreadystatechange = function(event) {
     try {
       if (xhr[READY_STATE] === 2) {
@@ -647,6 +654,16 @@ if (typeof WINDOW[FETCH] === "function") {
     });
   };
 }
+
+XHookHttpRequest.UNSENT = 0;
+
+XHookHttpRequest.OPENED = 1;
+
+XHookHttpRequest.HEADERS_RECEIVED = 2;
+
+XHookHttpRequest.LOADING = 3;
+
+XHookHttpRequest.DONE = 4;
 
 if (typeof define === "function" && define.amd) {
   define("xhook", [], function() {
