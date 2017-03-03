@@ -21,7 +21,7 @@ COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
 
 #parse IE version
-useragent = if navigator['useragent'] then navigator.userAgent else ''
+useragent = `navigator['useragent'] ? navigator.userAgent : ''`
 msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1])
 
 if (isNaN(msie))
@@ -55,7 +55,7 @@ proxyEvents = (events, src, dst) ->
       if (depricatedProp(k))
         continue
       val = e[k]
-      clone[k] = if val == src then dst else val
+      clone[k] = `val === src ? dst : val`
     #emits out the dst
     dst[FIRE](event, clone)
   #dont proxy manual events
@@ -89,7 +89,7 @@ EventEmitter = (nodeStyle) ->
     events[event] = listeners(event)
     if (events[event].indexOf(callback) >= 0)
       return
-    i = if i == `undefined` then events[event].length else i
+    i = `i === undefined ? events[event].length : i`
     events[event].splice(i, 0, callback)
     return
 
@@ -194,7 +194,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
 # object is used on send
 NativeFormData = WINDOW[FormData]
 XHookFormData = (form) ->
-  this.fd = if form then new NativeFormData(form) else new NativeFormData()
+  this.fd = `form ? new NativeFormData(form) : new NativeFormData()`
   this.form = form
   entries = []
   Object.defineProperty(this, 'entries', get: ->
@@ -203,7 +203,7 @@ XHookFormData = (form) ->
       slice(form.querySelectorAll("input,select")).filter((e) ->
         return e.type not in ['checkbox','radio'] || e.checked
       ).map((e) ->
-        [e.name, if e.type == "file" then e.files else e.value]
+        [e.name, `e.type === "file" ? e.files : e.value`]
       )
     #combine with js entries
     return fentries.concat(entries))
@@ -410,7 +410,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   facade.send = (body) ->
     #read xhr settings before hooking
     for k in ['type', 'timeout', 'withCredentials']
-      modk = if k == "type" then "responseType" else k
+      modk = `k === "type" ? "responseType" : k`
       if (modk of facade)
         request[k] = facade[modk]
 
@@ -427,7 +427,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
       #write xhr settings
       for k in ['type', 'timeout', 'withCredentials']
-        modk = if k == "type" then "responseType" else k
+        modk = `k === "type" ? "responseType" : k`
         if (k of request)
           xhr[modk] = request[k]
 
