@@ -321,7 +321,6 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   facade.response = xhr.response;
   facade.responseText = xhr.responseText;
   facade.responseXML = xhr.responseXML;
-  facade.response = xhr.response;
   facade.responseURL = xhr.responseURL;
   facade.readyState = xhr.readyState;
   facade.status = xhr.status;
