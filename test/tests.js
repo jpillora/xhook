@@ -156,6 +156,17 @@ describe('xhook', function() {
       expect((/\{\s*\[native code\]\s*\}/).test(window.fetch.toString())).to.equal(false);
     });
 
+    it('sync XHR should not fail', function(done) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '../example/example1.txt', false);
+      xhr.onload = function() {
+        expect(xhr.responseText).to.contain('the first text file');
+        done();
+      };
+
+      xhr.send();
+    });
+
   });
 
 
