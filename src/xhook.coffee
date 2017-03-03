@@ -1,5 +1,5 @@
 WINDOW = null;
-if typeof WorkerGlobalScope isnt 'undefined' && self instanceof WorkerGlobalScope
+if typeof WorkerGlobalScope != 'undefined' && self instanceof WorkerGlobalScope
   WINDOW = self
 else
   WINDOW = window
@@ -22,13 +22,13 @@ COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
 #parse IE version
 useragent = if navigator['useragent'] then navigator.userAgent else ''
-msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) or [])[1])
-msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) or [])[1])  if isNaN(msie)
+msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1])
+msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) || [])[1])  if isNaN(msie)
 
 #if required, add 'indexOf' method to Array
-Array::indexOf or= (item) ->
+Array::indexOf = Array::indexOf || (item) ->
   for x, i in this
-    return i if x is item
+    return i if x == item
   return -1
 
 slice = (o,n) -> Array::slice.call o,n
@@ -50,7 +50,7 @@ proxyEvents = (events, src, dst) ->
     for k of e
       continue if depricatedProp k
       val = e[k]
-      clone[k] = if val is src then dst else val
+      clone[k] = if val == src then dst else val
     #emits out the dst
     dst[FIRE] event, clone
   #dont proxy manual events
@@ -61,7 +61,7 @@ proxyEvents = (events, src, dst) ->
 
 #create fake event
 fakeEvent = (type) ->
-  if document and document.createEventObject?
+  if document && document.createEventObject?
     msieEventObject = document.createEventObject()
     msieEventObject.type = type
     msieEventObject
@@ -76,26 +76,26 @@ EventEmitter = (nodeStyle) ->
   #private
   events = {}
   listeners = (event) ->
-    events[event] or []
+    events[event] || []
   #public
   emitter = {}
   emitter[ON] = (event, callback, i) ->
     events[event] = listeners event
     return if events[event].indexOf(callback) >= 0
-    i = if i is `undefined` then events[event].length else i
-    events[event].splice i, 0, callback
+    i = if i == `undefined` then events[event].length else i
+    events[event].splice(i, 0, callback)
     return
   emitter[OFF] = (event, callback) ->
     #remove all
-    if event is `undefined`
+    if event == `undefined`
       events = {}
       return
     #remove all of type event
-    if callback is `undefined`
+    if callback == `undefined`
       events[event] = []
     #remove particular handler
     i = listeners(event).indexOf callback
-    return if i is -1
+    return if i == -1
     listeners(event).splice i, 1
     return
   emitter[FIRE] = ->
@@ -110,7 +110,7 @@ EventEmitter = (nodeStyle) ->
       listener.apply emitter, args
     return
   emitter._has = (event) ->
-    return !!(events[event] or emitter["on#{event}"])
+    return !!(events[event] || emitter["on#{event}"])
   #add extra aliases
   if nodeStyle
     emitter.listeners = (event) ->
@@ -132,16 +132,16 @@ EventEmitter = (nodeStyle) ->
 xhook = EventEmitter(true)
 xhook.EventEmitter = EventEmitter
 xhook[BEFORE] = (handler, i) ->
-  if handler.length < 1 or handler.length > 2
+  if handler.length < 1 || handler.length > 2
     throw "invalid hook"
   xhook[ON] BEFORE, handler, i
 xhook[AFTER] = (handler, i) ->
-  if handler.length < 2 or handler.length > 3
+  if handler.length < 2 || handler.length > 3
     throw "invalid hook"
   xhook[ON] AFTER, handler, i
 xhook.enable = ->
   WINDOW[XMLHTTP] = XHookHttpRequest
-  WINDOW[FETCH] = XHookFetchRequest if typeof XHookFetchRequest is "function"
+  WINDOW[FETCH] = XHookFetchRequest if typeof XHookFetchRequest == "function"
   WINDOW[FormData] = XHookFormData if NativeFormData
   return
 xhook.disable = ->
@@ -175,23 +175,23 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
 # object is used on send
 NativeFormData = WINDOW[FormData]
 XHookFormData = (form) ->
-  @fd = if form then new NativeFormData(form) else new NativeFormData()
-  @form = form
+  this.fd = if form then new NativeFormData(form) else new NativeFormData()
+  this.form = form
   entries = []
-  Object.defineProperty @, 'entries', get: ->
+  Object.defineProperty this, 'entries', get: ->
     #extract form entries
     fentries = unless form then [] else
       slice(form.querySelectorAll("input,select")).filter((e) ->
-        return e.type not in ['checkbox','radio'] or e.checked
+        return e.type not in ['checkbox','radio'] || e.checked
       ).map((e) ->
-        [e.name, if e.type is "file" then e.files else e.value]
+        [e.name, if e.type == "file" then e.files else e.value]
       )
     #combine with js entries
     return fentries.concat entries
-  @append = =>
+  this.append = =>
     args = slice arguments
     entries.push args
-    @fd.append.apply @fd, args
+    this.fd.append.apply this.fd, args
   return
 
 if NativeFormData
@@ -221,9 +221,9 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   readHead = ->
     # Accessing attributes on an aborted xhr object will
     # throw an 'c00c023f error' in IE9 and lower, don't touch it.
-    response.status = status or xhr.status
-    response.statusText = xhr.statusText  unless status is ABORTED and msie < 10
-    if status isnt ABORTED
+    response.status = status || xhr.status
+    response.statusText = xhr.statusText  unless status == ABORTED && msie < 10
+    if status != ABORTED
         for key, val of convertHeaders xhr.getAllResponseHeaders()
           unless response.headers[key]
             name = key.toLowerCase()
@@ -232,10 +232,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
   readBody = ->
     #https://xhr.spec.whatwg.org/
-    if !xhr.responseType or xhr.responseType is "text"
+    if !xhr.responseType || xhr.responseType == "text"
       response.text = xhr.responseText
       response.data = xhr.responseText
-    else if xhr.responseType is "document"
+    else if xhr.responseType == "document"
       response.xml = xhr.responseXML
       response.data = xhr.responseXML
     else
@@ -264,20 +264,20 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
   #ensure ready state 0 through 4 is handled
   emitReadyState = (n) ->
-    while n > currentState and currentState < 4
+    while n > currentState && currentState < 4
       facade[READY_STATE] = ++currentState
       # make fake events for libraries that actually check the type on
       # the event object
-      if currentState is 1
+      if currentState == 1
         facade[FIRE] "loadstart", {}
-      if currentState is 2
+      if currentState == 2
         writeHead()
-      if currentState is 4
+      if currentState == 4
         writeHead()
         writeBody()
       facade[FIRE] "readystatechange", {}
       #delay final events incase of error
-      if currentState is 4
+      if currentState == 4
         setTimeout emitFinal, 0
     return
 
@@ -293,7 +293,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   currentState = 0
   setReadyState = (n) ->
     #emit events until readyState reaches 4
-    if n isnt 4
+    if n != 4
       emitReadyState(n)
       return
     #before emitting 4, run all 'after' hooks in sequence
@@ -302,10 +302,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       unless hooks.length
         return emitReadyState(4)
       hook = hooks.shift()
-      if hook.length is 2
+      if hook.length == 2
         hook request, response
         process()
-      else if hook.length is 3 and request.async
+      else if hook.length == 3 && request.async
         hook request, response, process
       else
         process()
@@ -330,10 +330,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   xhr.onreadystatechange = (event) ->
     #pull status and headers
     try
-      if xhr[READY_STATE] is 2
+      if xhr[READY_STATE] == 2
         readHead()
     #pull response data
-    if xhr[READY_STATE] is 4
+    if xhr[READY_STATE] == 4
       transiting = false
       readHead()
       readBody()
@@ -359,7 +359,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
-  if 'withCredentials' of xhr or xhook.addWithCredentials
+  if 'withCredentials' of xhr || xhook.addWithCredentials
     facade.withCredentials = false
   facade.status = 0
 
@@ -380,7 +380,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
     request.method = method
     request.url = url
-    request.async = async isnt false
+    request.async = async != false
     request.user = user
     request.pass = pass
     # openned facade xhr (not real xhr)
@@ -390,7 +390,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   facade.send = (body) ->
     #read xhr settings before hooking
     for k in ['type', 'timeout', 'withCredentials']
-      modk = if k is "type" then "responseType" else k
+      modk = if k == "type" then "responseType" else k
       request[k] = facade[modk] if modk of facade
 
     request.body = body
@@ -406,7 +406,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
       #write xhr settings
       for k in ['type', 'timeout', 'withCredentials']
-        modk = if k is "type" then "responseType" else k
+        modk = if k == "type" then "responseType" else k
         xhr[modk] = request[k] if k of request
 
       #insert headers
@@ -428,12 +428,12 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       #go to next hook OR optionally provide response
       done = (userResponse) ->
         #break chain - provide dummy response (readyState 4)
-        if typeof userResponse is 'object' and
-           (typeof userResponse.status is 'number' or
-            typeof response.status is 'number')
+        if typeof userResponse == 'object' and
+           (typeof userResponse.status == 'number' or
+            typeof response.status == 'number')
           mergeObjects userResponse, response
           unless 'data' in userResponse
-            userResponse.data = userResponse.response or userResponse.text
+            userResponse.data = userResponse.response || userResponse.text
           setReadyState 4
           return
         #continue processing until no hooks left
@@ -450,9 +450,9 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 
       hook = hooks.shift()
       #async or sync?
-      if hook.length is 1
+      if hook.length == 1
         done hook request
-      else if hook.length is 2 and request.async
+      else if hook.length == 2 && request.async
         #async handlers must use an async xhr
         hook request, done
       else
@@ -501,7 +501,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   return facade
 
 #patch Fetch
-if typeof WINDOW[FETCH] is "function"
+if typeof WINDOW[FETCH] == "function"
   NativeFetch = WINDOW[FETCH]
   xhook[FETCH] = NativeFetch
   XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
@@ -528,17 +528,17 @@ if typeof WINDOW[FETCH] is "function"
 
         hook = afterHooks.shift()
 
-        if hook.length is 2
+        if hook.length == 2
           hook getRequest(), response
           processAfter(response)
-        else if hook.length is 3
+        else if hook.length == 3
           hook getRequest(), response, processAfter
         else
           processAfter(response)
 
       done = (userResponse) ->
         if userResponse != undefined
-          response = new Response(userResponse.body or userResponse.text, userResponse)
+          response = new Response(userResponse.body || userResponse.text, userResponse)
           resolve(response)
           processAfter(response)
           return
@@ -554,9 +554,9 @@ if typeof WINDOW[FETCH] is "function"
 
         hook = beforeHooks.shift()
 
-        if hook.length is 1
+        if hook.length == 1
           done hook(options)
-        else if hook.length is 2
+        else if hook.length == 2
           hook getRequest(), done
 
       send = ->
@@ -579,7 +579,7 @@ XHookHttpRequest.LOADING = 3;
 XHookHttpRequest.DONE = 4;
 
 #publicise (amd+commonjs+window)
-if typeof define is "function" and define.amd
+if typeof define == "function" && define.amd
   define "xhook", [], -> xhook
 else
-  (@exports or @).xhook = xhook
+  (this.exports || this).xhook = xhook
