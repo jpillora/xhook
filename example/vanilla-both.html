@@ -1,0 +1,64 @@
+
+<h5>example1.txt</h5>
+<pre id="one"></pre>
+
+<h5>example2.txt</h5>
+<pre id="two"></pre>
+
+<h5>example1.txt - fetch</h5>
+<pre id="fetch_one"></pre>
+
+<h5>example2.txt - fetch</h5>
+<pre id="fetch_two"></pre>
+
+<script src="../dist/xhook.js"></script>
+<script type="text/javascript">
+
+xhook.after(function(request, response, cb) {
+  if (request.url.match(/example2\.txt$/)) {
+    if (response instanceof Response) {
+      response.text().then(function (text) {
+        var newResponse = text.replace(/[aeiou]/g, 'z');
+        cb(new Response(newResponse))
+      })
+    } else {
+      response.text = response.text.replace(/[aeiou]/g, 'z');
+      cb(response);
+    }
+  } else {
+    cb(response);
+  }
+});
+
+//vanilla calls
+var xhr1 = new XMLHttpRequest();
+xhr1.open('GET', 'example1.txt');
+xhr1.onreadystatechange = function(e) {
+  document.getElementById('one').innerHTML = xhr1.responseText;
+};
+xhr1.send();
+
+var xhr2 = new XMLHttpRequest();
+xhr2.open('GET', 'example2.txt');
+xhr2.onreadystatechange = function(e) {
+  document.getElementById('two').innerHTML = xhr2.responseText;
+};
+xhr2.send();
+
+//fetch calls
+fetch('example1.txt')
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(response) {
+      document.getElementById('fetch_one').innerHTML = response;
+    });
+
+fetch('example2.txt')
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(response) {
+      document.getElementById('fetch_two').innerHTML = response;
+    });
+</script>

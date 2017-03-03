@@ -1,5 +1,11 @@
+WINDOW = null;
+if typeof WorkerGlobalScope isnt 'undefined' && self instanceof WorkerGlobalScope
+  WINDOW = self
+else
+  WINDOW = window
+
 #for compression
-document = window.document
+document = WINDOW.document
 BEFORE = 'before'
 AFTER = 'after'
 READY_STATE = 'readyState'
@@ -7,14 +13,17 @@ ON = 'addEventListener'
 OFF = 'removeEventListener'
 FIRE = 'dispatchEvent'
 XMLHTTP = 'XMLHttpRequest'
+FETCH = 'fetch'
 FormData = 'FormData'
 
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
+
 #parse IE version
-msie = parseInt((/msie (\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])
-msie = parseInt((/trident\/.*; rv:(\d+)/.exec((navigator.userAgent).toLowerCase()) or [])[1])  if isNaN(msie)
+useragent = if navigator['useragent'] then navigator.userAgent else ''
+msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) or [])[1])
+msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) or [])[1])  if isNaN(msie)
 
 #if required, add 'indexOf' method to Array
 Array::indexOf or= (item) ->
@@ -52,7 +61,7 @@ proxyEvents = (events, src, dst) ->
 
 #create fake event
 fakeEvent = (type) ->
-  if document.createEventObject?
+  if document and document.createEventObject?
     msieEventObject = document.createEventObject()
     msieEventObject.type = type
     msieEventObject
@@ -131,12 +140,14 @@ xhook[AFTER] = (handler, i) ->
     throw "invalid hook"
   xhook[ON] AFTER, handler, i
 xhook.enable = ->
-  window[XMLHTTP] = XHookHttpRequest
-  window[FormData] = XHookFormData if NativeFormData
+  WINDOW[XMLHTTP] = XHookHttpRequest
+  WINDOW[FETCH] = XHookFetchRequest if typeof XHookFetchRequest is "function"
+  WINDOW[FormData] = XHookFormData if NativeFormData
   return
 xhook.disable = ->
-  window[XMLHTTP] = xhook[XMLHTTP]
-  window[FormData] = NativeFormData if NativeFormData
+  WINDOW[XMLHTTP] = xhook[XMLHTTP]
+  WINDOW[FETCH] = xhook[FETCH]
+  WINDOW[FormData] = NativeFormData if NativeFormData
   return
 
 #helper
@@ -162,7 +173,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
 # we can do this safely because all XHR
 # is hooked, so we can ensure the real FormData
 # object is used on send
-NativeFormData = window[FormData]
+NativeFormData = WINDOW[FormData]
 XHookFormData = (form) ->
   @fd = if form then new NativeFormData(form) else new NativeFormData()
   @form = form
@@ -186,12 +197,12 @@ XHookFormData = (form) ->
 if NativeFormData
   #expose native formdata as xhook.FormData incase its needed
   xhook[FormData] = NativeFormData
-  window[FormData] = XHookFormData
+  WINDOW[FormData] = XHookFormData
 
 #patch XHR
-NativeXMLHttp = window[XMLHTTP]
+NativeXMLHttp = WINDOW[XMLHTTP]
 xhook[XMLHTTP] = NativeXMLHttp
-XHookHttpRequest = window[XMLHTTP] = ->
+XHookHttpRequest = WINDOW[XMLHTTP] = ->
   ABORTED = -1
   xhr = new xhook[XMLHTTP]()
 
@@ -474,6 +485,78 @@ XHookHttpRequest = window[XMLHTTP] = ->
     facade.upload = request.upload = EventEmitter()
 
   return facade
+
+#patch Fetch
+if typeof WINDOW[FETCH] is "function"
+  NativeFetch = WINDOW[FETCH]
+  xhook[FETCH] = NativeFetch
+  XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
+    options.url = url
+    request = null
+
+    beforeHooks = xhook.listeners BEFORE
+    afterHooks = xhook.listeners AFTER
+
+    return new Promise((resolve, reject) ->
+
+      getRequest = ->
+        if options.headers
+          options.headers = new Headers(options.headers)
+
+        if (!request)
+          request = new Request options.url, options
+
+        return mergeObjects(options, request)
+
+      processAfter = (response) ->
+        unless afterHooks.length
+          return resolve(response)
+
+        hook = afterHooks.shift()
+
+        if hook.length is 2
+          hook getRequest(), response
+          processAfter(response)
+        else if hook.length is 3
+          hook getRequest(), response, processAfter
+        else
+          processAfter(response)
+
+      done = (userResponse) ->
+        if userResponse != undefined
+          response = new Response(userResponse.body or userResponse.text, userResponse)
+          resolve(response)
+          processAfter(response)
+          return
+
+        #continue processing until no hooks left
+        processBefore()
+        return
+
+      processBefore = ->
+        unless beforeHooks.length
+          send()
+          return
+
+        hook = beforeHooks.shift()
+
+        if hook.length is 1
+          done hook(options)
+        else if hook.length is 2
+          hook getRequest(), done
+
+      send = ->
+        NativeFetch(getRequest())
+          .then((response) -> processAfter(response))
+          .catch((err) ->
+            processAfter(err)
+            reject(err)
+        )
+
+      processBefore()
+      return
+    )
+
 
 #publicise (amd+commonjs+window)
 if typeof define is "function" and define.amd

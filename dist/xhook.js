@@ -1,10 +1,17 @@
 // XHook - v1.3.5 - https://github.com/jpillora/xhook
-// Jaime Pillora <dev@jpillora.com> - MIT Copyright 2016
-(function(window,undefined) {
-var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FIRE, FormData, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, xhook, _base,
+// Jaime Pillora <dev@jpillora.com> - MIT Copyright 2017
+var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, useragent, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-document = window.document;
+WINDOW = null;
+
+if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+  WINDOW = self;
+} else {
+  WINDOW = window;
+}
+
+document = WINDOW.document;
 
 BEFORE = 'before';
 
@@ -20,16 +27,20 @@ FIRE = 'dispatchEvent';
 
 XMLHTTP = 'XMLHttpRequest';
 
+FETCH = 'fetch';
+
 FormData = 'FormData';
 
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
 
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
-msie = parseInt((/msie (\d+)/.exec(navigator.userAgent.toLowerCase()) || [])[1]);
+useragent = navigator['useragent'] ? navigator.userAgent : '';
+
+msie = parseInt((/msie (\d+)/.exec(useragent.toLowerCase()) || [])[1]);
 
 if (isNaN(msie)) {
-  msie = parseInt((/trident\/.*; rv:(\d+)/.exec(navigator.userAgent.toLowerCase()) || [])[1]);
+  msie = parseInt((/trident\/.*; rv:(\d+)/.exec(useragent.toLowerCase()) || [])[1]);
 }
 
 (_base = Array.prototype).indexOf || (_base.indexOf = function(item) {
@@ -91,7 +102,7 @@ proxyEvents = function(events, src, dst) {
 
 fakeEvent = function(type) {
   var msieEventObject;
-  if (document.createEventObject != null) {
+  if (document && (document.createEventObject != null)) {
     msieEventObject = document.createEventObject();
     msieEventObject.type = type;
     return msieEventObject;
@@ -197,16 +208,20 @@ xhook[AFTER] = function(handler, i) {
 };
 
 xhook.enable = function() {
-  window[XMLHTTP] = XHookHttpRequest;
+  WINDOW[XMLHTTP] = XHookHttpRequest;
+  if (typeof XHookFetchRequest === "function") {
+    WINDOW[FETCH] = XHookFetchRequest;
+  }
   if (NativeFormData) {
-    window[FormData] = XHookFormData;
+    WINDOW[FormData] = XHookFormData;
   }
 };
 
 xhook.disable = function() {
-  window[XMLHTTP] = xhook[XMLHTTP];
+  WINDOW[XMLHTTP] = xhook[XMLHTTP];
+  WINDOW[FETCH] = xhook[FETCH];
   if (NativeFormData) {
-    window[FormData] = NativeFormData;
+    WINDOW[FormData] = NativeFormData;
   }
 };
 
@@ -240,7 +255,7 @@ convertHeaders = xhook.headers = function(h, dest) {
   }
 };
 
-NativeFormData = window[FormData];
+NativeFormData = WINDOW[FormData];
 
 XHookFormData = function(form) {
   var entries;
@@ -271,14 +286,14 @@ XHookFormData = function(form) {
 
 if (NativeFormData) {
   xhook[FormData] = NativeFormData;
-  window[FormData] = XHookFormData;
+  WINDOW[FormData] = XHookFormData;
 }
 
-NativeXMLHttp = window[XMLHTTP];
+NativeXMLHttp = WINDOW[XMLHTTP];
 
 xhook[XMLHTTP] = NativeXMLHttp;
 
-XHookHttpRequest = window[XMLHTTP] = function() {
+XHookHttpRequest = WINDOW[XMLHTTP] = function() {
   var ABORTED, currentState, emitFinal, emitReadyState, event, facade, hasError, hasErrorHandler, readBody, readHead, request, response, setReadyState, status, transiting, writeBody, writeHead, xhr, _i, _len, _ref;
   ABORTED = -1;
   xhr = new xhook[XMLHTTP]();
@@ -552,6 +567,82 @@ XHookHttpRequest = window[XMLHTTP] = function() {
   return facade;
 };
 
+if (typeof WINDOW[FETCH] === "function") {
+  NativeFetch = WINDOW[FETCH];
+  xhook[FETCH] = NativeFetch;
+  XHookFetchRequest = WINDOW[FETCH] = function(url, options) {
+    var afterHooks, beforeHooks, request;
+    if (options == null) {
+      options = {
+        headers: {}
+      };
+    }
+    options.url = url;
+    request = null;
+    beforeHooks = xhook.listeners(BEFORE);
+    afterHooks = xhook.listeners(AFTER);
+    return new Promise(function(resolve, reject) {
+      var done, getRequest, processAfter, processBefore, send;
+      getRequest = function() {
+        if (options.headers) {
+          options.headers = new Headers(options.headers);
+        }
+        if (!request) {
+          request = new Request(options.url, options);
+        }
+        return mergeObjects(options, request);
+      };
+      processAfter = function(response) {
+        var hook;
+        if (!afterHooks.length) {
+          return resolve(response);
+        }
+        hook = afterHooks.shift();
+        if (hook.length === 2) {
+          hook(getRequest(), response);
+          return processAfter(response);
+        } else if (hook.length === 3) {
+          return hook(getRequest(), response, processAfter);
+        } else {
+          return processAfter(response);
+        }
+      };
+      done = function(userResponse) {
+        var response;
+        if (userResponse !== void 0) {
+          response = new Response(userResponse.body || userResponse.text, userResponse);
+          resolve(response);
+          processAfter(response);
+          return;
+        }
+        processBefore();
+      };
+      processBefore = function() {
+        var hook;
+        if (!beforeHooks.length) {
+          send();
+          return;
+        }
+        hook = beforeHooks.shift();
+        if (hook.length === 1) {
+          return done(hook(options));
+        } else if (hook.length === 2) {
+          return hook(getRequest(), done);
+        }
+      };
+      send = function() {
+        return NativeFetch(getRequest()).then(function(response) {
+          return processAfter(response);
+        })["catch"](function(err) {
+          processAfter(err);
+          return reject(err);
+        });
+      };
+      processBefore();
+    });
+  };
+}
+
 if (typeof define === "function" && define.amd) {
   define("xhook", [], function() {
     return xhook;
@@ -559,5 +650,3 @@ if (typeof define === "function" && define.amd) {
 } else {
   (this.exports || this).xhook = xhook;
 }
-
-}.call(this,window));

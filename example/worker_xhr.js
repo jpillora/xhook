@@ -1,12 +1,4 @@
-
-<h5>example1.txt</h5>
-<pre id="one"></pre>
-
-<h5>example2.txt</h5>
-<pre id="two"></pre>
-
-<script src="../dist/xhook.js"></script>
-<script type="text/javascript">
+importScripts('../dist/xhook.js');
 
 //hook and modify 'responseText' of 'example2.txt'
 xhook.after(function(request, response) {
@@ -18,14 +10,13 @@ xhook.after(function(request, response) {
 var xhr1 = new XMLHttpRequest();
 xhr1.open('GET', 'example1.txt');
 xhr1.onreadystatechange = function(e) {
-  document.getElementById('one').innerHTML = xhr1.responseText;
+  self.postMessage({ id: 'one', response: xhr1.responseText });
 }
 xhr1.send();
 
 var xhr2 = new XMLHttpRequest();
 xhr2.open('GET', 'example2.txt');
 xhr2.onreadystatechange = function(e) {
-  document.getElementById('two').innerHTML = xhr2.responseText;
+  self.postMessage({ id: 'two', response: xhr2.responseText });
 }
 xhr2.send();
-</script>
