@@ -23,7 +23,7 @@
     <script src="../dist/xhook.js"></script>
     <script src="tests.js"></script>
     <script>
-      mocha.setup({globals: ['gaplugins', 'gaGlobal']});//allow GA
+      mocha.setup({globals: ['gaplugins', 'gaGlobal', 'gaData']});//allow GA
       mocha.checkLeaks();
       //log test results to GA
       mocha.run().on("pass", function(test) {
