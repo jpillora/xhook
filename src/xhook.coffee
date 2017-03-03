@@ -69,7 +69,7 @@ fakeEvent = (type) ->
   if (document && document.createEventObject?)
     msieEventObject = document.createEventObject()
     msieEventObject.type = type
-    msieEventObject
+    return msieEventObject
   else
     # on some platforms like android 4.1.2 and safari on windows, it appears
     # that new Event is not allowed
@@ -84,6 +84,7 @@ EventEmitter = (nodeStyle) ->
     events[event] || []
   #public
   emitter = {}
+
   emitter[ON] = (event, callback, i) ->
     events[event] = listeners(event)
     if (events[event].indexOf(callback) >= 0)
@@ -91,6 +92,7 @@ EventEmitter = (nodeStyle) ->
     i = if i == `undefined` then events[event].length else i
     events[event].splice(i, 0, callback)
     return
+
   emitter[OFF] = (event, callback) ->
     #remove all
     if (event == `undefined`)
@@ -105,6 +107,7 @@ EventEmitter = (nodeStyle) ->
       return
     listeners(event).splice(i, 1)
     return
+
   emitter[FIRE] = ->
     args = slice(arguments)
     event = args.shift()
@@ -116,8 +119,10 @@ EventEmitter = (nodeStyle) ->
     for listener, i in listeners(event).concat(listeners("*"))
       listener.apply(emitter, args)
     return
+
   emitter._has = (event) ->
     return !!(events[event] || emitter["on#{event}"])
+
   #add extra aliases
   if (nodeStyle)
     emitter.listeners = (event) ->
@@ -133,19 +138,22 @@ EventEmitter = (nodeStyle) ->
     emitter.destroy = ->
       events = {}
 
-  emitter
+  return emitter
 
 #use event emitter to store hooks
 xhook = EventEmitter(true)
 xhook.EventEmitter = EventEmitter
+
 xhook[BEFORE] = (handler, i) ->
   if (handler.length < 1 || handler.length > 2)
     throw "invalid hook"
   xhook[ON](BEFORE, handler, i)
+
 xhook[AFTER] = (handler, i) ->
   if (handler.length < 2 || handler.length > 3)
     throw "invalid hook"
   xhook[ON](AFTER, handler, i)
+
 xhook.enable = ->
   WINDOW[XMLHTTP] = XHookHttpRequest
   if (typeof XHookFetchRequest == "function")
@@ -153,6 +161,7 @@ xhook.enable = ->
   if (NativeFormData)
     WINDOW[FormData] = XHookFormData
   return
+
 xhook.disable = ->
   WINDOW[XMLHTTP] = xhook[XMLHTTP]
   WINDOW[FETCH] = xhook[FETCH]
@@ -452,10 +461,12 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
         #continue processing until no hooks left
         process()
         return
+
       #specifically provide headers (readyState 2)
       done.head = (userResponse) ->
         mergeObjects(userResponse, response)
         setReadyState(2)
+
       #specifically provide partial text (responseText  readyState 3)
       done.progress = (userResponse) ->
         mergeObjects(userResponse, response)
@@ -482,6 +493,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     else
       facade[FIRE]('abort', {})
     return
+
   facade.setRequestHeader = (header, value) ->
     #the first header set is used for all future case-alternatives of 'name'
     lName = header?.toLowerCase()
@@ -491,9 +503,11 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       value = request.headers[name] + ', ' + value
     request.headers[name] = value
     return
+
   facade.getResponseHeader = (header) ->
     name = header?.toLowerCase()
     response.headers[name]
+
   facade.getAllResponseHeaders = ->
     convertHeaders(response.headers)
 
