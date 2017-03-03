@@ -22,6 +22,7 @@ With XHook, you could easily implement functionality to:
 ## Features
 
 * Intercept and modify XMLHttpRequest ("AJAX") **request** and **response**
+* Support for **fetch** protocol in compatible browsers
 * Simulate **responses** transparently
 * Backwards compatible `addEventListener` `removeEventListener`
 * Backwards compatible user controlled progress (download/upload) events
@@ -148,6 +149,7 @@ Contributors:
 * Jaime Pillora <dev@jpillora.com>
 * Daniel Gasienica <daniel@gasienica.ch>
 * Maayan Glikser <maayan@glikm.com>
+* Ilya Gelman <ilyagelman@ilyagelman.com>
 
 #### MIT License
 
