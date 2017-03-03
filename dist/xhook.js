@@ -478,9 +478,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
     send = function() {
       var header, value, _k, _len2, _ref2, _ref3;
       proxyEvents(COMMON_EVENTS, xhr, facade);
-      if (facade.upload) {
-        proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload);
-      }
+      proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload ? facade.upload : void 0);
       transiting = true;
       xhr.open(request.method, request.url, request.async, request.user, request.pass);
       _ref2 = ['type', 'timeout', 'withCredentials'];

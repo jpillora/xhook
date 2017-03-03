@@ -31,14 +31,14 @@ Array::indexOf = Array::indexOf || (item) ->
     return i if x == item
   return -1
 
-slice = (o,n) -> Array::slice.call o,n
+slice = (o,n) -> Array::slice.call(o,n)
 
 depricatedProp = (p) ->
   return p in ["returnValue","totalSize","position"]
 
 mergeObjects = (src, dst) ->
   for k,v of src
-    continue if depricatedProp k
+    continue if depricatedProp(k)
     try dst[k] = src[k]
   return dst
 
@@ -48,14 +48,14 @@ proxyEvents = (events, src, dst) ->
     clone = {}
     #copies event, with dst emitter inplace of src
     for k of e
-      continue if depricatedProp k
+      continue if depricatedProp(k)
       val = e[k]
       clone[k] = if val == src then dst else val
     #emits out the dst
-    dst[FIRE] event, clone
+    dst[FIRE](event, clone)
   #dont proxy manual events
   for event in events
-    if dst._has event
+    if dst._has(event)
       src["on#{event}"] = p(event)
   return
 
@@ -80,7 +80,7 @@ EventEmitter = (nodeStyle) ->
   #public
   emitter = {}
   emitter[ON] = (event, callback, i) ->
-    events[event] = listeners event
+    events[event] = listeners(event)
     return if events[event].indexOf(callback) >= 0
     i = if i == `undefined` then events[event].length else i
     events[event].splice(i, 0, callback)
@@ -94,35 +94,35 @@ EventEmitter = (nodeStyle) ->
     if callback == `undefined`
       events[event] = []
     #remove particular handler
-    i = listeners(event).indexOf callback
+    i = listeners(event).indexOf(callback)
     return if i == -1
-    listeners(event).splice i, 1
+    listeners(event).splice(i, 1)
     return
   emitter[FIRE] = ->
-    args = slice arguments
+    args = slice(arguments)
     event = args.shift()
     unless nodeStyle
-      args[0] = mergeObjects args[0], fakeEvent event
+      args[0] = mergeObjects(args[0], fakeEvent(event))
     legacylistener = emitter["on#{event}"]
     if legacylistener
-      legacylistener.apply emitter, args
+      legacylistener.apply(emitter, args)
     for listener, i in listeners(event).concat(listeners("*"))
-      listener.apply emitter, args
+      listener.apply(emitter, args)
     return
   emitter._has = (event) ->
     return !!(events[event] || emitter["on#{event}"])
   #add extra aliases
   if nodeStyle
     emitter.listeners = (event) ->
-      slice listeners event
+      slice(listeners(event))
     emitter.on = emitter[ON]
     emitter.off = emitter[OFF]
     emitter.fire = emitter[FIRE]
     emitter.once = (e, fn) ->
       fire = ->
-        emitter.off e, fire
-        fn.apply null, arguments
-      emitter.on e, fire
+        emitter.off(e, fire)
+        fn.apply(null, arguments)
+      emitter.on(e, fire)
     emitter.destroy = ->
       events = {}
 
@@ -134,11 +134,11 @@ xhook.EventEmitter = EventEmitter
 xhook[BEFORE] = (handler, i) ->
   if handler.length < 1 || handler.length > 2
     throw "invalid hook"
-  xhook[ON] BEFORE, handler, i
+  xhook[ON](BEFORE, handler, i)
 xhook[AFTER] = (handler, i) ->
   if handler.length < 2 || handler.length > 3
     throw "invalid hook"
-  xhook[ON] AFTER, handler, i
+  xhook[ON](AFTER, handler, i)
 xhook.enable = ->
   WINDOW[XMLHTTP] = XHookHttpRequest
   WINDOW[FETCH] = XHookFetchRequest if typeof XHookFetchRequest == "function"
@@ -157,10 +157,10 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
       headers = []
       for k,v of h
         name = k.toLowerCase()
-        headers.push "#{name}:\t#{v}"
-      return headers.join '\n'
+        headers.push("#{name}:\t#{v}")
+      return headers.join('\n')
     when "string"
-      headers = h.split '\n'
+      headers = h.split('\n')
       for header in headers
         if /([^:]+):\s*(.+)/.test(header)
           name = RegExp.$1?.toLowerCase()
@@ -178,7 +178,7 @@ XHookFormData = (form) ->
   this.fd = if form then new NativeFormData(form) else new NativeFormData()
   this.form = form
   entries = []
-  Object.defineProperty this, 'entries', get: ->
+  Object.defineProperty(this, 'entries', get: ->
     #extract form entries
     fentries = unless form then [] else
       slice(form.querySelectorAll("input,select")).filter((e) ->
@@ -187,11 +187,11 @@ XHookFormData = (form) ->
         [e.name, if e.type == "file" then e.files else e.value]
       )
     #combine with js entries
-    return fentries.concat entries
+    return fentries.concat(entries))
   this.append = =>
-    args = slice arguments
-    entries.push args
-    this.fd.append.apply this.fd, args
+    args = slice(arguments)
+    entries.push(args)
+    this.fd.append.apply(this.fd, args)
   return
 
 if NativeFormData
@@ -224,7 +224,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     response.status = status || xhr.status
     response.statusText = xhr.statusText  unless status == ABORTED && msie < 10
     if status != ABORTED
-        for key, val of convertHeaders xhr.getAllResponseHeaders()
+        for key, val of convertHeaders(xhr.getAllResponseHeaders())
           unless response.headers[key]
             name = key.toLowerCase()
             response.headers[name] = val
@@ -269,22 +269,22 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       # make fake events for libraries that actually check the type on
       # the event object
       if currentState == 1
-        facade[FIRE] "loadstart", {}
+        facade[FIRE]("loadstart", {})
       if currentState == 2
         writeHead()
       if currentState == 4
         writeHead()
         writeBody()
-      facade[FIRE] "readystatechange", {}
+      facade[FIRE]("readystatechange", {})
       #delay final events incase of error
       if currentState == 4
-        setTimeout emitFinal, 0
+        setTimeout(emitFinal, 0)
     return
 
   emitFinal = ->
     unless hasError
-      facade[FIRE] "load", {}
-    facade[FIRE] "loadend", {}
+      facade[FIRE]("load", {})
+    facade[FIRE]("loadend", {})
     if hasError
       facade[READY_STATE] = 0
     return
@@ -297,16 +297,16 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       emitReadyState(n)
       return
     #before emitting 4, run all 'after' hooks in sequence
-    hooks = xhook.listeners AFTER
+    hooks = xhook.listeners(AFTER)
     process = ->
       unless hooks.length
         return emitReadyState(4)
       hook = hooks.shift()
       if hook.length == 2
-        hook request, response
+        hook(request, response)
         process()
       else if hook.length == 3 && request.async
-        hook request, response, process
+        hook(request, response, process)
       else
         process()
     process()
@@ -338,24 +338,24 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       readHead()
       readBody()
 
-    setReadyState xhr[READY_STATE]
+    setReadyState(xhr[READY_STATE])
     return
 
   #mark this xhr as errored
   hasErrorHandler = ->
     hasError = true
     return
-  facade[ON] 'error', hasErrorHandler
-  facade[ON] 'timeout', hasErrorHandler
-  facade[ON] 'abort', hasErrorHandler
+  facade[ON]('error', hasErrorHandler)
+  facade[ON]('timeout', hasErrorHandler)
+  facade[ON]('abort', hasErrorHandler)
   # progress means we're current downloading...
-  facade[ON] 'progress', ->
+  facade[ON]('progress', ->
     #progress events are followed by readystatechange for some reason...
     if currentState < 3
-      setReadyState 3
+      setReadyState(3)
     else
-      facade[FIRE] "readystatechange", {} #TODO fake an XHR event
-    return
+      facade[FIRE]("readystatechange", {}) #TODO fake an XHR event
+    return)
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
@@ -384,7 +384,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     request.user = user
     request.pass = pass
     # openned facade xhr (not real xhr)
-    setReadyState 1
+    setReadyState(1)
     return
 
   facade.send = (body) ->
@@ -396,13 +396,13 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     request.body = body
     send = ->
       #proxy all events from real xhr to facade
-      proxyEvents COMMON_EVENTS, xhr, facade
-      proxyEvents COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload if facade.upload
+      proxyEvents(COMMON_EVENTS, xhr, facade)
+      proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload if facade.upload)
 
       #prepare request all at once
       transiting = true
       #perform open
-      xhr.open request.method, request.url, request.async, request.user, request.pass
+      xhr.open(request.method, request.url, request.async, request.user, request.pass)
 
       #write xhr settings
       for k in ['type', 'timeout', 'withCredentials']
@@ -412,15 +412,15 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       #insert headers
       for header, value of request.headers
         if header
-          xhr.setRequestHeader header, value
+          xhr.setRequestHeader(header, value)
       #extract real formdata
       if request.body instanceof XHookFormData
         request.body = request.body.fd
       #real send!
-      xhr.send request.body
+      xhr.send(request.body)
       return
 
-    hooks = xhook.listeners BEFORE
+    hooks = xhook.listeners(BEFORE)
     #process hooks sequentially
     process = ->
       unless hooks.length
@@ -431,30 +431,30 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
         if typeof userResponse == 'object' and
            (typeof userResponse.status == 'number' or
             typeof response.status == 'number')
-          mergeObjects userResponse, response
+          mergeObjects(userResponse, response)
           unless 'data' in userResponse
             userResponse.data = userResponse.response || userResponse.text
-          setReadyState 4
+          setReadyState(4)
           return
         #continue processing until no hooks left
         process()
         return
       #specifically provide headers (readyState 2)
       done.head = (userResponse) ->
-        mergeObjects userResponse, response
-        setReadyState 2
+        mergeObjects(userResponse, response)
+        setReadyState(2)
       #specifically provide partial text (responseText  readyState 3)
       done.progress = (userResponse) ->
-        mergeObjects userResponse, response
-        setReadyState 3
+        mergeObjects(userResponse, response)
+        setReadyState(3)
 
       hook = hooks.shift()
       #async or sync?
       if hook.length == 1
-        done hook request
+        done(hook(request))
       else if hook.length == 2 && request.async
         #async handlers must use an async xhr
-        hook request, done
+        hook(request, done)
       else
         #skip async hook on sync requests
         done()
@@ -467,7 +467,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     if transiting
       xhr.abort() #this will emit an 'abort' for us
     else
-      facade[FIRE] 'abort', {}
+      facade[FIRE]('abort', {})
     return
   facade.setRequestHeader = (header, value) ->
     #the first header set is used for all future case-alternatives of 'name'
@@ -482,12 +482,12 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     name = header?.toLowerCase()
     response.headers[name]
   facade.getAllResponseHeaders = ->
-    convertHeaders response.headers
+    convertHeaders(response.headers)
 
   #proxy call only when supported
   if xhr.overrideMimeType
     facade.overrideMimeType = ->
-      xhr.overrideMimeType.apply xhr, arguments
+      xhr.overrideMimeType.apply(xhr, arguments)
 
   #create emitter when supported
   if xhr.upload
@@ -508,8 +508,8 @@ if typeof WINDOW[FETCH] == "function"
     options.url = url
     request = null
 
-    beforeHooks = xhook.listeners BEFORE
-    afterHooks = xhook.listeners AFTER
+    beforeHooks = xhook.listeners(BEFORE)
+    afterHooks = xhook.listeners(AFTER)
 
     return new Promise((resolve, reject) ->
 
@@ -518,7 +518,7 @@ if typeof WINDOW[FETCH] == "function"
           options.headers = new Headers(options.headers)
 
         if (!request)
-          request = new Request options.url, options
+          request = new Request(options.url, options)
 
         return mergeObjects(options, request)
 
@@ -529,10 +529,10 @@ if typeof WINDOW[FETCH] == "function"
         hook = afterHooks.shift()
 
         if hook.length == 2
-          hook getRequest(), response
+          hook(getRequest(), response)
           processAfter(response)
         else if hook.length == 3
-          hook getRequest(), response, processAfter
+          hook(getRequest(), response, processAfter)
         else
           processAfter(response)
 
@@ -557,7 +557,7 @@ if typeof WINDOW[FETCH] == "function"
         if hook.length == 1
           done hook(options)
         else if hook.length == 2
-          hook getRequest(), done
+          hook(getRequest(), done)
 
       send = ->
         NativeFetch(getRequest())
@@ -580,6 +580,6 @@ XHookHttpRequest.DONE = 4;
 
 #publicise (amd+commonjs+window)
 if typeof define == "function" && define.amd
-  define "xhook", [], -> xhook
+  define("xhook", [], -> xhook)
 else
   (this.exports || this).xhook = xhook
