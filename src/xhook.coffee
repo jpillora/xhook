@@ -26,12 +26,12 @@ msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1])
 msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) || [])[1])  if isNaN(msie)
 
 #if required, add 'indexOf' method to Array
-Array::indexOf = Array::indexOf || (item) ->
+Array.prototype.indexOf = Array.prototype.indexOf || (item) ->
   for x, i in this
     return i if x == item
   return -1
 
-slice = (o,n) -> Array::slice.call(o,n)
+slice = (o,n) -> Array.prototype.slice.call(o,n)
 
 depricatedProp = (p) ->
   return p in ["returnValue","totalSize","position"]
