@@ -1,75 +1,75 @@
 WINDOW = null;
 if (typeof WorkerGlobalScope != 'undefined' && self instanceof WorkerGlobalScope)
-  WINDOW = self
+  WINDOW = self;
 else
-  WINDOW = window
+  WINDOW = window;
 
 #for compression
-document = WINDOW.document
-BEFORE = 'before'
-AFTER = 'after'
-READY_STATE = 'readyState'
-ON = 'addEventListener'
-OFF = 'removeEventListener'
-FIRE = 'dispatchEvent'
-XMLHTTP = 'XMLHttpRequest'
-FETCH = 'fetch'
-FormData = 'FormData'
+document = WINDOW.document;
+BEFORE = 'before';
+AFTER = 'after';
+READY_STATE = 'readyState';
+ON = 'addEventListener';
+OFF = 'removeEventListener';
+FIRE = 'dispatchEvent';
+XMLHTTP = 'XMLHttpRequest';
+FETCH = 'fetch';
+FormData = 'FormData';
 
-UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
-COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
+UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
+COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
 
 #parse IE version
-useragent = `navigator['useragent'] ? navigator.userAgent : ''`
-msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1])
+useragent = `navigator['useragent'] ? navigator.userAgent : ''`;
+msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1]);
 
 if (isNaN(msie))
-  msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) || [])[1])
+  msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) || [])[1]);
 
 #if required, add 'indexOf' method to Array
 Array.prototype.indexOf = Array.prototype.indexOf || (item) ->
   for x, i in this
     if (x == item)
-      return i
-  return -1
+      return i;
+  return -1;
 
-slice = (o,n) -> Array.prototype.slice.call(o,n)
+slice = (o,n) -> Array.prototype.slice.call(o,n);
 
 depricatedProp = (p) ->
-  return p in ["returnValue","totalSize","position"]
+  return p in ["returnValue","totalSize","position"];
 
 mergeObjects = (src, dst) ->
   for k,v of src
     if (depricatedProp(k))
-      continue
+      continue;
     try dst[k] = src[k]
-  return dst
+  return dst;
 
 #proxy events from one emitter to another
 proxyEvents = (events, src, dst) ->
   p = (event) -> (e) ->
-    clone = {}
+    clone = {};
     #copies event, with dst emitter inplace of src
     for k of e
       if (depricatedProp(k))
-        continue
-      val = e[k]
-      clone[k] = `val === src ? dst : val`
+        continue;
+      val = e[k];
+      clone[k] = `val === src ? dst : val`;
     #emits out the dst
-    dst[FIRE](event, clone)
+    dst[FIRE](event, clone);
   #dont proxy manual events
   for event in events
     if dst._has(event)
-      src["on#{event}"] = p(event)
+      src["on#{event}"] = p(event);
   return
 
 #create fake event
 fakeEvent = (type) ->
   if (document && document.createEventObject?)
-    msieEventObject = document.createEventObject()
-    msieEventObject.type = type
-    return msieEventObject
+    msieEventObject = document.createEventObject();
+    msieEventObject.type = type;
+    return msieEventObject;
   else
     # on some platforms like android 4.1.2 and safari on windows, it appears
     # that new Event is not allowed
@@ -79,114 +79,114 @@ fakeEvent = (type) ->
 #tiny event emitter
 EventEmitter = (nodeStyle) ->
   #private
-  events = {}
+  events = {};
   listeners = (event) ->
-    events[event] || []
+    events[event] || [];
   #public
-  emitter = {}
+  emitter = {};
 
   emitter[ON] = (event, callback, i) ->
-    events[event] = listeners(event)
+    events[event] = listeners(event);
     if (events[event].indexOf(callback) >= 0)
-      return
-    i = `i === undefined ? events[event].length : i`
-    events[event].splice(i, 0, callback)
-    return
+      return;
+    i = `i === undefined ? events[event].length : i`;
+    events[event].splice(i, 0, callback);
+    return;
 
   emitter[OFF] = (event, callback) ->
     #remove all
     if (event == `undefined`)
-      events = {}
-      return
+      events = {};
+      return;
     #remove all of type event
     if (callback == `undefined`)
-      events[event] = []
+      events[event] = [];
     #remove particular handler
-    i = listeners(event).indexOf(callback)
+    i = listeners(event).indexOf(callback);
     if (i == -1)
-      return
-    listeners(event).splice(i, 1)
-    return
+      return;
+    listeners(event).splice(i, 1);
+    return;
 
   emitter[FIRE] = ->
-    args = slice(arguments)
-    event = args.shift()
+    args = slice(arguments);
+    event = args.shift();
     if (!nodeStyle)
-      args[0] = mergeObjects(args[0], fakeEvent(event))
-    legacylistener = emitter["on#{event}"]
+      args[0] = mergeObjects(args[0], fakeEvent(event));
+    legacylistener = emitter["on#{event}"];
     if (legacylistener)
-      legacylistener.apply(emitter, args)
+      legacylistener.apply(emitter, args);
     for listener, i in listeners(event).concat(listeners("*"))
-      listener.apply(emitter, args)
-    return
+      listener.apply(emitter, args);
+    return;
 
   emitter._has = (event) ->
-    return !!(events[event] || emitter["on#{event}"])
+    return !!(events[event] || emitter["on#{event}"]);
 
   #add extra aliases
   if (nodeStyle)
     emitter.listeners = (event) ->
-      slice(listeners(event))
-    emitter.on = emitter[ON]
-    emitter.off = emitter[OFF]
-    emitter.fire = emitter[FIRE]
+      slice(listeners(event));
+    emitter.on = emitter[ON];
+    emitter.off = emitter[OFF];
+    emitter.fire = emitter[FIRE];
     emitter.once = (e, fn) ->
       fire = ->
-        emitter.off(e, fire)
-        fn.apply(null, arguments)
-      emitter.on(e, fire)
+        emitter.off(e, fire);
+        fn.apply(null, arguments);
+      emitter.on(e, fire);
     emitter.destroy = ->
-      events = {}
+      events = {};
 
-  return emitter
+  return emitter;
 
 #use event emitter to store hooks
-xhook = EventEmitter(true)
-xhook.EventEmitter = EventEmitter
+xhook = EventEmitter(true);
+xhook.EventEmitter = EventEmitter;
 
 xhook[BEFORE] = (handler, i) ->
   if (handler.length < 1 || handler.length > 2)
-    throw "invalid hook"
-  xhook[ON](BEFORE, handler, i)
+    throw "invalid hook";
+  xhook[ON](BEFORE, handler, i);
 
 xhook[AFTER] = (handler, i) ->
   if (handler.length < 2 || handler.length > 3)
-    throw "invalid hook"
-  xhook[ON](AFTER, handler, i)
+    throw "invalid hook";
+  xhook[ON](AFTER, handler, i);
 
 xhook.enable = ->
-  WINDOW[XMLHTTP] = XHookHttpRequest
+  WINDOW[XMLHTTP] = XHookHttpRequest;
   if (typeof XHookFetchRequest == "function")
-    WINDOW[FETCH] = XHookFetchRequest
+    WINDOW[FETCH] = XHookFetchRequest;
   if (NativeFormData)
-    WINDOW[FormData] = XHookFormData
-  return
+    WINDOW[FormData] = XHookFormData;
+  return;
 
 xhook.disable = ->
-  WINDOW[XMLHTTP] = xhook[XMLHTTP]
-  WINDOW[FETCH] = xhook[FETCH]
+  WINDOW[XMLHTTP] = xhook[XMLHTTP];
+  WINDOW[FETCH] = xhook[FETCH];
   if (NativeFormData)
-    WINDOW[FormData] = NativeFormData
-  return
+    WINDOW[FormData] = NativeFormData;
+  return;
 
 #helper
 convertHeaders = xhook.headers = (h, dest = {}) ->
   switch (typeof h)
     when "object"
-      headers = []
+      headers = [];
       for k,v of h
-        name = k.toLowerCase()
-        headers.push("#{name}:\t#{v}")
-      return headers.join('\n')
+        name = k.toLowerCase();
+        headers.push("#{name}:\t#{v}");
+      return headers.join('\n');
     when "string"
-      headers = h.split('\n')
+      headers = h.split('\n');
       for header in headers
         if (/([^:]+):\s*(.+)/.test(header))
-          name = RegExp.$1?.toLowerCase()
-          value = RegExp.$2
-          dest[name] ?= value
-      return dest
-  return
+          name = RegExp.$1?.toLowerCase();
+          value = RegExp.$2;
+          dest[name] ?= value;
+      return dest;
+  return;
 
 #patch FormData
 # we can do this safely because all XHR
@@ -194,9 +194,9 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
 # object is used on send
 NativeFormData = WINDOW[FormData]
 XHookFormData = (form) ->
-  this.fd = `form ? new NativeFormData(form) : new NativeFormData()`
-  this.form = form
-  entries = []
+  this.fd = `form ? new NativeFormData(form) : new NativeFormData()`;
+  this.form = form;
+  entries = [];
   Object.defineProperty(this, 'entries', get: ->
     #extract form entries
     fentries = if !form then [] else
@@ -206,32 +206,32 @@ XHookFormData = (form) ->
         [e.name, `e.type === "file" ? e.files : e.value`]
       )
     #combine with js entries
-    return fentries.concat(entries))
+    return fentries.concat(entries));
   this.append = =>
-    args = slice(arguments)
-    entries.push(args)
-    this.fd.append.apply(this.fd, args)
-  return
+    args = slice(arguments);
+    entries.push(args);
+    this.fd.append.apply(this.fd, args);
+  return;
 
 if (NativeFormData)
   #expose native formdata as xhook.FormData incase its needed
-  xhook[FormData] = NativeFormData
-  WINDOW[FormData] = XHookFormData
+  xhook[FormData] = NativeFormData;
+  WINDOW[FormData] = XHookFormData;
 
 #patch XHR
-NativeXMLHttp = WINDOW[XMLHTTP]
-xhook[XMLHTTP] = NativeXMLHttp
+NativeXMLHttp = WINDOW[XMLHTTP];
+xhook[XMLHTTP] = NativeXMLHttp;
 XHookHttpRequest = WINDOW[XMLHTTP] = ->
-  ABORTED = -1
-  xhr = new xhook[XMLHTTP]()
+  ABORTED = -1;
+  xhr = new xhook[XMLHTTP]();
 
   #==========================
   # Extra state
-  request = {}
-  status = null
-  hasError = undefined
-  transiting = undefined
-  response = undefined
+  request = {};
+  status = null;
+  hasError = undefined;
+  transiting = undefined;
+  response = undefined;
 
   #==========================
   # Private API
@@ -240,101 +240,101 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   readHead = ->
     # Accessing attributes on an aborted xhr object will
     # throw an 'c00c023f error' in IE9 and lower, don't touch it.
-    response.status = status || xhr.status
+    response.status = status || xhr.status;
     if (!(status == ABORTED && msie < 10))
-      response.statusText = xhr.statusText
+      response.statusText = xhr.statusText;
     if (status != ABORTED)
         for key, val of convertHeaders(xhr.getAllResponseHeaders())
           if (!response.headers[key])
-            name = key.toLowerCase()
-            response.headers[name] = val
-        return
+            name = key.toLowerCase();
+            response.headers[name] = val;
+        return;
 
   readBody = ->
     #https://xhr.spec.whatwg.org/
     if (!xhr.responseType || xhr.responseType == "text")
-      response.text = xhr.responseText
-      response.data = xhr.responseText
+      response.text = xhr.responseText;
+      response.data = xhr.responseText;
     else if (xhr.responseType == "document")
-      response.xml = xhr.responseXML
-      response.data = xhr.responseXML
+      response.xml = xhr.responseXML;
+      response.data = xhr.responseXML;
     else
-      response.data = xhr.response
+      response.data = xhr.response;
     #new in some browsers
     if ("responseURL" of xhr)
-      response.finalUrl = xhr.responseURL
+      response.finalUrl = xhr.responseURL;
     return
 
   #write response into facade xhr
   writeHead = ->
-    facade.status = response.status
-    facade.statusText = response.statusText
-    return
+    facade.status = response.status;
+    facade.statusText = response.statusText;
+    return;
 
   writeBody = ->
     if ('text' of response)
-      facade.responseText = response.text
+      facade.responseText = response.text;
     if ('xml' of response)
-      facade.responseXML = response.xml
+      facade.responseXML = response.xml;
     if ('data' of response)
-      facade.response = response.data
+      facade.response = response.data;
     if ('finalUrl' of response)
-      facade.responseURL = response.finalUrl
-    return
+      facade.responseURL = response.finalUrl;
+    return;
 
   #ensure ready state 0 through 4 is handled
   emitReadyState = (n) ->
     while (n > currentState && currentState < 4)
-      facade[READY_STATE] = ++currentState
+      facade[READY_STATE] = ++currentState;
       # make fake events for libraries that actually check the type on
       # the event object
       if (currentState == 1)
-        facade[FIRE]("loadstart", {})
+        facade[FIRE]("loadstart", {});
       if (currentState == 2)
-        writeHead()
+        writeHead();
       if (currentState == 4)
-        writeHead()
-        writeBody()
-      facade[FIRE]("readystatechange", {})
+        writeHead();
+        writeBody();
+      facade[FIRE]("readystatechange", {});
       #delay final events incase of error
       if (currentState == 4)
-        setTimeout(emitFinal, 0)
-    return
+        setTimeout(emitFinal, 0);
+    return;
 
   emitFinal = ->
     if (!hasError)
-      facade[FIRE]("load", {})
-    facade[FIRE]("loadend", {})
+      facade[FIRE]("load", {});
+    facade[FIRE]("loadend", {});
     if (hasError)
-      facade[READY_STATE] = 0
-    return
+      facade[READY_STATE] = 0;
+    return;
 
   #control facade ready state
-  currentState = 0
+  currentState = 0;
   setReadyState = (n) ->
     #emit events until readyState reaches 4
     if (n != 4)
-      emitReadyState(n)
-      return
+      emitReadyState(n);
+      return;
     #before emitting 4, run all 'after' hooks in sequence
-    hooks = xhook.listeners(AFTER)
+    hooks = xhook.listeners(AFTER);
     process = ->
       if (!hooks.length)
-        return emitReadyState(4)
-      hook = hooks.shift()
+        return emitReadyState(4);
+      hook = hooks.shift();
       if (hook.length == 2)
-        hook(request, response)
-        process()
+        hook(request, response);
+        process();
       else if (hook.length == 3 && request.async)
-        hook(request, response, process)
+        hook(request, response, process);
       else
-        process()
-    process()
-    return
+        process();
+    process();
+    return;
 
   #==========================
   # Facade XHR
-  facade = request.xhr = EventEmitter()
+  facade = request.xhr = EventEmitter();
 
   #==========================
 
@@ -351,251 +351,253 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     #pull status and headers
     try
       if (xhr[READY_STATE] == 2)
-        readHead()
+        readHead();
     #pull response data
     if (xhr[READY_STATE] == 4)
-      transiting = false
-      readHead()
-      readBody()
+      transiting = false;
+      readHead();
+      readBody();
 
-    setReadyState(xhr[READY_STATE])
-    return
+    setReadyState(xhr[READY_STATE]);
+    return;
 
   #mark this xhr as errored
   hasErrorHandler = ->
-    hasError = true
-    return
-  facade[ON]('error', hasErrorHandler)
-  facade[ON]('timeout', hasErrorHandler)
-  facade[ON]('abort', hasErrorHandler)
+    hasError = true;
+    return;
+  facade[ON]('error', hasErrorHandler);
+  facade[ON]('timeout', hasErrorHandler);
+  facade[ON]('abort', hasErrorHandler);
   # progress means we're current downloading...
   facade[ON]('progress', ->
     #progress events are followed by readystatechange for some reason...
     if (currentState < 3)
-      setReadyState(3)
+      setReadyState(3);
     else
-      facade[FIRE]("readystatechange", {}) #TODO fake an XHR event
-    return)
+      facade[FIRE]("readystatechange", {}); #TODO fake an XHR event
+    return;
+  )
 
   # initialise 'withCredentials' on facade xhr in browsers with it
   # or if explicitly told to do so
   if ('withCredentials' of xhr || xhook.addWithCredentials)
-    facade.withCredentials = false
-  facade.status = 0
+    facade.withCredentials = false;
+  facade.status = 0;
 
   # initialise all possible event handlers
   for event in COMMON_EVENTS.concat(UPLOAD_EVENTS)
-    facade["on#{event}"] = null
+    facade["on#{event}"] = null;
 
   facade.open = (method, url, async, user, pass) ->
     # Initailize empty XHR facade
-    currentState = 0
-    hasError = false
-    transiting = false
-    request.headers = {}
-    request.headerNames = {}
-    request.status = 0
-    response = {}
-    response.headers = {}
+    currentState = 0;
+    hasError = false;
+    transiting = false;
+    request.headers = {};
+    request.headerNames = {};
+    request.status = 0;
+    response = {};
+    response.headers = {};
 
-    request.method = method
-    request.url = url
-    request.async = async != false
-    request.user = user
-    request.pass = pass
+    request.method = method;
+    request.url = url;
+    request.async = async != false;
+    request.user = user;
+    request.pass = pass;
     # openned facade xhr (not real xhr)
-    setReadyState(1)
-    return
+    setReadyState(1);
+    return;
 
   facade.send = (body) ->
     #read xhr settings before hooking
     for k in ['type', 'timeout', 'withCredentials']
-      modk = `k === "type" ? "responseType" : k`
+      modk = `k === "type" ? "responseType" : k`;
       if (modk of facade)
-        request[k] = facade[modk]
+        request[k] = facade[modk];
 
-    request.body = body
+    request.body = body;
     send = ->
       #proxy all events from real xhr to facade
-      proxyEvents(COMMON_EVENTS, xhr, facade)
-      proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload if facade.upload)
+      proxyEvents(COMMON_EVENTS, xhr, facade);
+      proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload if facade.upload);
 
       #prepare request all at once
-      transiting = true
+      transiting = true;
       #perform open
-      xhr.open(request.method, request.url, request.async, request.user, request.pass)
+      xhr.open(request.method, request.url, request.async, request.user, request.pass);
 
       #write xhr settings
       for k in ['type', 'timeout', 'withCredentials']
-        modk = `k === "type" ? "responseType" : k`
+        modk = `k === "type" ? "responseType" : k`;
         if (k of request)
-          xhr[modk] = request[k]
+          xhr[modk] = request[k];
 
       #insert headers
       for header, value of request.headers
         if (header)
-          xhr.setRequestHeader(header, value)
+          xhr.setRequestHeader(header, value);
       #extract real formdata
       if (request.body instanceof XHookFormData)
-        request.body = request.body.fd
+        request.body = request.body.fd;
       #real send!
-      xhr.send(request.body)
-      return
+      xhr.send(request.body);
+      return;
 
-    hooks = xhook.listeners(BEFORE)
+    hooks = xhook.listeners(BEFORE);
     #process hooks sequentially
     process = ->
       if (!hooks.length)
-        return send()
+        return send();
       #go to next hook OR optionally provide response
       done = (userResponse) ->
         #break chain - provide dummy response (readyState 4)
         if (typeof userResponse == 'object' and
            (typeof userResponse.status == 'number' or
             typeof response.status == 'number'))
-          mergeObjects(userResponse, response)
+          mergeObjects(userResponse, response);
           if (!('data' in userResponse))
-            userResponse.data = userResponse.response || userResponse.text
-          setReadyState(4)
-          return
+            userResponse.data = userResponse.response || userResponse.text;
+          setReadyState(4);
+          return;
         #continue processing until no hooks left
-        process()
-        return
+        process();
+        return;
 
       #specifically provide headers (readyState 2)
       done.head = (userResponse) ->
-        mergeObjects(userResponse, response)
-        setReadyState(2)
+        mergeObjects(userResponse, response);
+        setReadyState(2);
 
       #specifically provide partial text (responseText  readyState 3)
       done.progress = (userResponse) ->
-        mergeObjects(userResponse, response)
-        setReadyState(3)
+        mergeObjects(userResponse, response);
+        setReadyState(3);
 
-      hook = hooks.shift()
+      hook = hooks.shift();
       #async or sync?
       if (hook.length == 1)
-        done(hook(request))
+        done(hook(request));
       else if (hook.length == 2 && request.async)
         #async handlers must use an async xhr
-        hook(request, done)
+        hook(request, done);
       else
         #skip async hook on sync requests
-        done()
+        done();
     #kick off
-    process()
-    return
+    process();
+    return;
 
   facade.abort = ->
     status = ABORTED;
     if (transiting)
-      xhr.abort() #this will emit an 'abort' for us
+      xhr.abort(); #this will emit an 'abort' for us
     else
-      facade[FIRE]('abort', {})
+      facade[FIRE]('abort', {});
     return
 
   facade.setRequestHeader = (header, value) ->
     #the first header set is used for all future case-alternatives of 'name'
-    lName = header?.toLowerCase()
-    name = request.headerNames[lName] = request.headerNames[lName] || header
+    lName = header?.toLowerCase();
+    name = request.headerNames[lName] = request.headerNames[lName] || header;
     #append header to any previous values
     if (request.headers[name])
-      value = request.headers[name] + ', ' + value
-    request.headers[name] = value
-    return
+      value = request.headers[name] + ', ' + value;
+    request.headers[name] = value;
+    return;
 
   facade.getResponseHeader = (header) ->
-    name = header?.toLowerCase()
-    response.headers[name]
+    name = header?.toLowerCase();
+    response.headers[name];
 
   facade.getAllResponseHeaders = ->
-    convertHeaders(response.headers)
+    convertHeaders(response.headers);
 
   #proxy call only when supported
   if (xhr.overrideMimeType)
     facade.overrideMimeType = ->
-      xhr.overrideMimeType.apply(xhr, arguments)
+      xhr.overrideMimeType.apply(xhr, arguments);
 
   #create emitter when supported
   if (xhr.upload)
-    facade.upload = request.upload = EventEmitter()
+    facade.upload = request.upload = EventEmitter();
 
-  facade.UNSENT = 0
-  facade.OPENED = 1
-  facade.HEADERS_RECEIVED = 2
-  facade.LOADING = 3
-  facade.DONE = 4
-  return facade
+  facade.UNSENT = 0;
+  facade.OPENED = 1;
+  facade.HEADERS_RECEIVED = 2;
+  facade.LOADING = 3;
+  facade.DONE = 4;
+  return facade;
 
 #patch Fetch
 if (typeof WINDOW[FETCH] == "function")
-  NativeFetch = WINDOW[FETCH]
-  xhook[FETCH] = NativeFetch
-  XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
-    options.url = url
-    request = null
+  NativeFetch = WINDOW[FETCH];
+  xhook[FETCH] = NativeFetch;
 
-    beforeHooks = xhook.listeners(BEFORE)
-    afterHooks = xhook.listeners(AFTER)
+  XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
+    options.url = url;
+    request = null;
+
+    beforeHooks = xhook.listeners(BEFORE);
+    afterHooks = xhook.listeners(AFTER);
 
     return new Promise((resolve, reject) ->
 
       getRequest = ->
         if (options.headers)
-          options.headers = new Headers(options.headers)
+          options.headers = new Headers(options.headers);
 
         if (!request)
-          request = new Request(options.url, options)
+          request = new Request(options.url, options);
 
-        return mergeObjects(options, request)
+        return mergeObjects(options, request);
 
       processAfter = (response) ->
         if (!afterHooks.length)
-          return resolve(response)
+          return resolve(response);
 
-        hook = afterHooks.shift()
+        hook = afterHooks.shift();
 
         if (hook.length == 2)
-          hook(getRequest(), response)
-          processAfter(response)
+          hook(getRequest(), response);
+          processAfter(response);
         else if (hook.length == 3)
-          hook(getRequest(), response, processAfter)
+          hook(getRequest(), response, processAfter);
         else
-          processAfter(response)
+          processAfter(response);
 
       done = (userResponse) ->
         if (userResponse != undefined)
-          response = new Response(userResponse.body || userResponse.text, userResponse)
-          resolve(response)
-          processAfter(response)
-          return
+          response = new Response(userResponse.body || userResponse.text, userResponse);
+          resolve(response);
+          processAfter(response);
+          return;
 
         #continue processing until no hooks left
-        processBefore()
-        return
+        processBefore();
+        return;
 
       processBefore = ->
         if (!beforeHooks.length)
-          send()
-          return
+          send();
+          return;
 
-        hook = beforeHooks.shift()
+        hook = beforeHooks.shift();
 
         if (hook.length == 1)
-          done(hook(options))
+          done(hook(options));
         else if (hook.length == 2)
-          hook(getRequest(), done)
+          hook(getRequest(), done);
 
       send = ->
         NativeFetch(getRequest())
           .then((response) -> processAfter(response))
           .catch((err) ->
-            processAfter(err)
-            reject(err)
+            processAfter(err);
+            reject(err);
         )
 
-      processBefore()
-      return
+      processBefore();
+      return;
     )
 
 
@@ -607,6 +609,6 @@ XHookHttpRequest.DONE = 4;
 
 #publicise (amd+commonjs+window)
 if (typeof define == "function" && define.amd)
-  define("xhook", [], -> xhook)
+  define("xhook", [], -> xhook);
 else
-  (this.exports || this).xhook = xhook
+  (this.exports || this).xhook = xhook;
