@@ -80,8 +80,7 @@ fakeEvent = (type) ->
 EventEmitter = (nodeStyle) ->
   #private
   events = {};
-  listeners = (event) ->
-    events[event] || [];
+  listeners = (event) -> events[event] || [];
   #public
   emitter = {};
 
@@ -120,8 +119,7 @@ EventEmitter = (nodeStyle) ->
       listener.apply(emitter, args);
     return;
 
-  emitter._has = (event) ->
-    return !!(events[event] || emitter["on#{event}"]);
+  emitter._has = (event) -> !!(events[event] || emitter["on#{event}"]);
 
   #add extra aliases
   if (nodeStyle)
@@ -135,8 +133,7 @@ EventEmitter = (nodeStyle) ->
         emitter.off(e, fire);
         fn.apply(null, arguments);
       emitter.on(e, fire);
-    emitter.destroy = ->
-      events = {};
+    emitter.destroy = -> events = {};
 
   return emitter;
 
