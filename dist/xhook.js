@@ -1,13 +1,14 @@
 // XHook - v1.4.0 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2017
-(function(window,undefined) {
-var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, useragent, xhook,
+var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, useragent, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 WINDOW = null;
 
 if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
   WINDOW = self;
+} else if (typeof global !== 'undefined') {
+  WINDOW = global;
 } else {
   WINDOW = window;
 }
@@ -44,7 +45,7 @@ if (isNaN(msie)) {
   msie = parseInt((/trident\/.*; rv:(\d+)/.exec(useragent.toLowerCase()) || [])[1]);
 }
 
-Array.prototype.indexOf = Array.prototype.indexOf || function(item) {
+(_base = Array.prototype).indexOf || (_base.indexOf = function(item) {
   var i, x, _i, _len;
   for (i = _i = 0, _len = this.length; _i < _len; i = ++_i) {
     x = this[i];
@@ -53,7 +54,7 @@ Array.prototype.indexOf = Array.prototype.indexOf || function(item) {
     }
   }
   return -1;
-};
+});
 
 slice = function(o, n) {
   return Array.prototype.slice.call(o, n);
@@ -267,11 +268,11 @@ XHookFormData = function(form) {
     get: function() {
       var fentries;
       fentries = !form ? [] : slice(form.querySelectorAll("input,select")).filter(function(e) {
-        var _ref;
-        return ((_ref = e.type) !== 'checkbox' && _ref !== 'radio') || e.checked;
-      }).map(function(e) {
-        return [e.name, e.type === "file" ? e.files : e.value];
-      });
+          var _ref;
+          return ((_ref = e.type) !== 'checkbox' && _ref !== 'radio') || e.checked;
+        }).map(function(e) {
+          return [e.name, e.type === "file" ? e.files : e.value];
+        });
       return fentries.concat(entries);
     }
   });
@@ -478,7 +479,9 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
     send = function() {
       var header, value, _k, _len2, _ref2, _ref3;
       proxyEvents(COMMON_EVENTS, xhr, facade);
-      proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload ? facade.upload : void 0);
+      if (facade.upload) {
+        proxyEvents(COMMON_EVENTS.concat(UPLOAD_EVENTS), xhr.upload, facade.upload);
+      }
       transiting = true;
       xhr.open(request.method, request.url, request.async, request.user, request.pass);
       _ref2 = ['type', 'timeout', 'withCredentials'];
@@ -510,7 +513,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
       done = function(userResponse) {
         if (typeof userResponse === 'object' && (typeof userResponse.status === 'number' || typeof response.status === 'number')) {
           mergeObjects(userResponse, response);
-          if (!(__indexOf.call(userResponse, 'data') >= 0)) {
+          if (__indexOf.call(userResponse, 'data') < 0) {
             userResponse.data = userResponse.response || userResponse.text;
           }
           setReadyState(4);
@@ -671,5 +674,3 @@ if (typeof define === "function" && define.amd) {
 } else {
   (this.exports || this).xhook = xhook;
 }
-
-}.call(this,window));
