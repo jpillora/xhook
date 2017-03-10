@@ -7,6 +7,8 @@ WINDOW = null;
 
 if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
   WINDOW = self;
+} else if (typeof global !== 'undefined') {
+  WINDOW = global;
 } else {
   WINDOW = window;
 }

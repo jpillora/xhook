@@ -1,6 +1,8 @@
 WINDOW = null;
 if typeof WorkerGlobalScope isnt 'undefined' && self instanceof WorkerGlobalScope
   WINDOW = self
+else if typeof global isnt 'undefined'
+  WINDOW = global
 else
   WINDOW = window
 
