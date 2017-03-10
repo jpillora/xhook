@@ -65,10 +65,10 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 * Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js) 14KB
 * Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js) 6KB
-* CDN (See available versions [here](https://github.com/jpillora/xhook/releases))
+* CDN (Use `latest` or lock to one of the [available versions](https://github.com/jpillora/xhook/releases))
 
 	``` html
-	<script src="//https://unpkg.com/xhook@latest/dist/xhook.min.js"></script>
+	<script src="//unpkg.com/xhook@latest/dist/xhook.min.js"></script>
 	```
 
 ## API
