@@ -464,14 +464,6 @@ function XHookHttpRequest() {
 
   //==============================
 
-  facade.response = xhr.response;
-  facade.responseText = xhr.responseText;
-  facade.responseXML = xhr.responseXML;
-  facade.responseURL = xhr.responseURL;
-  facade.readyState = xhr.readyState;
-  facade.status = xhr.status;
-  facade.statusText = xhr.statusText;
-
   // Handle the underlying ready state
   xhr.onreadystatechange = function (event) {
     //pull status and headers
