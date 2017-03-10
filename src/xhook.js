@@ -24,7 +24,7 @@ const UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
 const COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
 //parse IE version
-const useragent = navigator['useragent'] ? navigator.userAgent : '';
+const useragent = typeof navigator !== 'undefined' && navigator['useragent'] ? navigator.userAgent : '';
 let msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1]);
 
 if (isNaN(msie)) {
