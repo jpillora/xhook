@@ -2,6 +2,8 @@ let WINDOW = null;
 
 if (typeof WorkerGlobalScope !== 'undefined' && this instanceof WorkerGlobalScope) {
   WINDOW = this;
+} else if (typeof global !== 'undefined') {
+  WINDOW = global;
 } else {
   WINDOW = window;
 }
