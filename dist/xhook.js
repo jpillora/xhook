@@ -1,4 +1,4 @@
-// XHook - v1.4.1 - https://github.com/jpillora/xhook
+// XHook - v1.4.2 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2017
 var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, useragent, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -37,7 +37,7 @@ UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
 
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
-useragent = navigator['useragent'] ? navigator.userAgent : '';
+useragent = typeof navigator !== 'undefined' && navigator['useragent'] ? navigator.userAgent : '';
 
 msie = parseInt((/msie (\d+)/.exec(useragent.toLowerCase()) || [])[1]);
 

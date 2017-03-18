@@ -24,7 +24,7 @@ const UPLOAD_EVENTS = ['load', 'loadend', 'loadstart'];
 const COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout'];
 
 //parse IE version
-const useragent = navigator['useragent'] ? navigator.userAgent : '';
+const useragent = typeof navigator !== 'undefined' && navigator['useragent'] ? navigator.userAgent : '';
 let msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) || [])[1]);
 
 if (isNaN(msie)) {
@@ -463,14 +463,6 @@ function XHookHttpRequest() {
   const facade = request.xhr = EventEmitter();
 
   //==============================
-
-  facade.response = xhr.response;
-  facade.responseText = xhr.responseText;
-  facade.responseXML = xhr.responseXML;
-  facade.responseURL = xhr.responseURL;
-  facade.readyState = xhr.readyState;
-  facade.status = xhr.status;
-  facade.statusText = xhr.statusText;
 
   // Handle the underlying ready state
   xhr.onreadystatechange = function (event) {
