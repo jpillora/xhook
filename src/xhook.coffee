@@ -23,7 +23,7 @@ COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
 
 
 #parse IE version
-useragent = if navigator['useragent'] then navigator.userAgent else ''
+useragent = if typeof navigator isnt 'undefined' && navigator['useragent'] then navigator.userAgent else ''
 msie = parseInt((/msie (\d+)/.exec((useragent).toLowerCase()) or [])[1])
 msie = parseInt((/trident\/.*; rv:(\d+)/.exec((useragent).toLowerCase()) or [])[1])  if isNaN(msie)
 
