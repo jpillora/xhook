@@ -13,7 +13,8 @@ xhook.before(function(request, callback) {
   request.xhr.dispatchEvent('progress', { loaded: loaded, total: 100 });
 
   function tick() {
-    loaded += Math.round(8+Math.random()*8);
+    // randomization negated in favor of consistent tests
+    loaded += 13; //Math.round(8+Math.random()*8);
     loaded = Math.min(loaded, 100);
     request.xhr.dispatchEvent('progress', { loaded: loaded, total: 100 });
     if(loaded < 100)
@@ -38,7 +39,7 @@ xhr.onprogress = function(e) {
   append(Math.round((e.loaded/e.total)*100));
 }
 
-//will not 
+//will not
 xhr.open('GET', 'example1.txt');
 
 xhr.send();
