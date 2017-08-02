@@ -592,6 +592,9 @@ if (typeof WINDOW[FETCH] === "function") {
     return new Promise(function(resolve, reject) {
       var done, getRequest, processAfter, processBefore, send;
       getRequest = function() {
+        if (options.body instanceof XHookFormData) {
+          options.body = options.body.fd;
+        }
         if (options.headers) {
           options.headers = new Headers(options.headers);
         }

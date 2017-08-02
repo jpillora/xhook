@@ -508,6 +508,9 @@ if typeof WINDOW[FETCH] is "function"
     return new Promise((resolve, reject) ->
 
       getRequest = ->
+        if options.body instanceof XHookFormData
+          options.body = options.body.fd
+
         if options.headers
           options.headers = new Headers(options.headers)
 

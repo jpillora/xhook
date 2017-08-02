@@ -1,0 +1,35 @@
+<h5>Fetch with form data</h5>
+
+<form>
+  <input type="text" id="username" name="username">
+  <input type="password" id="password" name="password">
+  <button id="submit" type="button">submit</button>
+</form>
+
+<pre id="result"></pre>
+
+<script src="https://cdn.jsdelivr.net/fetch/2.0.1/fetch.min.js"></script>
+<script src="../dist/xhook.js"></script>
+<script type="text/javascript">
+  xhook.after(function (request, response) {
+    console.log(request, response);
+  });
+
+  document.getElementById("submit").addEventListener("click", function () {
+    var username = document.getElementById("username").value;
+    var password = document.getElementById("password").value;
+    const data = new FormData();
+    data.append('username', username);
+    data.append('password', password);
+    console.log("submitting data,", data);
+    fetch(`http://echo.jpillora.com/cors-test`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: data
+    }).then((response) => {
+      response.text().then((text) => {
+        document.querySelector('#result').innerHTML = text;
+      })
+    })
+  });
+</script>
