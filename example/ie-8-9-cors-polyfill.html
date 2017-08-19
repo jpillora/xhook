@@ -88,7 +88,7 @@ document.getElementById('polyfill-code').innerHTML = code.replace(/\n/g,"<br>")
 
 //vanilla calls
 var xhr1 = new XMLHttpRequest();
-xhr1.open('GET', 'http://echo.jpillora.com/cors-test');
+xhr1.open('GET', 'http://echo.jpillora.com/`cors-test`');
 xhr1.onreadystatechange = function() {
   document.getElementById('one').innerHTML = xhr1.responseText;
 }

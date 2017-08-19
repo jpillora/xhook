@@ -1,4 +1,4 @@
-// XHook - v1.4.3 - https://github.com/jpillora/xhook
+// XHook - v1.4.4 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2017
 (function(window,undefined) {
 var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, nullify, proxyEvents, slice, useragent, xhook, _base,
@@ -263,7 +263,6 @@ convertHeaders = xhook.headers = function(h, dest) {
       }
       return dest;
   }
-  return null;
 };
 
 NativeFormData = WINDOW[FormData];
@@ -565,7 +564,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
     return nullify(response.headers[name]);
   };
   facade.getAllResponseHeaders = function() {
-    return convertHeaders(response.headers);
+    return nullify(convertHeaders(response.headers));
   };
   if (xhr.overrideMimeType) {
     facade.overrideMimeType = function() {
@@ -600,6 +599,9 @@ if (typeof WINDOW[FETCH] === "function") {
     return new Promise(function(resolve, reject) {
       var done, getRequest, processAfter, processBefore, send;
       getRequest = function() {
+        if (options.body instanceof XHookFormData) {
+          options.body = options.body.fd;
+        }
         if (options.headers) {
           options.headers = new Headers(options.headers);
         }

@@ -174,7 +174,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
           value = RegExp.$2
           dest[name] ?= value
       return dest
-  return null
+  return
 
 #patch FormData
 # we can do this safely because all XHR
@@ -479,9 +479,9 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     return
   facade.getResponseHeader = (header) ->
     name = header?.toLowerCase()
-    nullify response.headers[name]
+    nullify(response.headers[name])
   facade.getAllResponseHeaders = ->
-    convertHeaders response.headers
+    nullify(convertHeaders response.headers)
 
   #proxy call only when supported
   if xhr.overrideMimeType
@@ -513,6 +513,9 @@ if typeof WINDOW[FETCH] is "function"
     return new Promise((resolve, reject) ->
 
       getRequest = ->
+        if options.body instanceof XHookFormData
+          options.body = options.body.fd
+
         if options.headers
           options.headers = new Headers(options.headers)
 

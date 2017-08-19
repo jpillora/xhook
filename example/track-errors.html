@@ -7,10 +7,13 @@
 
 <script type="text/javascript">
 
+var requestCounter = 1;
+
 //read response
 xhook.after(function(request, response) {
   if(response.status !== 200)
-    $("pre").append("Non-200 error code detected: " + response.status + ' ');
+    $("pre").append('(' + requestCounter + ') ' + "Non-200 error code detected: " + response.status + '\r\n');
+    requestCounter++;
 });
 
 $.get('exampleX.txt');

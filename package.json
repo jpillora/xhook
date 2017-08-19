@@ -1,14 +1,19 @@
 {
   "name": "xhook",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Easily intercept and modify XHR request and response",
   "browser": "dist/xhook.js",
   "main": "dist/xhook.js",
+  "scripts": {
+    "start": "grunt-source --server=3000",
+    "test": "testcafe chrome:headless tests",
+    "test:all": "testcafe all tests"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jpillora/xhook"
   },
-   "keywords": [
+  "keywords": [
     "xhr",
     "ajax",
     "intercept",
@@ -29,5 +34,11 @@
       "email": "daniel@gasienica.ch"
     }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "testcafe": "^0.16.2"
+  },
+  "dependencies": {
+    "testcafe-browser-provider-saucelabs": "^1.3.0"
+  }
 }
