@@ -44,6 +44,11 @@ mergeObjects = (src, dst) ->
     try dst[k] = src[k]
   return dst
 
+nullify = (res) ->
+  if res is undefined
+    return null
+  return res
+
 #proxy events from one emitter to another
 proxyEvents = (events, src, dst) ->
   p = (event) -> (e) ->
@@ -169,7 +174,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
           value = RegExp.$2
           dest[name] ?= value
       return dest
-  return
+  return null
 
 #patch FormData
 # we can do this safely because all XHR
@@ -474,7 +479,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     return
   facade.getResponseHeader = (header) ->
     name = header?.toLowerCase()
-    response.headers[name]
+    nullify response.headers[name]
   facade.getAllResponseHeaders = ->
     convertHeaders response.headers
 
