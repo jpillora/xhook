@@ -248,7 +248,7 @@ convertHeaders = xhook.headers = function(h, dest) {
         name = k.toLowerCase();
         headers.push("" + name + ":\t" + v);
       }
-      return headers.join('\n');
+      return headers.join('\n') + '\n';
     case "string":
       headers = h.split('\n');
       for (_i = 0, _len = headers.length; _i < _len; _i++) {
