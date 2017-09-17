@@ -1,7 +1,7 @@
 // XHook - v1.4.4 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2017
 (function(undefined) {
-var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, proxyEvents, slice, useragent, xhook, _base,
+var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, nullify, proxyEvents, slice, useragent, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 WINDOW = null;
@@ -77,6 +77,13 @@ mergeObjects = function(src, dst) {
     } catch (_error) {}
   }
   return dst;
+};
+
+nullify = function(res) {
+  if (res === void 0) {
+    return null;
+  }
+  return res;
 };
 
 proxyEvents = function(events, src, dst) {
@@ -554,10 +561,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
   facade.getResponseHeader = function(header) {
     var name;
     name = header != null ? header.toLowerCase() : void 0;
-    return response.headers[name];
+    return nullify(response.headers[name]);
   };
   facade.getAllResponseHeaders = function() {
-    return convertHeaders(response.headers);
+    return nullify(convertHeaders(response.headers));
   };
   if (xhr.overrideMimeType) {
     facade.overrideMimeType = function() {

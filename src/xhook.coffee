@@ -44,6 +44,11 @@ mergeObjects = (src, dst) ->
     try dst[k] = src[k]
   return dst
 
+nullify = (res) ->
+  if res is undefined
+    return null
+  return res
+
 #proxy events from one emitter to another
 proxyEvents = (events, src, dst) ->
   p = (event) -> (e) ->
@@ -474,9 +479,9 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     return
   facade.getResponseHeader = (header) ->
     name = header?.toLowerCase()
-    response.headers[name]
+    nullify(response.headers[name])
   facade.getAllResponseHeaders = ->
-    convertHeaders response.headers
+    nullify(convertHeaders response.headers)
 
   #proxy call only when supported
   if xhr.overrideMimeType
