@@ -160,7 +160,7 @@ convertHeaders = xhook.headers = (h, dest = {}) ->
       for k,v of h
         name = k.toLowerCase()
         headers.push "#{name}:\t#{v}"
-      return headers.join '\n'
+      return headers.join('\n') + '\n'
     when "string"
       headers = h.split '\n'
       for header in headers
