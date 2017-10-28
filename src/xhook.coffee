@@ -497,6 +497,14 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
   facade.HEADERS_RECEIVED = 2
   facade.LOADING = 3
   facade.DONE = 4
+
+  # fill in default values for an empty XHR object according to the spec
+  facade.response = '';
+  facade.responseText = '';
+  facade.responseXML = null;
+  facade.readyState = 0;
+  facade.statusText = '';
+
   return facade
 
 #patch Fetch
