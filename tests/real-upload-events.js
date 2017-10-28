@@ -8,7 +8,7 @@ test('should complete with real upload events', async t => {
 
   await t
     .switchToIframe('iframe')
-    .expect(result.innerText).eql('readyState 1\n' +
+    .expect(result.innerText).contains('readyState 1\n' +
       'sending #288889 chars\n' +
       'hooked xhr though left untouched!\n' +
       'upload started\n' +

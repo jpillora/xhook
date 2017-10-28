@@ -6,7 +6,8 @@
   "main": "dist/xhook.js",
   "scripts": {
     "start": "grunt-source --server=3000",
-    "test": "testcafe chrome:headless tests",
+    "test": "testcafe \"saucelabs:Chrome@beta:Windows 10\" tests --app \"http-server -p 3000 -s .\"",
+    "test:local": "testcafe \"chrome:headless\" tests --app \"http-server -p 3000 -s .\"",
     "test:all": "testcafe all tests"
   },
   "repository": {
@@ -36,9 +37,9 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "testcafe": "^0.16.2"
-  },
-  "dependencies": {
+    "http-server": "^0.10.0",
+    "testcafe": "^0.16.2",
     "testcafe-browser-provider-saucelabs": "^1.3.0"
-  }
+  },
+  "dependencies": {}
 }
