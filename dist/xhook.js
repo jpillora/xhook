@@ -579,6 +579,11 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
   facade.HEADERS_RECEIVED = 2;
   facade.LOADING = 3;
   facade.DONE = 4;
+  facade.response = '';
+  facade.responseText = '';
+  facade.responseXML = null;
+  facade.readyState = 0;
+  facade.statusText = '';
   return facade;
 };
 
