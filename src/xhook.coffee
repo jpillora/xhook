@@ -594,5 +594,7 @@ XHookHttpRequest.DONE = 4;
 #publicise (amd+commonjs+window)
 if typeof define is "function" and define.amd
   define "xhook", [], -> xhook
+else if typeof module is "object" and module.exports
+  module.exports = xhook
 else
-  (@exports or @).xhook = xhook
+  WINDOW.xhook = xhook
