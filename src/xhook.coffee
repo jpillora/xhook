@@ -285,7 +285,10 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       facade[FIRE] "readystatechange", {}
       #delay final events incase of error
       if currentState is 4
-        setTimeout emitFinal, 0
+        if request.async is false
+          emitFinal()
+        else
+          setTimeout emitFinal, 0
     return
 
   emitFinal = ->
