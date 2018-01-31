@@ -376,7 +376,11 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
       }
       facade[FIRE]("readystatechange", {});
       if (currentState === 4) {
-        setTimeout(emitFinal, 0);
+        if (request.async === false) {
+          emitFinal();
+        } else {
+          setTimeout(emitFinal, 0);
+        }
       }
     }
   };
@@ -680,8 +684,10 @@ if (typeof define === "function" && define.amd) {
   define("xhook", [], function() {
     return xhook;
   });
-} else {
-  (this.exports || this).xhook = xhook;
+} else if (typeof module === "object" && module.exports) {
+  module.exports = xhook;
+} else if (WINDOW) {
+  WINDOW.xhook = xhook;
 }
 
 }.call(this));
