@@ -595,6 +595,6 @@ XHookHttpRequest.DONE = 4;
 if typeof define is "function" and define.amd
   define "xhook", [], -> xhook
 else if typeof module is "object" and module.exports
-  module.exports = xhook
+  module.exports = { xhook }
 else if WINDOW
   WINDOW.xhook = xhook

@@ -685,7 +685,9 @@ if (typeof define === "function" && define.amd) {
     return xhook;
   });
 } else if (typeof module === "object" && module.exports) {
-  module.exports = xhook;
+  module.exports = {
+    xhook: xhook
+  };
 } else if (WINDOW) {
   WINDOW.xhook = xhook;
 }
