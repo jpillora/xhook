@@ -242,6 +242,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     if !xhr.responseType or xhr.responseType is "text"
       response.text = xhr.responseText
       response.data = xhr.responseText
+      response.xml = xhr.responseXML
     else if xhr.responseType is "document"
       response.xml = xhr.responseXML
       response.data = xhr.responseXML

@@ -333,6 +333,7 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
     if (!xhr.responseType || xhr.responseType === "text") {
       response.text = xhr.responseText;
       response.data = xhr.responseText;
+      response.xml = xhr.responseXML;
     } else if (xhr.responseType === "document") {
       response.xml = xhr.responseXML;
       response.data = xhr.responseXML;

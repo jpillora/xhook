@@ -1,0 +1,16 @@
+
+<h5>example3.txt (which does not actually exist - verify in devtools)</h5>
+<pre id="res"></pre>
+
+<script src="../dist/xhook.js"></script>
+<script type="text/javascript">
+
+//vanilla call
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'example.xml');
+xhr.addEventListener('readystatechange', function(e) {
+  console.log(xhr.responseXML, xhr.responseType);
+  document.getElementById('res').innerHTML = xhr.responseText;
+});
+xhr.send();
+</script>
