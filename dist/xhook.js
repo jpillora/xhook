@@ -1,6 +1,6 @@
 // XHook - v1.4.8 - https://github.com/jpillora/xhook
 // Jaime Pillora <dev@jpillora.com> - MIT Copyright 2018
-(function(undefined) {
+(function(window,undefined) {
 var AFTER, BEFORE, COMMON_EVENTS, EventEmitter, FETCH, FIRE, FormData, NativeFetch, NativeFormData, NativeXMLHttp, OFF, ON, READY_STATE, UPLOAD_EVENTS, WINDOW, XHookFetchRequest, XHookFormData, XHookHttpRequest, XMLHTTP, convertHeaders, depricatedProp, document, fakeEvent, mergeObjects, msie, nullify, proxyEvents, slice, useragent, xhook, _base,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -333,7 +333,11 @@ XHookHttpRequest = WINDOW[XMLHTTP] = function() {
     if (!xhr.responseType || xhr.responseType === "text") {
       response.text = xhr.responseText;
       response.data = xhr.responseText;
-      response.xml = xhr.responseXML;
+      try {
+        response.xml = xhr.responseXML;
+      } catch (_error) {
+
+      }
     } else if (xhr.responseType === "document") {
       response.xml = xhr.responseXML;
       response.data = xhr.responseXML;
@@ -693,4 +697,4 @@ if (typeof define === "function" && define.amd) {
   WINDOW.xhook = xhook;
 }
 
-}.call(this));
+}.call(this,window));

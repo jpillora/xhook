@@ -242,7 +242,13 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     if !xhr.responseType or xhr.responseType is "text"
       response.text = xhr.responseText
       response.data = xhr.responseText
-      response.xml = xhr.responseXML
+      try
+        response.xml = xhr.responseXML
+      catch
+        # unable to set responseXML due to response type, we attempt to assign responseXML
+        # when the type is text even though it's against the spec due to several libraries
+        # and browser vendors who allow this behavior. causing these requests to fail when
+        # xhook is installed on a page.
     else if xhr.responseType is "document"
       response.xml = xhr.responseXML
       response.data = xhr.responseXML
