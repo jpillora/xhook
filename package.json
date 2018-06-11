@@ -1,6 +1,6 @@
 {
   "name": "xhook",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "Easily intercept and modify XHR request and response",
   "browser": "dist/xhook.js",
   "main": "dist/xhook.js",
