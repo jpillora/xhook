@@ -65,6 +65,24 @@ describe('xhook', function() {
   });
 
   describe('fetch', function() {
+    it('should handle request objects', function(done) {
+      const request = new Request('../example/example1.txt', { headers: {
+        'x-blah': 'blah',
+      }});
+      xhook.before(function(req, callback) {
+        const value = req.headers.get('x-blah');
+        expect(value).to.equal('blah');
+        callback();
+      });
+      fetch(request)
+        .then(function(response) {
+          return response.text()
+        })
+        .then(function(text) {
+          expect(text).to.contain('the first text file');
+          done();
+        });
+    });
 
     it('should not modify url', function(done) {
       fetch('../example/example1.txt')
@@ -168,6 +186,7 @@ describe('xhook', function() {
     });
 
   });
+
 
 
 });

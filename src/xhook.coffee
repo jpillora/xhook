@@ -522,8 +522,11 @@ if typeof WINDOW[FETCH] is "function"
   NativeFetch = WINDOW[FETCH]
   xhook[FETCH] = NativeFetch
   XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
-    options.url = url
     request = null
+    if url instanceof Request
+      request = url;
+    options.url = url
+
 
     beforeHooks = xhook.listeners BEFORE
     afterHooks = xhook.listeners AFTER
