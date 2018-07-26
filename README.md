@@ -34,9 +34,11 @@ With XHook, you could easily implement functionality to:
 
 ## Example
 
-Here, we're converting vowels to **z**'s in all requests to 'example.txt':
+Using ES6 modules and converting vowels to **z**'s in all requests to 'example.txt'
 
 ``` javascript
+import xhook from 'xhook';
+
 //modify 'responseText' of 'example2.txt'
 xhook.after(function(request, response) {
   if(request.url.match(/example\.txt$/))
@@ -58,17 +60,29 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 ### *http://jpillora.com/xhook*
 
-## Download
+## Installation
 
-  :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
+  :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it, if you are using a application with ES6 modules, import it as soon as possible*
+
+#### Using npm
+```console
+$ npm install --save xhook
+```
+
+or
+
+#### Using CDN 
+``` html
+<script src="//unpkg.com/xhook@latest/dist/xhook.min.js"></script>
+```
+*Use `latest` or lock to one of the [available versions](https://github.com/jpillora/xhook/releases)*
+
+or 
+
+#### Download
 
 * Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js) 14KB
 * Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js) 6KB
-* CDN (Use `latest` or lock to one of the [available versions](https://github.com/jpillora/xhook/releases))
-
-	``` html
-	<script src="//unpkg.com/xhook@latest/dist/xhook.min.js"></script>
-	```
 
 ## API
 
