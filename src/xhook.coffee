@@ -498,6 +498,13 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
     facade.overrideMimeType = ->
       xhr.overrideMimeType.apply xhr, arguments
 
+  #mirror property 'responseType' to native xhr
+  Object.defineProperty facade, 'responseType',
+    get: ->
+      xhr.responseType
+    set: (responseType) ->
+      xhr.responseType = responseType
+
   #create emitter when supported
   if xhr.upload
     facade.upload = request.upload = EventEmitter()
