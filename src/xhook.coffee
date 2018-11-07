@@ -285,6 +285,8 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
       if currentState is 1
         facade[FIRE] "loadstart", {}
       if currentState is 2
+        # sometimes readHead is needed to set status here
+        readHead()
         writeHead()
       if currentState is 4
         writeHead()
