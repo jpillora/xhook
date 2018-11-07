@@ -37,6 +37,8 @@
   "license": "MIT",
   "devDependencies": {
     "testcafe": "^0.16.2",
-    "testcafe-browser-provider-saucelabs": "^1.3.0"
-  }
+    "testcafe-browser-provider-saucelabs": "^1.3.0",
+    "grunt-source": "^0.7.11"
+  },
+  "dependencies": {}
 }
