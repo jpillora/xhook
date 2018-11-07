@@ -62,6 +62,31 @@ describe('xhook', function() {
       xhr.send();
     });
 
+    it('should update status in readystatechange >= 2', function(done) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '../example/example1.txt?cacheBust=' + Math.random().toString());
+      xhr.addEventListener('readystatechange', function() {
+        try {
+          if (xhr.status === 0) return;
+        } catch(e) {
+          return;
+        }
+        expect(this.UNSENT).to.eql(0);
+        expect(this.OPENED).to.eql(1);
+        expect(this.HEADERS_RECEIVED).to.eql(2);
+        expect(this.LOADING).to.eql(3);
+        expect(this.DONE).to.eql(4);
+
+        if (this.readyState >= this.HEADERS_RECEIVED) {
+          expect(this.status).to.eql(200);
+        }
+        if (this.readyState === this.DONE) {
+          done();
+        }
+      });
+      xhr.send();
+    });
+
   });
 
   describe('fetch', function() {
