@@ -293,12 +293,11 @@ XHookFormData = function(form) {
     };
   })(this);
 };
-XHookFormData.prototype=NativeFormData.prototype;
 
 if (NativeFormData) {
+  XHookFormData.prototype=NativeFormData.prototype;
   xhook[FormData] = NativeFormData;
   WINDOW[FormData] = XHookFormData;
-  WINDOW[FormData].prototype = NativeFormData.prototype;
 }
 
 NativeXMLHttp = WINDOW[XMLHTTP];
