@@ -294,6 +294,7 @@ XHookFormData = function(form) {
   })(this);
 };
 XHookFormData.prototype=NativeFormData.prototype;
+
 if (NativeFormData) {
   xhook[FormData] = NativeFormData;
   WINDOW[FormData] = XHookFormData;
