@@ -1,4 +1,3 @@
-
 <!-- TODO create test capturing real xhr, comparing against xhook -->
 
 <h5>Comparing xhook and native XMLHttpRequests:</h5>
@@ -12,40 +11,44 @@
 <script src="../dist/xhook.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
 <script type="text/javascript">
-
-var xcontainer = $("#xhook");
-xhook.before(function(req, callback) {
-  xcontainer.append('[before start]...\n');
-  setTimeout(function() {
-    xcontainer.append('[before end]\n');
-    callback();
-  }, 1000);
-});
-
-var events = ["load","loadend","error","abort","timeout","readystatechange","progress"];
-
-function test(id) {
-  var container = $("#"+id);
-  //vanilla calls
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://echo.jpillora.com/delay/3000/'+id);
-  //display events
-  $.each(events, function(i, e) {
-    xhr["on"+e] = function() {
-      container.append(e+" ("+xhr.readyState+")\n");
-      if(e === "load")
-        container.append(" => "+xhr.status+"\n"+xhr.responseText+"\n");
-    };
+  var xcontainer = $("#xhook");
+  xhook.before(function(req, callback) {
+    xcontainer.append("[before start]...\n");
+    setTimeout(function() {
+      xcontainer.append("[before end]\n");
+      callback();
+    }, 1000);
   });
-  // xhr.timeout = 2000;
-  // setTimeout(function() {
-  //   xhr.abort();
-  // }, 250);
-  xhr.send();
-}
 
-test("xhook");
-xhook.disable();
-test("native");
+  var events = [
+    "load",
+    "loadend",
+    "error",
+    "abort",
+    "timeout",
+    "readystatechange",
+    "progress"
+  ];
 
+  function test(id) {
+    var container = $("#" + id);
+    //vanilla calls
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://echo.jpillora.com/delay/3000/" + id);
+    //display events
+    $.each(events, function(i, e) {
+      xhr["on" + e] = function() {
+        container.append(e + " (" + xhr.readyState + ")\n");
+        if (e === "load")
+          container.append(
+            " => " + xhr.status + "\n" + xhr.responseText + "\n"
+          );
+      };
+    });
+    xhr.send();
+  }
+
+  test("xhook");
+  xhook.disable();
+  test("native");
 </script>
