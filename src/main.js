@@ -26,6 +26,7 @@ xhook.after = function(handler, i) {
   }
   return xhook.on("after", handler, i);
 };
+
 //globally enable/disable
 xhook.enable = function() {
   XMLHttpRequest.patch();

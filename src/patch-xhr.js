@@ -296,7 +296,6 @@ const Xhook = function() {
     };
 
     const hooks = xhook.listeners("before");
-    console.log("EXEC", hooks.length, "BEFORE");
     //process hooks sequentially
     var process = function() {
       if (!hooks.length) {

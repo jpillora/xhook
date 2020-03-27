@@ -1,15 +1,15 @@
-## How to run locally
-
 * Install [Node](http://nodejs.org)
 
 * Fork and clone `git clone https://github.com/MY-USERNAME/xhook`
 
 * Enter project `cd xhook`
 
-* Install [`grunt-source`](https://github.com/jpillora/grunt-source) with `npm install -g grunt-source` (Grunt Source allows the use of external Grunt environments)
+* Install deps with `npm install`
 
-* Watch *src* for changes and will then compile and minify into *dist* with `grunt-source --server=3000`
+* Watch *src* for changes and will then compile and minify into *dist* with `npm start`
 
 * Open Chrome `open http://localhost:3000/`
 
 	### Issues and Pull-requests welcome!
+
+* Build distribution files with `npm run build`

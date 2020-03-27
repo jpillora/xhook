@@ -210,6 +210,7 @@ xhook.after = function(handler, i) {
   }
   return xhook.on("after", handler, i);
 };
+
 //globally enable/disable
 xhook.enable = function() {
   _patch_xhr__WEBPACK_IMPORTED_MODULE_3__["default"].patch();
@@ -926,8 +927,6 @@ const Xhook = function() {
   var facade = Object(_misc_event_emitter__WEBPACK_IMPORTED_MODULE_2__["EventEmitter"])();
   request.xhr = facade;
 
-  //==========================
-
   // Handle the underlying ready state
   xhr.onreadystatechange = function(event) {
     //pull status and headers
@@ -1054,7 +1053,6 @@ const Xhook = function() {
     };
 
     const hooks = xhook.listeners("before");
-    console.log("EXEC", hooks.length, "BEFORE");
     //process hooks sequentially
     var process = function() {
       if (!hooks.length) {
