@@ -8,8 +8,10 @@
 
 * Watch *src* for changes and will then compile and minify into *dist* with `npm start`
 
+  * Make sure you have [prettier](https://prettier.io/) installed, and you are reformatting on save
+
 * Open Chrome `open http://localhost:3000/`
 
-	### Issues and Pull-requests welcome!
+* Run tests `http://localhost:3000/test/`
 
 * Build distribution files with `npm run build`

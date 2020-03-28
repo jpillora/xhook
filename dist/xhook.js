@@ -240,7 +240,7 @@ xhook.enable();
 //publicise (amd+commonjs+window)
 if (typeof define === "function" && __webpack_require__(/*! !webpack amd options */ "./node_modules/webpack/buildin/amd-options.js")) {
   define("xhook", [], () => xhook);
-} else if ( true && module.exports) {
+} else if (module && typeof module === "object" && module.exports) {
   module.exports = { xhook };
 } else if (_misc_window__WEBPACK_IMPORTED_MODULE_1__["window"]) {
   _misc_window__WEBPACK_IMPORTED_MODULE_1__["window"].xhook = xhook;

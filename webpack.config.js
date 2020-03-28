@@ -16,7 +16,6 @@ const config = {
   devtool: "source-map",
   devServer: {
     publicPath: "/dist/",
-    writeToDisk: true,
     port: 3000
   },
   plugins: [banner]

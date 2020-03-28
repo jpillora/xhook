@@ -5,7 +5,7 @@ import headers from "./misc/headers";
 //patchable types
 import XMLHttpRequest from "./patch/xmlhttprequest";
 import fetch from "./patch/fetch";
-import FormData from "./patch/form-data";
+import FormData from "./patch/formdata";
 
 //global state
 import hooks from "./misc/hooks";

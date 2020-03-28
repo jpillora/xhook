@@ -7,7 +7,7 @@ import {
 } from "../misc/events";
 import { EventEmitter } from "../misc/event-emitter";
 import headers from "../misc/headers";
-import formData from "./form-data";
+import formData from "./formdata";
 
 const nullify = res => (res === undefined ? null : res);
 
