@@ -1,34 +1,30 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <h5>download progress events</h5>
 <pre id="events"></pre>
 
 <script src="../dist/xhook.js"></script>
 <script type="text/javascript">
+  //hook
+  xhook.before(function(request) {
+    append("hooked xhr though left untouched!");
+  });
 
-//hook
-xhook.before(function(request) {
-  append('hooked xhr though left untouched!');
-});
+  function append(str) {
+    document.getElementById("events").innerHTML += str + "<br>";
+  }
 
-function append(str) {
-  document.getElementById('events').innerHTML += str + "<br>";
-}
+  var xhr = new XMLHttpRequest();
 
-var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function(e) {
+    append("readyState " + xhr.readyState);
+  };
 
-xhr.onreadystatechange = function(e) {
-  append('readyState '+ xhr.readyState);
-}
+  xhr.onprogress = function(e) {
+    if (e.total) append(Math.round((e.loaded / e.total) * 100));
+    else append(e.loaded + " bytes loaded");
+  };
 
-xhr.onprogress = function(e) {
-  if(e.total)
-    append(Math.round((e.loaded/e.total)*100));
-  else
-    append(e.loaded + " bytes loaded")
-}
+  xhr.open("GET", "example-large.txt?r=" + Math.random());
 
-xhr.open('GET', 'example-large.txt?r='+Math.random());
-
-xhr.send();
-
+  xhr.send();
 </script>

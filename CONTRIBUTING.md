@@ -1,15 +1,17 @@
-## How to run locally
-
 * Install [Node](http://nodejs.org)
 
 * Fork and clone `git clone https://github.com/MY-USERNAME/xhook`
 
 * Enter project `cd xhook`
 
-* Install [`grunt-source`](https://github.com/jpillora/grunt-source) with `npm install -g grunt-source` (Grunt Source allows the use of external Grunt environments)
+* Install deps with `npm install`
 
-* Watch *src* for changes and will then compile and minify into *dist* with `grunt-source --server=3000`
+* Watch *src* for changes and will then compile and minify into *dist* with `npm start`
+
+  * Make sure you have [prettier](https://prettier.io/) installed, and you are reformatting on save
 
 * Open Chrome `open http://localhost:3000/`
 
-	### Issues and Pull-requests welcome!
+* Run tests `http://localhost:3000/test/`
+
+* Build distribution files with `npm run build`

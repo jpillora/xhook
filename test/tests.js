@@ -147,13 +147,22 @@ describe('xhook', function() {
         });
     });
 
-    it ('should replace native fetch when enable is called', function(){
+    it('should replace native fetch when enable is called', function() {
+      function native(obj) {
+        return /\{\s*\[native code\]\s*\}/.test(obj && obj.toString());
+      }
       xhook.disable();
-      expect(typeof window.fetch).to.equal('function');
-      expect((/\{\s*\[native code\]\s*\}/).test(window.fetch.toString())).to.equal(true);
+      expect(typeof window.fetch).to.equal("function");
+      const lastpass = /requestID:n/.test(window.fetch.toString());
+      if (!native(window.fetch) && !lastpass) {
+        //if lastpass installed, ignore this test since it hooks native fetch first
+        expect().fail('window.fetch should be native (try in incognito mode)');
+      }
       xhook.enable();
-      expect(typeof window.fetch).to.equal('function');
-      expect((/\{\s*\[native code\]\s*\}/).test(window.fetch.toString())).to.equal(false);
+      expect(typeof window.fetch).to.equal("function");
+      if (native(window.fetch)) {
+        expect().fail('window.fetch should be xhooks implementation');
+      }
     });
 
     it('sync XHR should not fail', function(done) {
