@@ -1,7 +1,7 @@
-import { window } from "./misc/window";
-import { mergeObjects } from "./misc/events";
-import hooks from "./misc/hooks";
-import formData from "./patch-form-data";
+import { window } from "../misc/window";
+import { mergeObjects } from "../misc/events";
+import hooks from "../misc/hooks";
+import formData from "./form-data";
 
 //browser's fetch
 const Native = window.fetch;

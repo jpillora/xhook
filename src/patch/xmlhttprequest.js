@@ -1,13 +1,13 @@
-import { window, msie } from "./misc/window";
+import { window, msie } from "../misc/window";
 import {
   proxyEvents,
   mergeObjects,
   COMMON_EVENTS,
   UPLOAD_EVENTS
-} from "./misc/events";
-import { EventEmitter } from "./misc/event-emitter";
-import headers from "./misc/headers";
-import formData from "./patch-form-data";
+} from "../misc/events";
+import { EventEmitter } from "../misc/event-emitter";
+import headers from "../misc/headers";
+import formData from "./form-data";
 
 const nullify = res => (res === undefined ? null : res);
 

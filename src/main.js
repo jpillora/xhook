@@ -3,9 +3,9 @@ import { window } from "./misc/window";
 import headers from "./misc/headers";
 
 //patchable types
-import XMLHttpRequest from "./patch-xhr";
-import fetch from "./patch-fetch";
-import formData from "./patch-form-data";
+import XMLHttpRequest from "./patch/xmlhttprequest";
+import fetch from "./patch/fetch";
+import FormData from "./patch/form-data";
 
 //global state
 import hooks from "./misc/hooks";
@@ -31,17 +31,17 @@ xhook.after = function(handler, i) {
 xhook.enable = function() {
   XMLHttpRequest.patch();
   fetch.patch();
-  formData.patch();
+  FormData.patch();
 };
 xhook.disable = function() {
   XMLHttpRequest.unpatch();
   fetch.unpatch();
-  formData.unpatch();
+  FormData.unpatch();
 };
 //expose native objects
 xhook.XMLHttpRequest = XMLHttpRequest.Native;
 xhook.fetch = fetch.Native;
-xhook.FormData = formData.Native;
+xhook.FormData = FormData.Native;
 
 //expose helpers
 xhook.headers = headers.convert;
@@ -52,7 +52,7 @@ xhook.enable();
 //publicise (amd+commonjs+window)
 if (typeof define === "function" && define.amd) {
   define("xhook", [], () => xhook);
-} else if (typeof module === "object" && module.exports) {
+} else if (module && typeof module === "object" && module.exports) {
   module.exports = { xhook };
 } else if (window) {
   window.xhook = xhook;

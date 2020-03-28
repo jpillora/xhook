@@ -1,3 +1,7 @@
+/*!
+ * XHook - v1.5.0 - https://github.com/jpillora/xhook
+ * Jaime Pillora <dev@jpillora.com> - MIT Copyright 2020
+ */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -178,9 +182,9 @@ __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(module) {/* harmony import */ var _misc_event_emitter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./misc/event-emitter */ "./src/misc/event-emitter.js");
 /* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./misc/window */ "./src/misc/window.js");
 /* harmony import */ var _misc_headers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./misc/headers */ "./src/misc/headers.js");
-/* harmony import */ var _patch_xhr__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./patch-xhr */ "./src/patch-xhr.js");
-/* harmony import */ var _patch_fetch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./patch-fetch */ "./src/patch-fetch.js");
-/* harmony import */ var _patch_form_data__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./patch-form-data */ "./src/patch-form-data.js");
+/* harmony import */ var _patch_xmlhttprequest__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./patch/xmlhttprequest */ "./src/patch/xmlhttprequest.js");
+/* harmony import */ var _patch_fetch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./patch/fetch */ "./src/patch/fetch.js");
+/* harmony import */ var _patch_form_data__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./patch/form-data */ "./src/patch/form-data.js");
 /* harmony import */ var _misc_hooks__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./misc/hooks */ "./src/misc/hooks.js");
 
 
@@ -213,17 +217,17 @@ xhook.after = function(handler, i) {
 
 //globally enable/disable
 xhook.enable = function() {
-  _patch_xhr__WEBPACK_IMPORTED_MODULE_3__["default"].patch();
+  _patch_xmlhttprequest__WEBPACK_IMPORTED_MODULE_3__["default"].patch();
   _patch_fetch__WEBPACK_IMPORTED_MODULE_4__["default"].patch();
   _patch_form_data__WEBPACK_IMPORTED_MODULE_5__["default"].patch();
 };
 xhook.disable = function() {
-  _patch_xhr__WEBPACK_IMPORTED_MODULE_3__["default"].unpatch();
+  _patch_xmlhttprequest__WEBPACK_IMPORTED_MODULE_3__["default"].unpatch();
   _patch_fetch__WEBPACK_IMPORTED_MODULE_4__["default"].unpatch();
   _patch_form_data__WEBPACK_IMPORTED_MODULE_5__["default"].unpatch();
 };
 //expose native objects
-xhook.XMLHttpRequest = _patch_xhr__WEBPACK_IMPORTED_MODULE_3__["default"].Native;
+xhook.XMLHttpRequest = _patch_xmlhttprequest__WEBPACK_IMPORTED_MODULE_3__["default"].Native;
 xhook.fetch = _patch_fetch__WEBPACK_IMPORTED_MODULE_4__["default"].Native;
 xhook.FormData = _patch_form_data__WEBPACK_IMPORTED_MODULE_5__["default"].Native;
 
@@ -554,19 +558,19 @@ const document = result.document;
 
 /***/ }),
 
-/***/ "./src/patch-fetch.js":
+/***/ "./src/patch/fetch.js":
 /*!****************************!*\
-  !*** ./src/patch-fetch.js ***!
+  !*** ./src/patch/fetch.js ***!
   \****************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./misc/window */ "./src/misc/window.js");
-/* harmony import */ var _misc_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./misc/events */ "./src/misc/events.js");
-/* harmony import */ var _misc_hooks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./misc/hooks */ "./src/misc/hooks.js");
-/* harmony import */ var _patch_form_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./patch-form-data */ "./src/patch-form-data.js");
+/* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../misc/window */ "./src/misc/window.js");
+/* harmony import */ var _misc_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../misc/events */ "./src/misc/events.js");
+/* harmony import */ var _misc_hooks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../misc/hooks */ "./src/misc/hooks.js");
+/* harmony import */ var _form_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./form-data */ "./src/patch/form-data.js");
 
 
 
@@ -588,7 +592,7 @@ const Xhook = function(url, options) {
 
   return new Promise(function(resolve, reject) {
     const getRequest = function() {
-      if (options.body instanceof _patch_form_data__WEBPACK_IMPORTED_MODULE_3__["default"].Xhook) {
+      if (options.body instanceof _form_data__WEBPACK_IMPORTED_MODULE_3__["default"].Xhook) {
         options.body = options.body.fd;
       }
 
@@ -681,17 +685,17 @@ const Xhook = function(url, options) {
 
 /***/ }),
 
-/***/ "./src/patch-form-data.js":
+/***/ "./src/patch/form-data.js":
 /*!********************************!*\
-  !*** ./src/patch-form-data.js ***!
+  !*** ./src/patch/form-data.js ***!
   \********************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./misc/window */ "./src/misc/window.js");
-/* harmony import */ var _misc_array__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./misc/array */ "./src/misc/array.js");
+/* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../misc/window */ "./src/misc/window.js");
+/* harmony import */ var _misc_array__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../misc/array */ "./src/misc/array.js");
 
 
 
@@ -746,20 +750,20 @@ const Xhook = function(form) {
 
 /***/ }),
 
-/***/ "./src/patch-xhr.js":
-/*!**************************!*\
-  !*** ./src/patch-xhr.js ***!
-  \**************************/
+/***/ "./src/patch/xmlhttprequest.js":
+/*!*************************************!*\
+  !*** ./src/patch/xmlhttprequest.js ***!
+  \*************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./misc/window */ "./src/misc/window.js");
-/* harmony import */ var _misc_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./misc/events */ "./src/misc/events.js");
-/* harmony import */ var _misc_event_emitter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./misc/event-emitter */ "./src/misc/event-emitter.js");
-/* harmony import */ var _misc_headers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./misc/headers */ "./src/misc/headers.js");
-/* harmony import */ var _patch_form_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./patch-form-data */ "./src/patch-form-data.js");
+/* harmony import */ var _misc_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../misc/window */ "./src/misc/window.js");
+/* harmony import */ var _misc_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../misc/events */ "./src/misc/events.js");
+/* harmony import */ var _misc_event_emitter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../misc/event-emitter */ "./src/misc/event-emitter.js");
+/* harmony import */ var _misc_headers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../misc/headers */ "./src/misc/headers.js");
+/* harmony import */ var _form_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./form-data */ "./src/patch/form-data.js");
 
 
 
@@ -1045,7 +1049,7 @@ const Xhook = function() {
         }
       }
       //extract real formdata
-      if (request.body instanceof _patch_form_data__WEBPACK_IMPORTED_MODULE_4__["default"].Xhook) {
+      if (request.body instanceof _form_data__WEBPACK_IMPORTED_MODULE_4__["default"].Xhook) {
         request.body = request.body.fd;
       }
       //real send!

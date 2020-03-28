@@ -1,5 +1,5 @@
-import { window } from "./misc/window";
-import { slice } from "./misc/array";
+import { window } from "../misc/window";
+import { slice } from "../misc/array";
 
 //note:
 // we can patch FormData safely because all XHR

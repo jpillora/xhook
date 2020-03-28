@@ -1,3 +1,11 @@
+const webpack = require("webpack");
+const banner = new webpack.BannerPlugin({
+  banner:
+    `XHook - v${require("./package.json").version} - ` +
+    "https://github.com/jpillora/xhook\n" +
+    `Jaime Pillora <dev@jpillora.com> - ` +
+    `MIT Copyright ${new Date().getFullYear()}`
+});
 const path = require("path");
 const config = {
   entry: "./src/main.js",
@@ -10,6 +18,7 @@ const config = {
     publicPath: "/dist/",
     writeToDisk: true,
     port: 3000
-  }
+  },
+  plugins: [banner]
 };
 module.exports = config;
