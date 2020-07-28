@@ -521,7 +521,12 @@ XHookHttpRequest = WINDOW[XMLHTTP] = ->
 if typeof WINDOW[FETCH] is "function"
   NativeFetch = WINDOW[FETCH]
   xhook[FETCH] = NativeFetch
-  XHookFetchRequest = WINDOW[FETCH] = (url, options = { headers: {} }) ->
+  XHookFetchRequest = WINDOW[FETCH] = (url, options) ->
+    if not options
+      options = {
+        headers: if url instanceof Request then url.headers else {}
+      };
+
     options.url = url
     request = null
 
@@ -534,7 +539,7 @@ if typeof WINDOW[FETCH] is "function"
         if options.body instanceof XHookFormData
           options.body = options.body.fd
 
-        if options.headers
+        if options.headers not instanceof Headers
           options.headers = new Headers(options.headers)
 
         if (!request)
