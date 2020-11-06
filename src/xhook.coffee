@@ -20,7 +20,7 @@ FormData = 'FormData'
 
 UPLOAD_EVENTS = ['load', 'loadend', 'loadstart']
 COMMON_EVENTS = ['progress', 'abort', 'error', 'timeout']
-
+BODYLESS_STATUS_CODES = [101, 204, 205, 304]
 
 #parse IE version
 useragent = if typeof navigator isnt 'undefined' && navigator['useragent'] then navigator.userAgent else ''
@@ -558,7 +558,8 @@ if typeof WINDOW[FETCH] is "function"
 
       done = (userResponse) ->
         if userResponse != undefined
-          response = new Response(userResponse.body or userResponse.text, userResponse)
+          body = if BODYLESS_STATUS_CODES.includes(userResponse.status) then null else userResponse.body or userResponse.text
+          response = new Response(body, userResponse)
           resolve(response)
           processAfter(response)
           return
