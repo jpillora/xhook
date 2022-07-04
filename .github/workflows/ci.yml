@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - es6-2020-refactor
+  pull_request:
+    branches:
+      - main
+      - es6-2020-refactor
 
 jobs:
   test:
