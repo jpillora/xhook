@@ -7,7 +7,8 @@
   "scripts": {
     "start": "webpack-dev-server --mode development",
     "build": "webpack-cli --mode development && webpack-cli --mode production --output-filename xhook.min.js",
-    "test": "http-server -s & playwright test",
+    "test": "playwright test",
+    "test:server": "http-server --port 8080",
     "test:all": "testcafe all tests"
   },
   "repository": {
