@@ -1,0 +1,31 @@
+name: run-test
+
+on:
+  push:
+    branches:
+      - main
+      - es6-2020-refactor
+  pull_request:
+    branches:
+      - main
+      - es6-2020-refactor
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: build
+        run: npm run build
+      - name: Run your tests
+        run: npm test
