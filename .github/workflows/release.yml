@@ -23,6 +23,12 @@ jobs:
           git checkout gh-pages
           git reset --hard main
 
+      - name: replace the version placeholder in package.json with real version
+        run: |
+          tag=${{github.ref_name}}
+          version=${tag:1}
+          sed -i "s/0.0.0-git-tag/$version/" package.json
+
       - name: install dependencies
         run: npm ci
         env:
