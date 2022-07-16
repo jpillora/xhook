@@ -18,6 +18,7 @@ const Xhook = function(url, options) {
   const afterHooks = hooks.listeners("after");
 
   return new Promise(function(resolve, reject) {
+    let fullfiled = resolve
     const getRequest = function() {
       if (options.body instanceof formData.Xhook) {
         options.body = options.body.fd;
@@ -36,7 +37,7 @@ const Xhook = function(url, options) {
 
     var processAfter = function(response) {
       if (!afterHooks.length) {
-        return resolve(response);
+        return fullfiled(response);
       }
 
       const hook = afterHooks.shift();
@@ -85,6 +86,7 @@ const Xhook = function(url, options) {
       Native(getRequest())
         .then(response => processAfter(response))
         .catch(function(err) {
+          fullfiled = reject
           processAfter(err);
           return reject(err);
         });
