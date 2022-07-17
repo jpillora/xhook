@@ -76,7 +76,7 @@ const Xhook = function(url, options) {
       const hook = beforeHooks.shift();
 
       if (hook.length === 1) {
-        return done(hook(options));
+        return done(getRequest());
       } else if (hook.length === 2) {
         return hook(getRequest(), done);
       }
