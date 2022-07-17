@@ -1,4 +1,4 @@
-name: run-test
+name: test
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - es6-2020-refactor
 
 jobs:
-  test:
+  Test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]

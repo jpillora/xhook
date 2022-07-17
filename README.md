@@ -58,12 +58,16 @@ Tested in IE8+, Chrome, Firefox, Safari
 
 ### *http://jpillora.com/xhook*
 
-## Download
+## Usage
 
   :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
-* Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js) 14KB
-* Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js) 6KB
+```
+npm install xhook
+```
+
+* Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js)
+* Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js)
 * CDN (Use `latest` or lock to one of the [available versions](https://github.com/jpillora/xhook/releases))
 
 	``` html
@@ -145,13 +149,13 @@ See [CONTRIBUTING](CONTRIBUTING.md) for instructions on how to build and run XHo
 
 Contributors:
 
-* Jaime Pillora <dev@jpillora.com>
+* Jaime Pillora @jpillora <dev@jpillora.com>
 * Daniel Gasienica <daniel@gasienica.ch>
 * Maayan Glikser <maayan@glikm.com>
-
+* @TrickyPi
 #### MIT License
 
-Copyright © 2014 Jaime Pillora <dev@jpillora.com>
+Copyright © 2022 Jaime Pillora <dev@jpillora.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
