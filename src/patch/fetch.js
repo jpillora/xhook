@@ -11,8 +11,14 @@ const Xhook = function(url, options) {
   if (options == null) {
     options = { headers: {} };
   }
-  options.url = url;
+
   let request = null;
+
+  if (url instanceof Request) {
+    request = url
+  } else {
+    options.url = url;
+  }
 
   const beforeHooks = hooks.listeners("before");
   const afterHooks = hooks.listeners("after");
