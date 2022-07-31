@@ -1,4 +1,4 @@
-import { document } from "./window";
+import { documentRef } from "./window";
 
 export const UPLOAD_EVENTS = ["load", "loadend", "loadstart"];
 export const COMMON_EVENTS = ["progress", "abort", "error", "timeout"];
@@ -45,8 +45,8 @@ export const proxyEvents = function(events, src, dst) {
 
 //create fake event
 export const fakeEvent = function(type) {
-  if (document && document.createEventObject != null) {
-    const msieEventObject = document.createEventObject();
+  if (documentRef && documentRef.createEventObject != null) {
+    const msieEventObject = documentRef.createEventObject();
     msieEventObject.type = type;
     return msieEventObject;
   }
