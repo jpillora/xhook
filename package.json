@@ -2,11 +2,11 @@
   "name": "xhook",
   "version": "0.0.0-git-tag",
   "description": "Easily intercept and modify XHR request and response",
-  "browser": "dist/xhook.js",
-  "main": "src/main.js",
+  "main": "lib/main.js",
+  "module": "es/main.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development",
-    "build": "webpack-cli --mode development && webpack-cli --mode production --output-filename xhook.min.js",
+    "start": "rollup -c -w",
+    "build": "rollup -c",
     "test": "playwright test",
     "test:server": "http-server --port 8080",
     "test:all": "testcafe all tests"
@@ -44,9 +44,7 @@
   "devDependencies": {
     "@playwright/test": "^1.23.0",
     "http-server": "^14.1.1",
-    "webpack": "^4.42.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.10.3"
+    "rollup-plugin-terser": "^7.0.2"
   },
   "prettier": {}
 }

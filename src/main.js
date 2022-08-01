@@ -1,5 +1,4 @@
 import { EventEmitter } from "./misc/event-emitter";
-import { window } from "./misc/window";
 import headers from "./misc/headers";
 
 //patchable types
@@ -49,11 +48,5 @@ xhook.headers = headers.convert;
 //enable by default
 xhook.enable();
 
-//publicise (amd+commonjs+window)
-if (typeof define === "function" && define.amd) {
-  define("xhook", [], () => xhook);
-} else if (module && typeof module === "object" && module.exports) {
-  module.exports = { xhook };
-} else if (window) {
-  window.xhook = xhook;
-}
+
+export default xhook;

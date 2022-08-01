@@ -4,4 +4,7 @@ bower_components
 .vscode
 .DS_Store
 
+# ouput dir
 dist/
+lib/
+es/
