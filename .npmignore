@@ -1,10 +1,9 @@
 .github/
 example/
-test/
+src/
 tests/
-bower.json
 CONTRIBUTING.md
 index.html
 package-lock.json
 playwright.config.ts
-webpack.config.js
+rollup.config.js
