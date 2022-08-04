@@ -26,5 +26,5 @@ if (
   msie = parseInt(RegExp.$1, 10);
 }
 
-export const window = result;
-export const document = result.document;
+export const windowRef = result;
+export const documentRef = result.document;

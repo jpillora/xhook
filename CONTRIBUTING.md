@@ -6,12 +6,10 @@
 
 * Install deps with `npm install`
 
-* Watch *src* for changes and will then compile and minify into *dist* with `npm start`
+* Watch *src* for changes and will then compile into *dist*, *lib* and *es* with `npm start`
 
   * Make sure you have [prettier](https://prettier.io/) installed, and you are reformatting on save
 
-* Open Chrome `open http://localhost:3000/`
-
-* Run tests `http://localhost:3000/test/`
+* Run tests `npm run test`
 
 * Build distribution files with `npm run build`

@@ -1,10 +1,10 @@
-import { window } from "../misc/window";
+import { windowRef } from "../misc/window";
 import { mergeObjects } from "../misc/events";
 import hooks from "../misc/hooks";
 import formData from "./formdata";
 
 //browser's fetch
-const Native = window.fetch;
+const Native = windowRef.fetch;
 
 //xhook's fetch
 const Xhook = function(url, options) {
@@ -105,12 +105,12 @@ const Xhook = function(url, options) {
 export default {
   patch() {
     if (Native) {
-      window.fetch = Xhook;
+      windowRef.fetch = Xhook;
     }
   },
   unpatch() {
     if (Native) {
-      window.fetch = Native;
+      windowRef.fetch = Native;
     }
   },
   Native,

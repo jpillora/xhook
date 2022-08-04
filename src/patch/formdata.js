@@ -1,4 +1,4 @@
-import { window } from "../misc/window";
+import { windowRef } from "../misc/window";
 import { slice } from "../misc/array";
 
 //note:
@@ -7,7 +7,7 @@ import { slice } from "../misc/array";
 // object is used on send
 
 //browser's FormData
-var Native = window.FormData;
+var Native = windowRef.FormData;
 
 //xhooks's FormData
 const Xhook = function(form) {
@@ -37,12 +37,12 @@ const Xhook = function(form) {
 export default {
   patch() {
     if (Native) {
-      window.FormData = Xhook;
+      windowRef.FormData = Xhook;
     }
   },
   unpatch() {
     if (Native) {
-      window.FormData = Native;
+      windowRef.FormData = Native;
     }
   },
   Native,

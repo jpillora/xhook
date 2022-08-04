@@ -1,4 +1,4 @@
-import { window, msie } from "../misc/window";
+import { windowRef, msie } from "../misc/window";
 import {
   proxyEvents,
   mergeObjects,
@@ -12,7 +12,7 @@ import formData from "./formdata";
 const nullify = res => (res === undefined ? null : res);
 
 //browser's XMLHttpRequest
-const Native = window.XMLHttpRequest;
+const Native = windowRef.XMLHttpRequest;
 
 //xhook's XMLHttpRequest
 const Xhook = function() {
@@ -413,12 +413,12 @@ Xhook.DONE = 4;
 export default {
   patch() {
     if (Native) {
-      window.XMLHttpRequest = Xhook;
+      windowRef.XMLHttpRequest = Xhook;
     }
   },
   unpatch() {
     if (Native) {
-      window.XMLHttpRequest = Native;
+      windowRef.XMLHttpRequest = Native;
     }
   },
   Native,
