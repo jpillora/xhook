@@ -26,33 +26,9 @@ With XHook, you could easily implement functionality to:
 * Backwards compatible `addEventListener` `removeEventListener`
 * Backwards compatible user controlled progress (download/upload) events
 
-## Future Features
-
-* Add BrowserSwarm or TestlingCI automated cross-browser tests
-
-  *Tip: See [CONTRIBUTING.md](CONTRIBUTING.md) for steps on how to contribute* :wink:
-
-## Example
-
-Here, we're converting vowels to **z**'s in all requests to 'example.txt':
-
-``` javascript
-//modify 'responseText' of 'example2.txt'
-xhook.after(function(request, response) {
-  if(request.url.match(/example\.txt$/))
-    response.text = response.text.replace(/[aeiou]/g,'z');
-});
-```
-
 ## Browser Support
 
-Tested in IE8+, Chrome, Firefox, Safari
-
-#### *Run test suite here: http://jpillora.com/xhook/test*
-
-<!--
-[![browser support](https://ci.testling.com/jpillora/xhook.png)](https://ci.testling.com/jpillora/xhook)
- -->
+Support Modern Browser.
 
 ## Demos
 
@@ -62,17 +38,36 @@ Tested in IE8+, Chrome, Firefox, Safari
 
   :warning:    *It's* **important** *to include XHook first as other libraries may store a reference to `XMLHttpRequest` before XHook can patch it*
 
-```
-npm install xhook
-```
+Using `script` link to load xhook and use it, like so:
 
+``` html
+<script src="//unpkg.com/xhook@latest/dist/xhook.min.js"></script>
+<script>
+xhook.after(function(request, response) {
+  if(request.url.match(/example\.txt$/))
+    response.text = response.text.replace(/[aeiou]/g,'z');
+});
+</script>
+```
 * Development [xhook.js](https://jpillora.com/xhook/dist/xhook.js)
 * Production [xhook.min.js](https://jpillora.com/xhook/dist/xhook.min.js)
 * CDN (Use `latest` or lock to one of the [available versions](https://github.com/jpillora/xhook/releases))
 
-	``` html
-	<script src="//unpkg.com/xhook@latest/dist/xhook.min.js"></script>
-	```
+We can also install xhook via npm.
+
+```bash
+npm install xhook
+```
+
+Then use ESM syntax to load xhook.
+```js
+import xhook from 'xhook';
+//modify 'responseText' of 'example2.txt'
+xhook.after(function(request, response) {
+  if(request.url.match(/example\.txt$/))
+    response.text = response.text.replace(/[aeiou]/g,'z');
+});
+```
 
 ## API
 
@@ -119,7 +114,7 @@ Disables XHook (swaps the native `XMLHttpRequest` class back in)
 * `xml` (XML) *([`responseXML`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#responseXML))*
 * `data` (Varies) *([`response`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#response))*
 
-### Overview
+## Overview
 
 <img src="https://docs.google.com/drawings/d/1PTxHDqdW9iNqagDwtaO0ggXZkJp7ILiRDVWAMHInFGQ/pub?w=498&amp;h=235">
 
@@ -127,7 +122,7 @@ Disables XHook (swaps the native `XMLHttpRequest` class back in)
 hooks, then trigger the appropriate events, so it* **appears** *as if `response` came from
 the server.*
 
-### Reference
+## Reference
 
 https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
 
@@ -135,7 +130,7 @@ http://www.w3.org/TR/XMLHttpRequest/
 
 http://www.w3.org/TR/XMLHttpRequest2/
 
-### Issues
+## Issues
 
 * XHook does **not** attempt to resolve any browser compatibility issues. Libraries like jQuery
 and https://github.com/ilinsky/xmlhttprequest will attempt to do this. XHook simply proxies to and from `XMLHttpRequest`, so you may use any library
@@ -147,31 +142,6 @@ conjunction with XHook, just make sure to load XHook **first**.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for instructions on how to build and run XHook locally.
 
-Contributors:
+## License
 
-* Jaime Pillora @jpillora <dev@jpillora.com>
-* Daniel Gasienica <daniel@gasienica.ch>
-* Maayan Glikser <maayan@glikm.com>
-* @TrickyPi
-#### MIT License
-
-Copyright © 2022 Jaime Pillora <dev@jpillora.com>
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+[MIT](LICENSE) License Copyright © 2022 Jaime Pillora dev@jpillora.com
