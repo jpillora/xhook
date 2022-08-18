@@ -7,7 +7,6 @@ import {
 } from "../misc/events";
 import { EventEmitter } from "../misc/event-emitter";
 import headers from "../misc/headers";
-import formData from "./formdata";
 import hooks from "../misc/hooks";
 
 const nullify = res => (res === undefined ? null : res);
@@ -287,10 +286,6 @@ const Xhook = function() {
         if (header) {
           xhr.setRequestHeader(header, value);
         }
-      }
-      //extract real formdata
-      if (request.body instanceof formData.Xhook) {
-        request.body = request.body.fd;
       }
       //real send!
       xhr.send(request.body);
