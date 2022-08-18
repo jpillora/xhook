@@ -8,6 +8,7 @@ import {
 import { EventEmitter } from "../misc/event-emitter";
 import headers from "../misc/headers";
 import formData from "./formdata";
+import hooks from "../misc/hooks";
 
 const nullify = res => (res === undefined ? null : res);
 
@@ -143,11 +144,11 @@ const Xhook = function() {
       return;
     }
     //before emitting 4, run all 'after' hooks in sequence
-    const hooks = xhook.listeners("after");
+    const afterHooks = hooks.listeners("after");
     var process = function() {
-      if (hooks.length > 0) {
+      if (afterHooks.length > 0) {
         //execute each 'before' hook one at a time
-        const hook = hooks.shift();
+        const hook = afterHooks.shift();
         if (hook.length === 2) {
           hook(request, response);
           process();
@@ -207,7 +208,7 @@ const Xhook = function() {
 
   // initialise 'withCredentials' on facade xhr in browsers with it
   // or if explicitly told to do so
-  if ("withCredentials" in xhr || xhook.addWithCredentials) {
+  if ("withCredentials" in xhr) {
     facade.withCredentials = false;
   }
   facade.status = 0;
@@ -295,10 +296,10 @@ const Xhook = function() {
       xhr.send(request.body);
     };
 
-    const hooks = xhook.listeners("before");
-    //process hooks sequentially
+    const beforeHooks = hooks.listeners("before");
+    //process beforeHooks sequentially
     var process = function() {
-      if (!hooks.length) {
+      if (!beforeHooks.length) {
         return send();
       }
       //go to next hook OR optionally provide response
@@ -316,7 +317,7 @@ const Xhook = function() {
           setReadyState(4);
           return;
         }
-        //continue processing until no hooks left
+        //continue processing until no beforeHooks left
         process();
       };
       //specifically provide headers (readyState 2)
@@ -330,7 +331,7 @@ const Xhook = function() {
         setReadyState(3);
       };
 
-      const hook = hooks.shift();
+      const hook = beforeHooks.shift();
       //async or sync?
       if (hook.length === 1) {
         done(hook(request));
