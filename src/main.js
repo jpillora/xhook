@@ -4,7 +4,6 @@ import headers from "./misc/headers";
 //patchable types
 import XMLHttpRequest from "./patch/xmlhttprequest";
 import fetch from "./patch/fetch";
-import FormData from "./patch/formdata";
 
 //global state
 import hooks from "./misc/hooks";
@@ -30,17 +29,14 @@ xhook.after = function(handler, i) {
 xhook.enable = function() {
   XMLHttpRequest.patch();
   fetch.patch();
-  FormData.patch();
 };
 xhook.disable = function() {
   XMLHttpRequest.unpatch();
   fetch.unpatch();
-  FormData.unpatch();
 };
 //expose native objects
 xhook.XMLHttpRequest = XMLHttpRequest.Native;
 xhook.fetch = fetch.Native;
-xhook.FormData = FormData.Native;
 
 //expose helpers
 xhook.headers = headers.convert;

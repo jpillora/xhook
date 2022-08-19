@@ -1,7 +1,6 @@
 import { windowRef } from "../misc/window";
 import { mergeObjects } from "../misc/events";
 import hooks from "../misc/hooks";
-import formData from "./formdata";
 
 //browser's fetch
 const Native = windowRef.fetch;
@@ -26,10 +25,6 @@ const Xhook = function(url, options) {
   return new Promise(function(resolve, reject) {
     let fullfiled = resolve
     const getRequest = function() {
-      if (options.body instanceof formData.Xhook) {
-        options.body = options.body.fd;
-      }
-
       if (options.headers) {
         options.headers = new Headers(options.headers);
       }
