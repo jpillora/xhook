@@ -12,19 +12,5 @@ if (
   result = window;
 }
 
-//find IE version
-const useragent =
-  typeof navigator !== "undefined" && navigator["useragent"]
-    ? navigator.userAgent
-    : "";
-
-export let msie = null;
-if (
-  /msie (\d+)/.test(useragent.toLowerCase()) ||
-  /trident\/.*; rv:(\d+)/.test(useragent.toLowerCase())
-) {
-  msie = parseInt(RegExp.$1, 10);
-}
-
 export const windowRef = result;
 export const documentRef = result.document;

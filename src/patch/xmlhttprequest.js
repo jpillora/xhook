@@ -1,4 +1,4 @@
-import { windowRef, msie } from "../misc/window";
+import { windowRef } from "../misc/window";
 import {
   proxyEvents,
   mergeObjects,
@@ -36,7 +36,7 @@ const Xhook = function() {
     // Accessing attributes on an aborted xhr object will
     // throw an 'c00c023f error' in IE9 and lower, don't touch it.
     response.status = status || xhr.status;
-    if (status !== ABORTED || !(msie < 10)) {
+    if (status !== ABORTED) {
       response.statusText = xhr.statusText;
     }
     if (status !== ABORTED) {
