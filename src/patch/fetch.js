@@ -6,7 +6,7 @@ import hooks from "../misc/hooks";
 const Native = windowRef.fetch;
 
 //xhook's fetch
-const Xhook = function(url, options) {
+const Xhook = function (url, options) {
   if (options == null) {
     options = { headers: {} };
   }
@@ -14,7 +14,7 @@ const Xhook = function(url, options) {
   let request = null;
 
   if (url instanceof Request) {
-    request = url
+    request = url;
   } else {
     options.url = url;
   }
@@ -22,9 +22,9 @@ const Xhook = function(url, options) {
   const beforeHooks = hooks.listeners("before");
   const afterHooks = hooks.listeners("after");
 
-  return new Promise(function(resolve, reject) {
-    let fullfiled = resolve
-    const getRequest = function() {
+  return new Promise(function (resolve, reject) {
+    let fullfiled = resolve;
+    const getRequest = function () {
       if (options.headers) {
         options.headers = new Headers(options.headers);
       }
@@ -36,7 +36,7 @@ const Xhook = function(url, options) {
       return mergeObjects(options, request);
     };
 
-    var processAfter = function(response) {
+    var processAfter = function (response) {
       if (!afterHooks.length) {
         return fullfiled(response);
       }
@@ -53,7 +53,7 @@ const Xhook = function(url, options) {
       }
     };
 
-    const done = function(userResponse) {
+    const done = function (userResponse) {
       if (userResponse !== undefined) {
         const response = new Response(
           userResponse.body || userResponse.text,
@@ -68,7 +68,7 @@ const Xhook = function(url, options) {
       processBefore();
     };
 
-    var processBefore = function() {
+    var processBefore = function () {
       if (!beforeHooks.length) {
         send();
         return;
@@ -86,8 +86,8 @@ const Xhook = function(url, options) {
     var send = () =>
       Native(getRequest())
         .then(response => processAfter(response))
-        .catch(function(err) {
-          fullfiled = reject
+        .catch(function (err) {
+          fullfiled = reject;
           processAfter(err);
           return reject(err);
         });
@@ -109,5 +109,5 @@ export default {
     }
   },
   Native,
-  Xhook
+  Xhook,
 };
