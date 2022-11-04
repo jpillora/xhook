@@ -1,5 +1,5 @@
 //helper
-const convert = function(h, dest) {
+const convert = function (h, dest) {
   let name;
   if (dest == null) {
     dest = {};

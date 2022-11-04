@@ -1,45 +1,48 @@
-import { defineConfig } from 'rollup';
+import { defineConfig } from "rollup";
 import { terser } from "rollup-plugin-terser";
-import { version } from './package.json'
+import { version } from "./package.json";
 
 const year = new Date().getFullYear();
 
-const banner = `//XHook - v${version} - ` +
+const banner =
+  `//XHook - v${version} - ` +
   "https://github.com/jpillora/xhook\n" +
   `//Jaime Pillora <dev@jpillora.com> - ` +
-  `MIT Copyright ${year}`
+  `MIT Copyright ${year}`;
 
 const baseIifeConfig = {
   banner,
-  format: 'iife',
-  name: 'xhook',
+  format: "iife",
+  name: "xhook",
   sourcemap: true,
-}
+};
 
 export default defineConfig({
-  input: 'src/main.js',
+  input: "src/main.js",
   output: [
     {
       ...baseIifeConfig,
-      file: 'dist/xhook.js',
+      file: "dist/xhook.js",
     },
     {
       ...baseIifeConfig,
-      file: 'dist/xhook.min.js',
-      plugins: [terser({
-        format: {
-          comments: /^(XHook|Jaime)/,
-        },
-      })]
+      file: "dist/xhook.min.js",
+      plugins: [
+        terser({
+          format: {
+            comments: /^(XHook|Jaime)/,
+          },
+        }),
+      ],
     },
     {
-      dir: 'lib',
-      format: 'cjs',
-      exports: 'auto'
+      dir: "lib",
+      format: "cjs",
+      exports: "auto",
     },
     {
-      dir: 'es',
-      format: 'esm',
-    }
-  ]
-})
+      dir: "es",
+      format: "esm",
+    },
+  ],
+});

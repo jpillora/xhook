@@ -3,7 +3,7 @@ import {
   proxyEvents,
   mergeObjects,
   COMMON_EVENTS,
-  UPLOAD_EVENTS
+  UPLOAD_EVENTS,
 } from "../misc/events";
 import { EventEmitter } from "../misc/event-emitter";
 import headers from "../misc/headers";
@@ -15,7 +15,7 @@ const nullify = res => (res === undefined ? null : res);
 const Native = windowRef.XMLHttpRequest;
 
 //xhook's XMLHttpRequest
-const Xhook = function() {
+const Xhook = function () {
   const ABORTED = -1;
   const xhr = new Native();
 
@@ -32,7 +32,7 @@ const Xhook = function() {
   // Private API
 
   //read results from real xhr into response
-  const readHead = function() {
+  const readHead = function () {
     // Accessing attributes on an aborted xhr object will
     // throw an 'c00c023f error' in IE9 and lower, don't touch it.
     response.status = status || xhr.status;
@@ -52,7 +52,7 @@ const Xhook = function() {
     }
   };
 
-  const readBody = function() {
+  const readBody = function () {
     //https://xhr.spec.whatwg.org/
     if (!xhr.responseType || xhr.responseType === "text") {
       response.text = xhr.responseText;
@@ -77,12 +77,12 @@ const Xhook = function() {
   };
 
   //write response into facade xhr
-  const writeHead = function() {
+  const writeHead = function () {
     facade.status = response.status;
     facade.statusText = response.statusText;
   };
 
-  const writeBody = function() {
+  const writeBody = function () {
     if ("text" in response) {
       facade.responseText = response.text;
     }
@@ -97,7 +97,7 @@ const Xhook = function() {
     }
   };
 
-  const emitFinal = function() {
+  const emitFinal = function () {
     if (!hasError) {
       facade.dispatchEvent("load", {});
     }
@@ -108,7 +108,7 @@ const Xhook = function() {
   };
 
   //ensure ready state 0 through 4 is handled
-  const emitReadyState = function(n) {
+  const emitReadyState = function (n) {
     while (n > currentState && currentState < 4) {
       facade.readyState = ++currentState;
       // make fake events for libraries that actually check the type on
@@ -136,7 +136,7 @@ const Xhook = function() {
   };
 
   //control facade ready state
-  const setReadyState = function(n) {
+  const setReadyState = function (n) {
     //emit events until readyState reaches 4
     if (n !== 4) {
       emitReadyState(n);
@@ -144,7 +144,7 @@ const Xhook = function() {
     }
     //before emitting 4, run all 'after' hooks in sequence
     const afterHooks = hooks.listeners("after");
-    var process = function() {
+    var process = function () {
       if (afterHooks.length > 0) {
         //execute each 'before' hook one at a time
         const hook = afterHooks.shift();
@@ -171,7 +171,7 @@ const Xhook = function() {
   request.xhr = facade;
 
   // Handle the underlying ready state
-  xhr.onreadystatechange = function(event) {
+  xhr.onreadystatechange = function (event) {
     //pull status and headers
     try {
       if (xhr.readyState === 2) {
@@ -189,14 +189,14 @@ const Xhook = function() {
   };
 
   //mark this xhr as errored
-  const hasErrorHandler = function() {
+  const hasErrorHandler = function () {
     hasError = true;
   };
   facade.addEventListener("error", hasErrorHandler);
   facade.addEventListener("timeout", hasErrorHandler);
   facade.addEventListener("abort", hasErrorHandler);
   // progress means we're current downloading...
-  facade.addEventListener("progress", function(event) {
+  facade.addEventListener("progress", function (event) {
     if (currentState < 3) {
       setReadyState(3);
     } else if (xhr.readyState <= 3) {
@@ -217,7 +217,7 @@ const Xhook = function() {
     facade[`on${event}`] = null;
   }
 
-  facade.open = function(method, url, async, user, pass) {
+  facade.open = function (method, url, async, user, pass) {
     // Initailize empty XHR facade
     currentState = 0;
     hasError = false;
@@ -238,7 +238,7 @@ const Xhook = function() {
     setReadyState(1);
   };
 
-  facade.send = function(body) {
+  facade.send = function (body) {
     //read xhr settings before hooking
     let k, modk;
     for (k of ["type", "timeout", "withCredentials"]) {
@@ -249,7 +249,7 @@ const Xhook = function() {
     }
 
     request.body = body;
-    const send = function() {
+    const send = function () {
       //proxy all events from real xhr to facade
       proxyEvents(COMMON_EVENTS, xhr, facade);
       //proxy all upload events from the real to the upload facade
@@ -293,12 +293,12 @@ const Xhook = function() {
 
     const beforeHooks = hooks.listeners("before");
     //process beforeHooks sequentially
-    var process = function() {
+    var process = function () {
       if (!beforeHooks.length) {
         return send();
       }
       //go to next hook OR optionally provide response
-      const done = function(userResponse) {
+      const done = function (userResponse) {
         //break chain - provide dummy response (readyState 4)
         if (
           typeof userResponse === "object" &&
@@ -316,12 +316,12 @@ const Xhook = function() {
         process();
       };
       //specifically provide headers (readyState 2)
-      done.head = function(userResponse) {
+      done.head = function (userResponse) {
         mergeObjects(userResponse, response);
         setReadyState(2);
       };
       //specifically provide partial text (responseText  readyState 3)
-      done.progress = function(userResponse) {
+      done.progress = function (userResponse) {
         mergeObjects(userResponse, response);
         setReadyState(3);
       };
@@ -343,7 +343,7 @@ const Xhook = function() {
     process();
   };
 
-  facade.abort = function() {
+  facade.abort = function () {
     status = ABORTED;
     if (transiting) {
       xhr.abort(); //this will emit an 'abort' for us
@@ -352,7 +352,7 @@ const Xhook = function() {
     }
   };
 
-  facade.setRequestHeader = function(header, value) {
+  facade.setRequestHeader = function (header, value) {
     //the first header set is used for all future case-alternatives of 'name'
     const lName = header != null ? header.toLowerCase() : undefined;
     const name = (request.headerNames[lName] =
@@ -371,7 +371,7 @@ const Xhook = function() {
 
   //proxy call only when supported
   if (xhr.overrideMimeType) {
-    facade.overrideMimeType = function() {
+    facade.overrideMimeType = function () {
       xhr.overrideMimeType.apply(xhr, arguments);
     };
   }
@@ -418,5 +418,5 @@ export default {
     }
   },
   Native,
-  Xhook
+  Xhook,
 };

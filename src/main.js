@@ -12,13 +12,13 @@ import hooks from "./misc/hooks";
 const xhook = hooks;
 xhook.EventEmitter = EventEmitter;
 //modify hooks
-xhook.before = function(handler, i) {
+xhook.before = function (handler, i) {
   if (handler.length < 1 || handler.length > 2) {
     throw "invalid hook";
   }
   return xhook.on("before", handler, i);
 };
-xhook.after = function(handler, i) {
+xhook.after = function (handler, i) {
   if (handler.length < 2 || handler.length > 3) {
     throw "invalid hook";
   }
@@ -26,11 +26,11 @@ xhook.after = function(handler, i) {
 };
 
 //globally enable/disable
-xhook.enable = function() {
+xhook.enable = function () {
   XMLHttpRequest.patch();
   fetch.patch();
 };
-xhook.disable = function() {
+xhook.disable = function () {
   XMLHttpRequest.unpatch();
   fetch.unpatch();
 };
@@ -43,6 +43,5 @@ xhook.headers = headers.convert;
 
 //enable by default
 xhook.enable();
-
 
 export default xhook;
