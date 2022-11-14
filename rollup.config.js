@@ -1,4 +1,5 @@
 import { defineConfig } from "rollup";
+import typescript from "@rollup/plugin-typescript";
 import { terser } from "rollup-plugin-terser";
 import { version } from "./package.json";
 
@@ -45,4 +46,5 @@ export default defineConfig({
       format: "esm",
     },
   ],
+  plugins: [typescript()],
 });

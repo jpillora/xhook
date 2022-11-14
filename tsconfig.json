@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "module": "ESNext",
-    "target": "ESNext",
-    "lib": ["DOM", "ESNext"],
-    "strict": true,
+    "module": "ES6",
+    "target": "ES6",
+    "lib": ["DOM", "DOM.Iterable", "ES6"],
+    "strict": false,
     "esModuleInterop": true,
     "jsx": "preserve",
     "skipLibCheck": true,
@@ -12,6 +12,5 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src"]
 }
