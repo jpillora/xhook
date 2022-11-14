@@ -57,12 +57,10 @@ const Xhook: typeof fetch = function (input, init = { headers: {} }) {
 
   if (input instanceof Request) {
     const requestObj = copyToObjFromRequest(input);
-    console.log(requestObj);
     const prevHeaders = {
       ...covertHeaderToPlainObj(requestObj.headers),
       ...covertHeaderToPlainObj(options.headers),
     };
-    console.log(prevHeaders);
     options = {
       ...requestObj,
       ...init,
@@ -72,7 +70,7 @@ const Xhook: typeof fetch = function (input, init = { headers: {} }) {
   } else {
     options.url = input;
   }
-  console.log(options);
+
   const beforeHooks = hooks.listeners("before");
   const afterHooks = hooks.listeners("after");
 
