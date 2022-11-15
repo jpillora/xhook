@@ -43,11 +43,14 @@
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.24.2",
+    "@rollup/plugin-typescript": "^9.0.2",
     "http-server": "^14.1.1",
     "husky": "^8.0.1",
     "prettier": "2.7.1",
     "rollup": "^2.77.2",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "tslib": "^2.4.1",
+    "typescript": "^4.8.4"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
