@@ -58,3 +58,5 @@ jobs:
         run: npm run build
       - name: Run your tests
         run: npm test
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{steps.npm-cache-dir.outputs.dir}}
