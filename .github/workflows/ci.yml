@@ -31,9 +31,24 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "14"
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"    
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright
+      - name: Get Playwright version
+        id: playwright-version
+        run: |
+          echo "::set-output name=version::$(node -p 'require("@playwright/test/package.json").version')"
+      - uses: actions/cache@v3
+        name: Check if Playwright browser is cached
+        id: playwright-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-Playwright-${{steps.playwright-version.outputs.version}}
+      - name: Install Playwright browser if not cached
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
       - name: build
         run: npm run build
