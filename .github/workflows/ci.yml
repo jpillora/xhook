@@ -35,14 +35,12 @@ jobs:
         id: npm-cache-dir
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
-          # echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
       - name: Install dependencies
         run: npm ci
       - name: Get Playwright version
         id: playwright-version
         run: |
           echo "::set-output name=version::$(node -p "require('@playwright/test/package.json').version")"
-          # echo "version=$(node -p "require('@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
       - uses: actions/cache@v3
         name: Check if Playwright browser is cached
         id: playwright-cache
@@ -54,6 +52,9 @@ jobs:
         run: npx playwright install --with-deps
         env:
           PLAYWRIGHT_BROWSERS_PATH: ${{steps.npm-cache-dir.outputs.dir}}
+      - name: Install OS dependencies of Playwright
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
       - name: build
         run: npm run build
       - name: Run your tests
