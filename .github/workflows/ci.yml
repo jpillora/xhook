@@ -34,13 +34,15 @@ jobs:
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
-          echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+          echo "::set-output name=dir::$(npm config get cache)"
+          # echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
       - name: Install dependencies
         run: npm ci
       - name: Get Playwright version
         id: playwright-version
         run: |
-          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
+          echo "::set-output name=version::$(node -p "require('@playwright/test/package.json').version")"
+          # echo "version=$(node -p "require('@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
       - uses: actions/cache@v3
         name: Check if Playwright browser is cached
         id: playwright-cache
