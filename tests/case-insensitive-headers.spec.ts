@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Case Insensitive Headers", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(
-      "http://127.0.0.1:8080/example/case-insensitive-headers.html"
+      "http://127.0.0.1:8080/example/case-insensitive-headers.html",
     );
   });
   test("response should include all header variations", async ({ page }) => {

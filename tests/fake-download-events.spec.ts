@@ -25,6 +25,6 @@ test("should complete with fake download events", async ({ page }) => {
       "readyState 3\n" +
       "100\n" +
       "readyState 3\n" +
-      "readyState 4\n"
+      "readyState 4\n",
   );
 });

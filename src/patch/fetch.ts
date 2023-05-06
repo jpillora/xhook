@@ -98,7 +98,7 @@ const Xhook: typeof fetch = function (input, init = { headers: {} }) {
       if (userResponse !== undefined) {
         const response = new Response(
           userResponse.body || userResponse.text,
-          userResponse
+          userResponse,
         );
         resolve(response);
         processAfter(response);

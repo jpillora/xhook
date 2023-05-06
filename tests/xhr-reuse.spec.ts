@@ -9,7 +9,7 @@ test.describe("XHR Reuse", () => {
     await waitting;
     const text = await page.locator("id=one").innerText();
     expect(text).toContain(
-      "this is the first text file example (example1.txt)"
+      "this is the first text file example (example1.txt)",
     );
   });
   test("example 2 should return example2.txt", async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe("XHR Reuse", () => {
     await waitting;
     const text = await page.locator("id=two").innerText();
     expect(text).toContain(
-      "this is the second text file example (example2.txt)"
+      "this is the second text file example (example2.txt)",
     );
   });
 });
