@@ -6,7 +6,7 @@ export const COMMON_EVENTS = ["progress", "abort", "error", "timeout"];
 const depricatedProp = p =>
   ["returnValue", "totalSize", "position"].includes(p);
 
-export const mergeObjects = function(src, dst) {
+export const mergeObjects = function (src, dst) {
   for (let k in src) {
     if (depricatedProp(k)) {
       continue;
@@ -20,9 +20,9 @@ export const mergeObjects = function(src, dst) {
 };
 
 //proxy events from one emitter to another
-export const proxyEvents = function(events, src, dst) {
+export const proxyEvents = function (events, src, dst) {
   const p = event =>
-    function(e) {
+    function (e) {
       const clone = {};
       //copies event, with dst emitter inplace of src
       for (let k in e) {
@@ -44,7 +44,7 @@ export const proxyEvents = function(events, src, dst) {
 };
 
 //create fake event
-export const fakeEvent = function(type) {
+export const fakeEvent = function (type) {
   if (documentRef && documentRef.createEventObject != null) {
     const msieEventObject = documentRef.createEventObject();
     msieEventObject.type = type;

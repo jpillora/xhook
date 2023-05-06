@@ -2,13 +2,13 @@ import { slice } from "./array";
 import { mergeObjects, fakeEvent } from "./events";
 
 //tiny event emitter
-export const EventEmitter = function(nodeStyle) {
+export const EventEmitter = function (nodeStyle) {
   //private
   let events = {};
   const listeners = event => events[event] || [];
   //public
   const emitter = {};
-  emitter.addEventListener = function(event, callback, i) {
+  emitter.addEventListener = function (event, callback, i) {
     events[event] = listeners(event);
     if (events[event].indexOf(callback) >= 0) {
       return;
@@ -16,7 +16,7 @@ export const EventEmitter = function(nodeStyle) {
     i = i === undefined ? events[event].length : i;
     events[event].splice(i, 0, callback);
   };
-  emitter.removeEventListener = function(event, callback) {
+  emitter.removeEventListener = function (event, callback) {
     //remove all
     if (event === undefined) {
       events = {};
@@ -33,7 +33,7 @@ export const EventEmitter = function(nodeStyle) {
     }
     listeners(event).splice(i, 1);
   };
-  emitter.dispatchEvent = function() {
+  emitter.dispatchEvent = function () {
     const args = slice(arguments);
     const event = args.shift();
     if (!nodeStyle) {
@@ -56,8 +56,8 @@ export const EventEmitter = function(nodeStyle) {
     emitter.on = emitter.addEventListener;
     emitter.off = emitter.removeEventListener;
     emitter.fire = emitter.dispatchEvent;
-    emitter.once = function(e, fn) {
-      var fire = function() {
+    emitter.once = function (e, fn) {
+      var fire = function () {
         emitter.off(e, fire);
         return fn.apply(null, arguments);
       };

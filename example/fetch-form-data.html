@@ -18,8 +18,8 @@
     console.log("AFTER", request, response);
   });
   document.getElementById("submit").addEventListener("click", function() {
-    var username = document.getElementById("username").value;
-    var password = document.getElementById("password").value;
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
     const data = new FormData();
     data.append("username", username);
     data.append("password", password);
