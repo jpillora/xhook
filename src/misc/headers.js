@@ -1,32 +1,46 @@
 //helper
-const convert = function(h, dest) {
-  let name;
-  if (dest == null) {
-    dest = {};
-  }
-  switch (typeof h) {
-    case "object":
-      var headers = [];
-      for (let k in h) {
-        const v = h[k];
-        name = k.toLowerCase();
-        headers.push(`${name}:\t${v}`);
-      }
-      return headers.join("\n") + "\n";
-    case "string":
-      headers = h.split("\n");
-      for (let header of Array.from(headers)) {
+const CRLF = "\r\n";
+
+const objectToString = function (headersObj) {
+    const entries = Object.entries(headersObj)
+
+    const headers = entries.map(([name, value]) => {
+        return `${name.toLowerCase()}: ${value}`
+    })
+
+    return headers.join(CRLF);
+}
+
+const stringToObject = function (headersString, dest) {
+    const headers = headersString.split(CRLF);
+    if (dest == null) {
+        dest = {};
+    }
+
+    for (let header of headers) {
         if (/([^:]+):\s*(.+)/.test(header)) {
-          name = RegExp.$1 != null ? RegExp.$1.toLowerCase() : undefined;
-          const value = RegExp.$2;
-          if (dest[name] == null) {
-            dest[name] = value;
-          }
+            const name = RegExp.$1 != null ? RegExp.$1.toLowerCase() : undefined;
+            const value = RegExp.$2;
+            if (dest[name] == null) {
+                dest[name] = value;
+            }
         }
-      }
-      return dest;
-  }
-  return [];
+    }
+
+    return dest;
+}
+
+const convert = function (headers, dest) {
+    switch (typeof headers) {
+        case "object": {
+            return objectToString(headers)
+        }
+        case "string": {
+            return stringToObject(headers, dest)
+        }
+    }
+
+    return [];
 };
 
-export default { convert };
+export default {convert};
