@@ -11,6 +11,6 @@ test("should send username & password using FormData", async ({ page }) => {
     '"form": {\n' +
       '    "password": "password",\n' +
       '    "username": "username"\n' +
-      "  }",
+      "  }"
   );
 });

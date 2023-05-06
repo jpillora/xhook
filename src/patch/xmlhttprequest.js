@@ -257,7 +257,7 @@ const Xhook = function () {
         proxyEvents(
           COMMON_EVENTS.concat(UPLOAD_EVENTS),
           xhr.upload,
-          facade.upload,
+          facade.upload
         );
       }
 
@@ -269,7 +269,7 @@ const Xhook = function () {
         request.url,
         request.async,
         request.user,
-        request.pass,
+        request.pass
       );
 
       //write xhr settings

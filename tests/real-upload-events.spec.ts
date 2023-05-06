@@ -6,7 +6,7 @@ test("should complete with real upload events", async ({
 }) => {
   test.skip(
     browserName === "webkit" && process.env.RUNNER_OS === "Windows",
-    "Still working on it",
+    "Still working on it"
   );
   await page.goto("http://127.0.0.1:8080/example/progress-upload-real.html");
   const dom = page.locator("id=events");
@@ -19,6 +19,6 @@ test("should complete with real upload events", async ({
       "upload complete\n" +
       "readyState 2\n" +
       "readyState 3\n" +
-      "readyState 4\n",
+      "readyState 4\n"
   );
 });

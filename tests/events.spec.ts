@@ -16,7 +16,7 @@ test("should complete with xhook events", async ({ page }) => {
       "readystatechange (3)\n" +
       "readystatechange (4)\n" +
       "load (4)\n" +
-      " => 200\n",
+      " => 200\n"
   );
   expect(await dom.innerText()).toContain("loadend (4)");
 });
