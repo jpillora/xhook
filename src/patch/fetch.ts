@@ -124,9 +124,12 @@ const Xhook: typeof fetch = function (input, init = { headers: {} }) {
       }
     };
 
-    const send = () => {
+    const send = async () => {
       const { url, isFetch, acceptedRequest, ...restInit } = options;
-      Native(url, restInit)
+      if (input instanceof Request && restInit.body instanceof ReadableStream) {
+        restInit.body = await new Response(restInit.body).text();
+      }
+      return Native(url, restInit)
         .then(response => processAfter(response))
         .catch(function (err) {
           fullfiled = reject;
