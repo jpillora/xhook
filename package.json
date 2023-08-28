@@ -1,6 +1,6 @@
 {
   "name": "xhook",
-  "version": "0.0.0-git-tag",
+  "version": "1.6.2",
   "description": "Easily intercept and modify XHR request and response",
   "main": "lib/main.js",
   "module": "es/main.js",
