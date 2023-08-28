@@ -55,9 +55,7 @@ jobs:
       - name: Install OS dependencies of Playwright if cache hit
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps
-      - name: build
-        run: npm run build
-      - name: Run your tests
+      - name: Build and test XHook
         run: npm test
         env:
           PLAYWRIGHT_BROWSERS_PATH: ${{steps.npm-cache-dir.outputs.dir}}
