@@ -7,7 +7,8 @@
   "scripts": {
     "start": "rollup -c -w",
     "build": "rollup -c",
-    "test": "playwright test",
+    "test": "npm run build && playwright test",
+    "test:only": "playwright test",
     "test:server": "http-server --port 8080",
     "prepare": "husky install"
   },
