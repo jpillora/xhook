@@ -89,7 +89,7 @@ To make the `handler` is asynchronous, just include the optional `callback` func
 
 ### `xhook.enable()`
 
-Enables XHook (swaps out the native `XMLHttpRequest` class). XHook is enabled be default.
+Enables XHook (swaps out the native `XMLHttpRequest` class). XHook is enabled by default.
 
 ### `xhook.disable()`
 
