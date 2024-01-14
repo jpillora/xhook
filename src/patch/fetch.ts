@@ -66,6 +66,7 @@ const Xhook: typeof fetch = function (input, init = { headers: {} }) {
       ...init,
       headers: prevHeaders,
       acceptedRequest: true,
+      isFetch: true,
     };
   } else {
     options.url = input;
