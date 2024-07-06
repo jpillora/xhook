@@ -395,6 +395,7 @@ const Xhook = function () {
   facade.responseXML = null;
   facade.readyState = 0;
   facade.statusText = "";
+  facade.responseType = "";
 
   return facade;
 };
