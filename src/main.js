@@ -41,7 +41,4 @@ xhook.fetch = fetch.Native;
 //expose helpers
 xhook.headers = headers.convert;
 
-//enable by default
-xhook.enable();
-
 export default xhook;
