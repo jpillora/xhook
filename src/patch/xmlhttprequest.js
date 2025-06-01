@@ -27,6 +27,7 @@ const Xhook = function () {
   let transiting = undefined;
   let response = undefined;
   var currentState = 0;
+  let lastProgress = null;
 
   //==========================
   // Private API
@@ -97,11 +98,20 @@ const Xhook = function () {
     }
   };
 
+  const createZeroProgress = function () {
+    return {
+      lengthComputable: false,
+      loaded: 0,
+      total: 0,
+    };
+  };
+
   const emitFinal = function () {
+    const finalEvent = lastProgress ? lastProgress : createZeroProgress();
     if (!hasError) {
-      facade.dispatchEvent("load", {});
+      facade.dispatchEvent("load", finalEvent);
     }
-    facade.dispatchEvent("loadend", {});
+    facade.dispatchEvent("loadend", finalEvent);
     if (hasError) {
       facade.readyState = 0;
     }
@@ -111,11 +121,6 @@ const Xhook = function () {
   const emitReadyState = function (n) {
     while (n > currentState && currentState < 4) {
       facade.readyState = ++currentState;
-      // make fake events for libraries that actually check the type on
-      // the event object
-      if (currentState === 1) {
-        facade.dispatchEvent("loadstart", {});
-      }
       if (currentState === 2) {
         writeHead();
       }
@@ -197,6 +202,11 @@ const Xhook = function () {
   facade.addEventListener("abort", hasErrorHandler);
   // progress means we're current downloading...
   facade.addEventListener("progress", function (event) {
+    lastProgress = {
+      lengthComputable: event.lengthComputable,
+      loaded: event.loaded,
+      total: event.total,
+    };
     if (currentState < 3) {
       setReadyState(3);
     } else if (xhr.readyState <= 3) {
@@ -222,6 +232,7 @@ const Xhook = function () {
     currentState = 0;
     hasError = false;
     transiting = false;
+    lastProgress = null;
     //reset request
     request.headers = {};
     request.headerNames = {};
@@ -287,6 +298,10 @@ const Xhook = function () {
           xhr.setRequestHeader(header, value);
         }
       }
+
+      //dispatch loadstart just before xhr.send() to simulate native XHR.
+      facade.dispatchEvent("loadstart", createZeroProgress());
+
       //real send!
       xhr.send(request.body);
     };
