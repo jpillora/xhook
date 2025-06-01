@@ -13,7 +13,9 @@ export const mergeObjects = function (src, dst) {
     }
     const v = src[k];
     try {
-      dst[k] = v;
+      if (dst[k] !== v) {
+        Object.defineProperty(dst, k, { value: v });
+      }
     } catch (error) {}
   }
   return dst;

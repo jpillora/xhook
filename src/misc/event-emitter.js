@@ -42,6 +42,12 @@ export const EventEmitter = function (nodeStyle) {
         writable: false,
         value: this,
       });
+      if (!args[0].currentTarget) {
+        Object.defineProperty(args[0], "currentTarget", {
+          writable: false,
+          value: this,
+        });
+      }
     }
     const legacylistener = emitter[`on${event}`];
     if (legacylistener) {

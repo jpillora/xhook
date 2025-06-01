@@ -7,7 +7,7 @@ test("event target should be xhr self", async ({ page }) => {
       const xhr = new XMLHttpRequest();
       xhr.open("GET", "example1.txt");
       xhr.addEventListener("load", function (e) {
-        resolve(e.target === xhr);
+        resolve(e.target === xhr && e.currentTarget === xhr);
       });
       xhr.send();
     });
